@@ -82,6 +82,7 @@ func TestSQLCertificationRepository_UpdateCertificationAnchor(t *testing.T) {
 	require.NoError(t, err)
 	err = conn.Migrate()
 	require.NoError(t, err)
+	hash := "2ea2f1d0abf3fc66cf29eebb70cbd4e7fe762ef8a09bcc06c8edf641230afec0"
 
 	certificationRepository := NewSQLCertificationRepository(*conn, 5*time.Second, zerolog.Logger{})
 	anchorID := 3
@@ -118,7 +119,7 @@ func TestSQLCertificationRepository_UpdateCertificationAnchor(t *testing.T) {
 		err = certificationRepository.UpdateCertificationAnchor(context.TODO(), *updatedAnchor)
 
 		certifications, queryErr := conn.DB().Certification.Query().
-			Where(certification.AnchorID(anchorID), certification.And(certification.AnchorID(smallAnchorID)), certification.And(certification.Hash(hash))).All(context.TODO())
+			Where(certification.Hash(hash)).All(context.TODO())
 		require.NoError(t, queryErr)
 		assert.NoError(t, err)
 		assert.Equal(t, updatedAnchor, certifications[0].Anchor)

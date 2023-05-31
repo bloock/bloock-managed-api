@@ -13,7 +13,7 @@ func TestBloockIntegrityRepository_Certify(t *testing.T) {
 		[]byte("Hello World!"),
 	}
 	t.Run("given data to certify it should be certified with no errors", func(t *testing.T) {
-		apiKey := os.Getenv("BLOOCK_API_KEY")
+		apiKey := "Nm1sFmrojcrRgfZ4v0H0w0d1d22GookjcJl7y-2jr51qx0RioCR3nVm1z74hDEzZ" //os.Getenv("BLOOCK_API_KEY")
 		expectedHash := "3ea2f1d0abf3fc66cf29eebb70cbd4e7fe762ef8a09bcc06c8edf641230afec0"
 		data := data
 
@@ -21,7 +21,7 @@ func TestBloockIntegrityRepository_Certify(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.Equal(t, expectedHash, certification.Hashes()[0])
-		assert.Greater(t, certification.Anchor(), 0)
+		assert.Greater(t, certification.AnchorID(), 0)
 	})
 
 	t.Run("given error certifying it should be returned", func(t *testing.T) {

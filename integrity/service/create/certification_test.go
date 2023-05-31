@@ -24,7 +24,7 @@ func TestCertification_Certify(t *testing.T) {
 		certification := domain.NewCertification(1, []string{
 			"9c22ff5f21f0b81b113e63f7db6da94fedef11b2119b4088b89664fb9a3cb658",
 			"4da432f1ecd4c0ac028ebde3a3f78510a21d54087b161590a63080d33b702b8d",
-		})
+		}, nil)
 		integrityRepository.EXPECT().Certify(ctx, files).Return(*certification, nil)
 		certificationRepository.EXPECT().SaveCertification(ctx, *certification)
 
@@ -37,7 +37,7 @@ func TestCertification_Certify(t *testing.T) {
 		certification := domain.NewCertification(1, []string{
 			"9c22ff5f21f0b81b113e63f7db6da94fedef11b2119b4088b89664fb9a3cb658",
 			"4da432f1ecd4c0ac028ebde3a3f78510a21d54087b161590a63080d33b702b8d",
-		})
+		}, nil)
 		integrityRepository.EXPECT().Certify(ctx, files).Return(*certification, nil)
 		certificationRepository.EXPECT().SaveCertification(ctx, *certification).
 			Return(someErr)
