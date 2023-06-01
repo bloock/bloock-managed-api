@@ -8,12 +8,29 @@ import (
 
 type CertificationAnchor struct {
 	certificationRepository repository.CertificationRepository
+	notificationRepository  repository.NotificationRepository
 }
 
-func NewCertificationAnchor(certificationRepository repository.CertificationRepository) *CertificationAnchor {
-	return &CertificationAnchor{certificationRepository: certificationRepository}
+func NewCertificationAnchor(certificationRepository repository.CertificationRepository, notificationRepository repository.NotificationRepository) *CertificationAnchor {
+	return &CertificationAnchor{certificationRepository: certificationRepository, notificationRepository: notificationRepository}
 }
 
 func (c CertificationAnchor) UpdateAnchor(ctx context.Context, anchor integrity.Anchor) error {
-	return c.certificationRepository.UpdateCertificationAnchor(ctx, anchor)
+	err := c.certificationRepository.UpdateCertificationAnchor(ctx, anchor)
+	if err != nil {
+		return err
+	}
+
+	certifications, err := c.certificationRepository.GetCertificationsByAnchorID(ctx, int(anchor.Id))
+	if err != nil {
+		return err
+	}
+
+	for _, crt := range certifications {
+		err := c.notificationRepository.NotifyCertification(crt.Hash(), *crt.Anchor())
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

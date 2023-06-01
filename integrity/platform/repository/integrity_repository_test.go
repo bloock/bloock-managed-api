@@ -20,8 +20,8 @@ func TestBloockIntegrityRepository_Certify(t *testing.T) {
 		certification, err := NewBloockIntegrityRepository(apiKey, zerolog.Logger{}).Certify(context.TODO(), data)
 
 		assert.NoError(t, err)
-		assert.Equal(t, expectedHash, certification.Hashes()[0])
-		assert.Greater(t, certification.AnchorID(), 0)
+		assert.Equal(t, expectedHash, certification[0].Hash())
+		assert.Greater(t, certification[0].AnchorID(), 0)
 	})
 
 	t.Run("given error certifying it should be returned", func(t *testing.T) {

@@ -2,6 +2,7 @@ package create
 
 import (
 	"bloock-managed-api/integrity/domain/repository"
+	"bloock-managed-api/integrity/service/response"
 	"context"
 )
 
@@ -14,15 +15,20 @@ func NewCertification(certificationRepository repository.CertificationRepository
 	return &Certification{certificationRepository: certificationRepository, integrityRepository: integrityRepository}
 }
 
-func (c Certification) Certify(ctx context.Context, files [][]byte) error {
-	certification, err := c.integrityRepository.Certify(ctx, files)
+func (c Certification) Certify(ctx context.Context, files [][]byte) ([]response.CertificationResponse, error) {
+	certifications, err := c.integrityRepository.Certify(ctx, files)
 	if err != nil {
-		return err
+		return []response.CertificationResponse{}, err
 	}
 
-	if err := c.certificationRepository.SaveCertification(ctx, certification); err != nil {
-		return err
+	if err := c.certificationRepository.SaveCertification(ctx, certifications); err != nil {
+		return []response.CertificationResponse{}, err
 	}
 
-	return nil
+	var responses []response.CertificationResponse
+	for _, crt := range certifications {
+		responses = append(responses, *response.NewCertificationResponse(crt.Hash(), crt.AnchorID()))
+	}
+
+	return responses, nil
 }

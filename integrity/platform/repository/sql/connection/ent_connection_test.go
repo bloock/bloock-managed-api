@@ -2,7 +2,7 @@ package connection
 
 import (
 	"bloock-managed-api/ent"
-	mock_sql "bloock-managed-api/integrity/platform/repository/sql/mocks"
+	mock_connection "bloock-managed-api/integrity/platform/repository/sql/connection/mocks"
 	"github.com/golang/mock/gomock"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
@@ -11,7 +11,7 @@ import (
 
 func TestConnection_NewConnection(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	storageConnector := mock_sql.NewMockStorageConnector(ctrl)
+	storageConnector := mock_connection.NewMockSQLConnector(ctrl)
 
 	tests := []struct {
 		name   string
@@ -26,13 +26,13 @@ func TestConnection_NewConnection(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			client := ent.NewClient()
 			storageConnector.EXPECT().Connect(test.driver, test.url).Return(client, nil)
-			_, err := NewConnection(test.url, storageConnector, zerolog.Logger{})
+			_, err := NewEntConnection(test.url, storageConnector, zerolog.Logger{})
 			assert.NoError(t, err)
 		})
 	}
 
 	t.Run("given unsupported database error should be returned", func(t *testing.T) {
-		_, err := NewConnection("somedb://username:password@localhost:3306/mydatabase", storageConnector, zerolog.Logger{})
+		_, err := NewEntConnection("somedb://username:password@localhost:3306/mydatabase", storageConnector, zerolog.Logger{})
 		assert.Error(t, err)
 	})
 }

@@ -6,5 +6,5 @@ import (
 )
 
 type IntegrityRepository interface {
-	Certify(ctx context.Context, bytes [][]byte) (certification domain.Certification, err error)
+	Certify(ctx context.Context, bytes [][]byte) (certification []domain.Certification, err error)
 }

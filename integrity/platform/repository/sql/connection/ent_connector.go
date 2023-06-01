@@ -5,10 +5,6 @@ import (
 	"github.com/rs/zerolog"
 )
 
-type SQLConnector interface {
-	Connect(driver string, connectionURL string) (*ent.Client, error)
-}
-
 type EntConnector struct {
 	logger zerolog.Logger
 }

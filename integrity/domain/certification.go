@@ -5,11 +5,15 @@ import "github.com/bloock/bloock-sdk-go/v2/entity/integrity"
 type Certification struct {
 	anchorID int
 	anchor   *integrity.Anchor
-	hashes   []string
+	hash     string
 }
 
-func NewCertification(anchorID int, hash []string, anchor *integrity.Anchor) *Certification {
-	return &Certification{anchorID: anchorID, hashes: hash, anchor: anchor}
+func NewPendingCertification(anchorID int, hash string) *Certification {
+	return &Certification{anchorID: anchorID, hash: hash}
+}
+
+func NewCertification(anchorID int, hash string, anchor *integrity.Anchor) *Certification {
+	return &Certification{anchorID: anchorID, hash: hash, anchor: anchor}
 }
 
 func (c Certification) AnchorID() int {
@@ -20,6 +24,6 @@ func (c Certification) Anchor() *integrity.Anchor {
 	return c.anchor
 }
 
-func (c Certification) Hashes() []string {
-	return c.hashes
+func (c Certification) Hash() string {
+	return c.hash
 }

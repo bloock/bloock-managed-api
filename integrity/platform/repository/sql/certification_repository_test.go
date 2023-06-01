@@ -18,15 +18,15 @@ var hash = "3ea2f1d0abf3fc66cf29eebb70cbd4e7fe762ef8a09bcc06c8edf641230afec0"
 
 func TestSQLCertificationRepository_SaveCertification(t *testing.T) {
 	entConnector := connection.NewEntConnector(zerolog.Logger{})
-	conn, err := connection.NewConnection("file:ent?mode=memory&cache=shared&_fk=1", entConnector, zerolog.Logger{})
+	conn, err := connection.NewEntConnection("file:ent?mode=memory&cache=shared&_fk=1", entConnector, zerolog.Logger{})
 	require.NoError(t, err)
 	err = conn.Migrate()
 	require.NoError(t, err)
 
 	certificationRepository := NewSQLCertificationRepository(*conn, 5*time.Second, zerolog.Logger{})
 	t.Run("given certification it should be saved", func(t *testing.T) {
-		certification := domain.NewCertification(1, []string{hash}, nil)
-		err := certificationRepository.SaveCertification(context.TODO(), *certification)
+		certification := domain.NewPendingCertification(1, hash)
+		err := certificationRepository.SaveCertification(context.TODO(), []domain.Certification{*certification})
 
 		assert.NoError(t, err)
 	})
@@ -35,7 +35,7 @@ func TestSQLCertificationRepository_SaveCertification(t *testing.T) {
 
 func TestSQLCertificationRepository_GetCertification(t *testing.T) {
 	entConnector := connection.NewEntConnector(zerolog.Logger{})
-	conn, err := connection.NewConnection("file:ent?mode=memory&cache=shared&_fk=1", entConnector, zerolog.Logger{})
+	conn, err := connection.NewEntConnection("file:ent?mode=memory&cache=shared&_fk=1", entConnector, zerolog.Logger{})
 	require.NoError(t, err)
 	err = conn.Migrate()
 	require.NoError(t, err)
@@ -59,26 +59,26 @@ func TestSQLCertificationRepository_GetCertification(t *testing.T) {
 			Save(ctx)
 		require.NoError(t, err)
 
-		certification, err := certificationRepository.GetCertification(ctx, anchorID, hash)
+		certifications, err := certificationRepository.GetCertificationsByAnchorID(ctx, anchorID)
 
 		assert.NoError(t, err)
-		assert.Equal(t, hash, certification.Hashes()[0])
-		assert.Equal(t, anchorID, certification.AnchorID())
-		assert.Equal(t, anchor, certification.Anchor())
+		assert.Equal(t, hash, certifications[0].Hash())
+		assert.Equal(t, anchorID, certifications[0].AnchorID())
+		assert.Equal(t, anchor, certifications[0].Anchor())
 	})
 
-	t.Run("given anchor and hash it should return error when doesnt exists", func(t *testing.T) {
+	t.Run("given anchor and hash it should return empty list when no certification exists", func(t *testing.T) {
 
-		certification, err := certificationRepository.GetCertification(ctx, 2, hash)
+		certifications, err := certificationRepository.GetCertificationsByAnchorID(ctx, 2)
 
-		assert.Error(t, err)
-		assert.Empty(t, certification)
+		assert.NoError(t, err)
+		assert.Empty(t, certifications)
 	})
 }
 
 func TestSQLCertificationRepository_UpdateCertificationAnchor(t *testing.T) {
 	entConnector := connection.NewEntConnector(zerolog.Logger{})
-	conn, err := connection.NewConnection("file:ent?mode=memory&cache=shared&_fk=1", entConnector, zerolog.Logger{})
+	conn, err := connection.NewEntConnection("file:ent?mode=memory&cache=shared&_fk=1", entConnector, zerolog.Logger{})
 	require.NoError(t, err)
 	err = conn.Migrate()
 	require.NoError(t, err)

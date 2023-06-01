@@ -17,14 +17,14 @@ const (
 	Sqlite   = "sqlite3"
 )
 
-type Connection struct {
+type EntConnection struct {
 	db     *ent.Client
 	logger zerolog.Logger
 }
 
-func NewConnection(connectionURL string, connector SQLConnector, logger zerolog.Logger) (*Connection, error) {
+func NewEntConnection(connectionURL string, connector SQLConnector, logger zerolog.Logger) (*EntConnection, error) {
 	if connectionURL == "" {
-		return &Connection{}, errors.New("connectionURL cannot be empty")
+		return &EntConnection{}, errors.New("connectionURL cannot be empty")
 	}
 
 	if strings.Contains(connectionURL, "file") {
@@ -32,7 +32,7 @@ func NewConnection(connectionURL string, connector SQLConnector, logger zerolog.
 		if err != nil {
 			return nil, err
 		}
-		return &Connection{
+		return &EntConnection{
 			db: client,
 		}, nil
 	}
@@ -41,7 +41,7 @@ func NewConnection(connectionURL string, connector SQLConnector, logger zerolog.
 		if err != nil {
 			return nil, err
 		}
-		return &Connection{
+		return &EntConnection{
 			db: client,
 		}, nil
 	}
@@ -50,7 +50,7 @@ func NewConnection(connectionURL string, connector SQLConnector, logger zerolog.
 		if err != nil {
 			return nil, err
 		}
-		return &Connection{
+		return &EntConnection{
 			db: client,
 		}, nil
 	}
@@ -61,7 +61,7 @@ func NewConnection(connectionURL string, connector SQLConnector, logger zerolog.
 
 }
 
-func (c *Connection) DB() *ent.Client {
+func (c *EntConnection) DB() *ent.Client {
 	return c.db
 }
 
@@ -73,7 +73,7 @@ func open(connector SQLConnector, driver string, connectionURL string) (*ent.Cli
 	return client, nil
 }
 
-func (c *Connection) Migrate() error {
+func (c *EntConnection) Migrate() error {
 	if err := c.db.Schema.Create(context.Background()); err != nil {
 		return err
 	}

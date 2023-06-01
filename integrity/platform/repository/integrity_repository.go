@@ -24,13 +24,13 @@ func NewBloockIntegrityRepository(apikey string, log zerolog.Logger) *BloockInte
 	}
 }
 
-func (b BloockIntegrityRepository) Certify(ctx context.Context, files [][]byte) (certification domain.Certification, err error) {
+func (b BloockIntegrityRepository) Certify(ctx context.Context, files [][]byte) (certification []domain.Certification, err error) {
 	var records []record.Record
 	for i, _ := range files {
 		rec, err := client.NewRecordClient().FromBytes(files[i]).Build()
 		if err != nil {
 			b.log.Error().Err(err).Msg("error certifying data")
-			return domain.Certification{}, err
+			return []domain.Certification{}, err
 		}
 
 		records = append(records, rec)
@@ -39,13 +39,14 @@ func (b BloockIntegrityRepository) Certify(ctx context.Context, files [][]byte) 
 	receipt, err := b.integrityClient.SendRecords(records)
 	if err != nil {
 		b.log.Error().Err(err).Msg("error certifying data")
-		return domain.Certification{}, err
+		return []domain.Certification{}, err
 	}
 
-	var hashes []string
+	var certifications []domain.Certification
 	for _, recordReceipt := range receipt {
-		hashes = append(hashes, recordReceipt.Record)
+		crts := *domain.NewPendingCertification(int(recordReceipt.Anchor), recordReceipt.Record)
+		certifications = append(certifications, crts)
 	}
 
-	return *domain.NewCertification(int(receipt[0].Anchor), hashes, nil), nil
+	return certifications, nil
 }

@@ -1,4 +1,4 @@
-package server
+package rest
 
 import (
 	"fmt"
@@ -13,7 +13,7 @@ type Server struct {
 
 func (s Server) Start() error {
 	router := gin.Default()
-
+	router.MaxMultipartMemory = 5 << 20 // 5 MiB
 	return router.Run(fmt.Sprintf("%s:%s", s.host, s.port))
 }
 
