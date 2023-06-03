@@ -9,14 +9,30 @@ import (
 	"bloock-managed-api/internal/service/create"
 	"bloock-managed-api/internal/service/update"
 	"github.com/rs/zerolog"
+	"github.com/spf13/viper"
 	"net/http"
 	"time"
 )
 
 func main() {
+	v := viper.New()
+	v.AddConfigPath(".")
+	err := v.ReadInConfig()
+	if _, configFileNotFound := err.(viper.ConfigFileNotFoundError); err != nil && !configFileNotFound {
+		panic(err)
+	}
+
+	var cfg Config
+
+	err = v.Unmarshal(&cfg)
+	if err != nil {
+		panic(err)
+		return
+	}
+
 	logger := zerolog.Logger{}
 	entConnector := connection.NewEntConnector(logger)
-	conn, err := connection.NewEntConnection("file:ent?mode=memory&cache=shared&_fk=1", entConnector, logger)
+	conn, err := connection.NewEntConnection(cfg.DBConnectionString, entConnector, logger)
 	if err != nil {
 		panic(err)
 		return
@@ -27,16 +43,35 @@ func main() {
 		return
 	}
 	certificationRepository := sql.NewSQLCertificationRepository(*conn, 5*time.Second, logger)
-	integrityRepository := repository.NewBloockIntegrityRepository("Nm1sFmrojcrRgfZ4v0H0w0d1d22GookjcJl7y-2jr51qx0RioCR3nVm1z74hDEzZ", logger)
-	notificationRepository := http_repository.NewHttpNotificationRepository(http.Client{}, "http://localhost:8081/v1/certification", logger)
+	integrityRepository := repository.NewBloockIntegrityRepository(cfg.BloockAPIKey, logger)
+	notificationRepository := http_repository.NewHttpNotificationRepository(http.Client{}, cfg.WebhookURL, logger)
 
 	createCertification := create.NewCertification(certificationRepository, integrityRepository)
 	updateCertificationAnchor := update.NewCertificationAnchor(certificationRepository, notificationRepository)
 
-	server := rest.NewServer("", "8081", *createCertification, *updateCertificationAnchor, 5, logger)
+	server := rest.NewServer(
+		cfg.APIHost,
+		cfg.APIPort,
+		*createCertification,
+		*updateCertificationAnchor,
+		cfg.WebhookSecretKey,
+		cfg.WebhookEnforceTolerance,
+		logger,
+	)
 	err = server.Start()
 	if err != nil {
 		panic(err)
 		return
 	}
+}
+
+type Config struct {
+	DBConnectionString      string
+	BloockAPIKey            string
+	WebhookURL              string
+	APIHost                 string
+	APIPort                 string
+	MaxMemoryPerRequest     string
+	WebhookEnforceTolerance bool
+	WebhookSecretKey        string
 }

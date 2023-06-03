@@ -1,0 +1,8 @@
+services:
+  bloock-managed-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+    container_name: api-notifications
+    ports:
+      - 8080:8080

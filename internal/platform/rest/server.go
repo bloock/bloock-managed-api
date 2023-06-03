@@ -16,14 +16,21 @@ type Server struct {
 	logger zerolog.Logger
 }
 
-func NewServer(host string, port string, createCertification create.Certification, updateAnchor update.CertificationAnchor, maxMemoryPerRequest int64, logger zerolog.Logger) *Server {
+func NewServer(
+	host string,
+	port string,
+	createCertification create.Certification,
+	updateAnchor update.CertificationAnchor,
+	webhookSecretKey string,
+	enforceTolerance bool,
+	logger zerolog.Logger,
+) *Server {
 	router := gin.Default()
-	router.MaxMultipartMemory = maxMemoryPerRequest << 20
 
 	v1 := router.Group("/v1/")
 	v1.POST("certification", handler.PostCreateCertification(createCertification))
 
-	v1.POST("webhook", handler.PostReceiveConfirmation(updateAnchor)) //TODO validacion webhook
+	v1.POST("webhook", handler.PostReceiveConfirmation(updateAnchor, webhookSecretKey, enforceTolerance))
 	return &Server{host: host, port: port, engine: router, logger: logger}
 }
 
