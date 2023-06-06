@@ -30,10 +30,10 @@ jobs:
       - name: Setup
         run: |
           git config --global url.https://$GH_ACCESS_TOKEN@github.com/.insteadOf https://github.com/
-          make cache
-          make schemas
           go install github.com/golang/mock/mockgen@v1.6.0
           go install entgo.io/ent/cmd/ent@latest
+          make cache
           make mocks
+          make schemas
       - name: Run tests
         run: make test
