@@ -22,9 +22,13 @@ jobs:
       - name: Build
         run: | 
           go mod vendor
+          make mocks
+          make schemas
           go build -v ./...
 
       - name: Test
         run: |
           go mod vendor
-          go test -v ./...
+          make mocks
+          make schemas
+          make test
