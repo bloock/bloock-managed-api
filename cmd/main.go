@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bloock-managed-api/internal/config"
 	"bloock-managed-api/internal/platform/repository"
 	http_repository "bloock-managed-api/internal/platform/repository/http"
 	"bloock-managed-api/internal/platform/repository/sql"
@@ -9,22 +10,12 @@ import (
 	"bloock-managed-api/internal/service/create"
 	"bloock-managed-api/internal/service/update"
 	"github.com/rs/zerolog"
-	"github.com/spf13/viper"
 	"net/http"
 	"time"
 )
 
 func main() {
-	v := viper.New()
-	v.AddConfigPath(".")
-	err := v.ReadInConfig()
-	if _, configFileNotFound := err.(viper.ConfigFileNotFoundError); err != nil && !configFileNotFound {
-		panic(err)
-	}
-
-	var cfg Config
-
-	err = v.Unmarshal(&cfg)
+	cfg, err := config.InitConfig()
 	if err != nil {
 		panic(err)
 		return
@@ -63,15 +54,4 @@ func main() {
 		panic(err)
 		return
 	}
-}
-
-type Config struct {
-	DBConnectionString      string
-	BloockAPIKey            string
-	WebhookURL              string
-	APIHost                 string
-	APIPort                 string
-	MaxMemoryPerRequest     string
-	WebhookEnforceTolerance bool
-	WebhookSecretKey        string
 }

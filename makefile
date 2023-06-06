@@ -7,3 +7,8 @@ mocks:
 schema:
 	go run -mod=mod entgo.io/ent/cmd/ent generate --target ./internal/platform/repository/sql/ent ./internal/platform/repository/sql/schema
 
+up:
+	docker-compose up -d --build
+
+test:
+	go test ./...
