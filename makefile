@@ -14,4 +14,5 @@ test:
 	go test -v ./...
 
 cache:
+	go mod tidy
 	go mod vendor
