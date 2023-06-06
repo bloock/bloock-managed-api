@@ -12,3 +12,6 @@ up:
 
 test:
 	go test -v ./...
+
+cache:
+	go mod vendor
