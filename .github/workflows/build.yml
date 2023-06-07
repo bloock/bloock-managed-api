@@ -37,13 +37,6 @@ jobs:
       - name: Run tests
         run: make test
 
-  name: ci
-
-  on:
-    push:
-      branches:
-        - 'main'
-
   docker:
     runs-on: ubuntu-latest
     needs: [ test ]
