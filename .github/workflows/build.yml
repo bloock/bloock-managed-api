@@ -36,6 +36,5 @@ jobs:
           go install entgo.io/ent/cmd/ent@latest
           make cache
           make mocks
-          make schemas
       - name: Run tests
         run: make test
