@@ -29,7 +29,6 @@ jobs:
           go-version: 1.18
 
       - name: Setup
-        uses: ent/contrib/ci@master
         run: |
           git config --global url.https://$GH_ACCESS_TOKEN@github.com/.insteadOf https://github.com/
           go install github.com/golang/mock/mockgen@v1.6.0
