@@ -2,16 +2,16 @@ package handler
 
 import (
 	"bloock-managed-api/internal/service/update"
+	"bloock-managed-api/internal/service/update/request"
 	"encoding/json"
 	"github.com/bloock/bloock-sdk-go/v2/client"
-	"github.com/bloock/bloock-sdk-go/v2/entity/integrity"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
-func PostReceiveConfirmation(certification update.CertificationAnchor, secretKey string, enforceTolerance bool) gin.HandlerFunc {
+func PostReceiveWebhook(certification update.CertificationAnchor, secretKey string, enforceTolerance bool) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var webhookRequest integrity.Anchor
+		var webhookRequest WebhookRequest
 		if err := ctx.BindJSON(&webhookRequest); err != nil {
 			ctx.JSON(http.StatusBadRequest, "invalid json body")
 			return
@@ -36,11 +36,31 @@ func PostReceiveConfirmation(certification update.CertificationAnchor, secretKey
 			return
 		}
 
-		if err := certification.UpdateAnchor(ctx, webhookRequest); err != nil {
+		if err := certification.UpdateAnchor(ctx, request.UpdateCertificationAnchorRequest{
+			AnchorId: webhookRequest.Network.AnchorId,
+			Payload:  webhookRequest,
+		}); err != nil {
 			ctx.JSON(http.StatusInternalServerError, err.Error())
 			return
 		}
 
 		ctx.Status(http.StatusAccepted)
 	}
+}
+
+type WebhookRequest struct {
+	CreatedAt    int  `json:"created_at"`
+	Finalized    bool `json:"finalized"`
+	Id           int  `json:"id"`
+	MessageCount int  `json:"message_count"`
+	Network      struct {
+		AnchorId  int    `json:"anchor_id"`
+		CreatedAt int    `json:"created_at"`
+		Name      string `json:"name"`
+		Status    string `json:"status"`
+		Test      bool   `json:"test"`
+		TxHash    string `json:"tx_hash"`
+	} `json:"network"`
+	Root string `json:"root"`
+	Test bool   `json:"test"`
 }

@@ -2,32 +2,38 @@ package update
 
 import (
 	"bloock-managed-api/internal/domain/repository"
+	"bloock-managed-api/internal/service/update/request"
 	"context"
-	"github.com/bloock/bloock-sdk-go/v2/entity/integrity"
 )
 
 type CertificationAnchor struct {
 	certificationRepository repository.CertificationRepository
+	integrityRepository     repository.IntegrityRepository
 	notificationRepository  repository.NotificationRepository
 }
 
-func NewCertificationAnchor(certificationRepository repository.CertificationRepository, notificationRepository repository.NotificationRepository) *CertificationAnchor {
-	return &CertificationAnchor{certificationRepository: certificationRepository, notificationRepository: notificationRepository}
+func NewCertificationAnchor(certificationRepository repository.CertificationRepository, notificationRepository repository.NotificationRepository, integrityRepository repository.IntegrityRepository) *CertificationAnchor {
+	return &CertificationAnchor{certificationRepository: certificationRepository, integrityRepository: integrityRepository, notificationRepository: notificationRepository}
 }
 
-func (c CertificationAnchor) UpdateAnchor(ctx context.Context, anchor integrity.Anchor) error {
-	err := c.certificationRepository.UpdateCertificationAnchor(ctx, anchor)
+func (c CertificationAnchor) UpdateAnchor(ctx context.Context, updateRequest request.UpdateCertificationAnchorRequest) error {
+	anchorID := updateRequest.AnchorId
+	anchor, err := c.integrityRepository.GetAnchorByID(ctx, anchorID)
+	if err != nil {
+		return err
+	}
+	err = c.certificationRepository.UpdateCertificationAnchor(ctx, anchor)
 	if err != nil {
 		return err
 	}
 
-	certifications, err := c.certificationRepository.GetCertificationsByAnchorID(ctx, int(anchor.Id))
+	certifications, err := c.certificationRepository.GetCertificationsByAnchorID(ctx, anchorID)
 	if err != nil {
 		return err
 	}
 
 	for _, crt := range certifications {
-		err := c.notificationRepository.NotifyCertification(crt.Hash(), *crt.Anchor())
+		err := c.notificationRepository.NotifyCertification(crt.Hash(), updateRequest.Payload)
 		if err != nil {
 			return err
 		}

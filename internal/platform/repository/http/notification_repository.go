@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"github.com/bloock/bloock-sdk-go/v2/entity/integrity"
 	"github.com/rs/zerolog"
 	"net/http"
 )
@@ -19,10 +18,10 @@ func NewHttpNotificationRepository(httpClient http.Client, destinationURL string
 	return &HttpNotificationRepository{httpClient: httpClient, destinationURL: destinationURL, logger: logger}
 }
 
-func (h HttpNotificationRepository) NotifyCertification(hash string, anchor integrity.Anchor) error {
+func (h HttpNotificationRepository) NotifyCertification(hash string, whResponse interface{}) error {
 	notificationJsonBody := NotificationJsonBody{
-		Hash:   hash,
-		Anchor: anchor,
+		Hash:       hash,
+		WhResponse: whResponse,
 	}
 	bodyBytes, err := json.Marshal(&notificationJsonBody)
 	if err != nil {
@@ -46,6 +45,6 @@ func (h HttpNotificationRepository) NotifyCertification(hash string, anchor inte
 }
 
 type NotificationJsonBody struct {
-	Hash   string           `json:"hash"`
-	Anchor integrity.Anchor `json:"anchor"`
+	Hash       string      `json:"hash"`
+	WhResponse interface{} `json:"webhook_response"`
 }

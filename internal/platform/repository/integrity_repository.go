@@ -5,6 +5,7 @@ import (
 	"context"
 	"github.com/bloock/bloock-sdk-go/v2"
 	"github.com/bloock/bloock-sdk-go/v2/client"
+	"github.com/bloock/bloock-sdk-go/v2/entity/integrity"
 	"github.com/bloock/bloock-sdk-go/v2/entity/record"
 	"github.com/rs/zerolog"
 )
@@ -49,4 +50,14 @@ func (b BloockIntegrityRepository) Certify(ctx context.Context, files [][]byte) 
 	}
 
 	return certifications, nil
+}
+
+func (b BloockIntegrityRepository) GetAnchorByID(ctx context.Context, anchorID int) (integrity.Anchor, error) {
+	anchor, err := b.integrityClient.GetAnchor(int64(anchorID))
+	if err != nil {
+		b.log.Error().Err(err).Msg("error getting anchor")
+		return integrity.Anchor{}, err
+	}
+
+	return anchor, nil
 }

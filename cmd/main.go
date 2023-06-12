@@ -34,11 +34,11 @@ func main() {
 		return
 	}
 	certificationRepository := sql.NewSQLCertificationRepository(*conn, 5*time.Second, logger)
-	integrityRepository := repository.NewBloockIntegrityRepository(cfg.BloockAPIKey, logger)
+	integrityRepository := repository.NewBloockIntegrityRepository(cfg.APIKey, logger)
 	notificationRepository := http_repository.NewHttpNotificationRepository(http.Client{}, cfg.WebhookURL, logger)
 
 	createCertification := create.NewCertification(certificationRepository, integrityRepository)
-	updateCertificationAnchor := update.NewCertificationAnchor(certificationRepository, notificationRepository)
+	updateCertificationAnchor := update.NewCertificationAnchor(certificationRepository, notificationRepository, nil)
 
 	server := rest.NewServer(
 		cfg.APIHost,

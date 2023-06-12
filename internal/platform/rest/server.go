@@ -30,7 +30,7 @@ func NewServer(
 	v1 := router.Group("/v1/")
 	v1.POST("certification", handler.PostCreateCertification(createCertification))
 
-	v1.POST("webhook", handler.PostReceiveConfirmation(updateAnchor, webhookSecretKey, enforceTolerance))
+	v1.POST("webhook", handler.PostReceiveWebhook(updateAnchor, webhookSecretKey, enforceTolerance))
 	return &Server{host: host, port: port, engine: router, logger: logger}
 }
 
