@@ -38,7 +38,7 @@ func main() {
 	notificationRepository := http_repository.NewHttpNotificationRepository(http.Client{}, cfg.WebhookURL, logger)
 
 	createCertification := create.NewCertification(certificationRepository, integrityRepository)
-	updateCertificationAnchor := update.NewCertificationAnchor(certificationRepository, notificationRepository, nil)
+	updateCertificationAnchor := update.NewCertificationAnchor(certificationRepository, notificationRepository, integrityRepository)
 
 	server := rest.NewServer(
 		cfg.APIHost,

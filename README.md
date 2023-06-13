@@ -78,4 +78,4 @@ To start the service with MemDB:
 ```
 docker compose -f docker-compose-memdb.yaml up
 ```
-The default Docker Compose file uses MemDB. You can execute the service with make up, which will build the application and start the service in a Docker container.
+The default Docker Compose file uses MemDB. You can execute the service with `make up` command, which will build the application and start the service in a Docker container.
