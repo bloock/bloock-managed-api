@@ -14,18 +14,19 @@ func TestConnection_NewConnection(t *testing.T) {
 	storageConnector := mock_connection.NewMockSQLConnector(ctrl)
 
 	tests := []struct {
-		name   string
-		url    string
-		driver string
+		name     string
+		url      string
+		driver   string
+		expected string
 	}{
-		{name: "given mysql url it should be detected", url: "mysql://username:password@localhost:3306/mydatabase", driver: Mysql},
-		{name: "given postgres url it should be detected", url: "postgresql://username:password@localhost:5432/mydatabase", driver: Postgres},
-		{name: "given sqlite memory url it should be detected", url: "file:ent?mode=memory&cache=shared&_fk=1", driver: Sqlite},
+		{name: "given mysql url it should be detected", url: "mysql://username:password@localhost:3306/mydatabase", driver: Mysql, expected: "username:password@localhost:3306/mydatabase"},
+		{name: "given postgres url it should be detected", url: "postgres://username:password@localhost:5432/mydatabase", driver: Postgres, expected: "username:password@localhost:5432/mydatabase"},
+		{name: "given sqlite memory url it should be detected", url: "file:ent?mode=memory&cache=shared&_fk=1", driver: Sqlite, expected: "file:ent?mode=memory&cache=shared&_fk=1"},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			client := ent.NewClient()
-			storageConnector.EXPECT().Connect(test.driver, test.url).Return(client, nil)
+			storageConnector.EXPECT().Connect(test.driver, test.expected).Return(client, nil)
 			_, err := NewEntConnection(test.url, storageConnector, zerolog.Logger{})
 			assert.NoError(t, err)
 		})
