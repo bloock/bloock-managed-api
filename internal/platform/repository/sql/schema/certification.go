@@ -29,7 +29,7 @@ func (Certification) Edges() []ent.Edge {
 
 func (Certification) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("id", "hash", "anchor").
+		index.Fields("id", "hash", "anchor_id").
 			Unique(),
 	}
 }

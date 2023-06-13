@@ -1,0 +1,28 @@
+services:
+  mysql:
+    platform: linux/x86_64
+    container_name: mysql
+    image: mysql:8.0.22
+    environment:
+      MYSQL_DATABASE: managed
+    ports:
+      - "3306:3306"
+
+  bloock-managed-api:
+    platform: linux/x86_64
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bloock-managed-api
+    ports:
+      - 8080:8080
+    depends_on:
+      - mysql
+    environment:
+      BLOOCK_DB_CONNECTION_STRING: "mysql://admin:admin@tcp(mysql:3306)/managed"
+      BLOOCK_API_KEY: "Nm1sFmrojcrRgfZ4v0H0w0d1d22GookjcJl7y-2jr51qx0RioCR3nVm1z74hDEzZ"
+      BLOOCK_WEBHOOK_URL: "https://bloock-managedapi.ultrahook.com"
+      BLOOCK_WEBHOOK_SECRET_KEY: "1AI1yw3JsqPODg0KLRLcyn62BfxUbXcn"
+      BLOOCK_API_HOST: "0.0.0.0"
+      BLOOCK_API_PORT: "8080"
+      BLOOCK_ENFORCE_TOLERANCE: false

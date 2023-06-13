@@ -37,7 +37,7 @@ func NewEntConnection(connectionURL string, connector SQLConnector, logger zerol
 		}, nil
 	}
 	if strings.Contains(connectionURL, "mysql") {
-		client, err := open(connector, Mysql, connectionURL)
+		client, err := open(connector, Mysql, strings.Replace(connectionURL, "mysql://", "", 1))
 		if err != nil {
 			return nil, err
 		}
@@ -46,7 +46,7 @@ func NewEntConnection(connectionURL string, connector SQLConnector, logger zerol
 		}, nil
 	}
 	if strings.Contains(connectionURL, "postgres") {
-		client, err := open(connector, Postgres, connectionURL)
+		client, err := open(connector, Postgres, strings.Replace(connectionURL, "postgres://", "", 1))
 		if err != nil {
 			return nil, err
 		}

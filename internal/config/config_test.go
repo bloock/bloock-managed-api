@@ -17,7 +17,7 @@ func TestInitConfig(t *testing.T) {
 		err = os.Setenv("BLOOCK_API_KEY", value)
 		err = os.Setenv("BLOOCK_WEBHOOK_URL", value)
 		err = os.Setenv("BLOOCK_WEBHOOK_SECRET_KEY", value)
-		err = os.Setenv("BLOOCK_ENFORCE_TOLERANCE_STRING", "0")
+		err = os.Setenv("BLOOCK_ENFORCE_TOLERANCE", "0")
 		err = os.Setenv("BLOOCK_DB_CONNECTION_STRING", value)
 		config, err := InitConfig()
 

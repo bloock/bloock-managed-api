@@ -1,6 +1,7 @@
 DBConnectionString: "file:bloock?mode=memory&cache=shared&_fk=1"
 APIKey: "Nm1sFmrojcrRgfZ4v0H0w0d1d22GookjcJl7y-2jr51qx0RioCR3nVm1z74hDEzZ"
-WebhookURL: "https://bloock-managedapi.ultrahook.com"
+WebhookURL: "https://google.com"
 WebhookSecretKey:  "1AI1yw3JsqPODg0KLRLcyn62BfxUbXcn"
 APIHost: "0.0.0.0"
 APIPort: "8080"
+WebhookEnforceTolerance: true

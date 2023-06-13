@@ -2,6 +2,7 @@ package config
 
 import (
 	"encoding/json"
+	"github.com/rs/zerolog"
 	"github.com/spf13/viper"
 	"os"
 	"strings"
@@ -18,11 +19,13 @@ type Config struct {
 }
 
 func InitConfig() (*Config, error) {
+	logger := zerolog.Logger{}
 	v := viper.New()
 	var cfg = &Config{}
 
 	cfgPath := os.Getenv("BLOOCK_CONFIG_PATH")
 	if cfgPath == "" {
+		logger.Info().Msg("reading configuration from env")
 		err := readFromEnv(cfg)
 		if err != nil {
 			return &Config{}, err
@@ -30,6 +33,7 @@ func InitConfig() (*Config, error) {
 
 		return cfg, err
 	}
+	logger.Info().Msgf("reading configuration from config file: %s", cfgPath)
 
 	v.AddConfigPath(cfgPath)
 	v.SetConfigName("config")

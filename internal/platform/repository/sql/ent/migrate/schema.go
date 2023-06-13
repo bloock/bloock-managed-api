@@ -22,9 +22,9 @@ var (
 		PrimaryKey: []*schema.Column{CertificationsColumns[0]},
 		Indexes: []*schema.Index{
 			{
-				Name:    "certification_id_hash_anchor",
+				Name:    "certification_id_hash_anchor_id",
 				Unique:  true,
-				Columns: []*schema.Column{CertificationsColumns[0], CertificationsColumns[3], CertificationsColumns[2]},
+				Columns: []*schema.Column{CertificationsColumns[0], CertificationsColumns[3], CertificationsColumns[1]},
 			},
 		},
 	}
