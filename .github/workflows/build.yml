@@ -48,7 +48,7 @@ jobs:
         with:
           images: name/app
           tags: |
-            pattern={{version}}
+            type=semver,pattern={{raw}}
       - name: Login to DockerHub
         if: github.event_name != 'pull_request'
         uses: docker/login-action@v2
