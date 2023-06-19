@@ -16,6 +16,7 @@ type Config struct {
 	WebhookURL              string `json:"bloock_webhook_url"`
 	WebhookSecretKey        string `json:"bloock_webhook_secret_key"`
 	WebhookEnforceTolerance bool   `json:"bloock_webhook_enforce_tolerance"`
+	DebugMode               bool   `json:"bloock_api_debug_mode"`
 }
 
 func InitConfig() (*Config, error) {
@@ -50,7 +51,21 @@ func InitConfig() (*Config, error) {
 		return &Config{}, err
 	}
 
+	setDefaults(cfg)
 	return cfg, nil
+}
+
+func setDefaults(cfg *Config) {
+	if cfg.APIHost == "" {
+		cfg.APIHost = "0.0.0.0"
+	}
+	if cfg.APIPort == "" {
+		cfg.APIPort = "8080"
+	}
+	if cfg.DBConnectionString == "" {
+		cfg.DBConnectionString = "file:managed?mode=memory&cache=shared&_fk=1"
+	}
+
 }
 
 func readFromEnv(cfg *Config) error {

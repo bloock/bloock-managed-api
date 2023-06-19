@@ -16,3 +16,6 @@ test:
 cache:
 	go mod tidy
 	go mod vendor
+qa:
+	staticcheck ./...
+	go vet ./...

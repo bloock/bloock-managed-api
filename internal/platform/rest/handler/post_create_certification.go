@@ -3,6 +3,7 @@ package handler
 import (
 	"bloock-managed-api/internal/service/create"
 	"bloock-managed-api/internal/service/response"
+	"encoding/json"
 	"errors"
 	"github.com/gin-gonic/gin"
 	"io"
@@ -17,7 +18,16 @@ func PostCreateCertification(certification create.Certification) gin.HandlerFunc
 		var files [][]byte
 
 		if err != nil {
-			jsonBytes, err := io.ReadAll(ctx.Request.Body)
+			var request CertificationJSONRequest
+			if err := ctx.BindJSON(&request); err != nil {
+				ctx.JSON(http.StatusInternalServerError, err.Error())
+				return
+			}
+			jsonBytes, err := json.Marshal(request.data)
+			if err != nil {
+				ctx.JSON(http.StatusInternalServerError, err.Error())
+				return
+			}
 			files = append(files, jsonBytes)
 			if err != nil {
 				ctx.JSON(http.StatusInternalServerError, err.Error())
@@ -25,7 +35,7 @@ func PostCreateCertification(certification create.Certification) gin.HandlerFunc
 			}
 
 		} else {
-			for true {
+			for {
 				p, err := mr.NextPart()
 				if errors.Is(err, io.EOF) {
 					break
@@ -68,4 +78,8 @@ func mapToCertificationJsonResponse(certificationResponse []response.Certificati
 type CertificationJSONResponse struct {
 	Hash     string `json:"hash"`
 	AnchorId int    `json:"anchor_id"`
+}
+
+type CertificationJSONRequest struct {
+	data interface{}
 }

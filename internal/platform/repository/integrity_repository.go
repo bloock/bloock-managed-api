@@ -27,7 +27,7 @@ func NewBloockIntegrityRepository(apikey string, log zerolog.Logger) *BloockInte
 
 func (b BloockIntegrityRepository) Certify(ctx context.Context, files [][]byte) (certification []domain.Certification, err error) {
 	var records []record.Record
-	for i, _ := range files {
+	for i := range files {
 		rec, err := client.NewRecordClient().FromBytes(files[i]).Build()
 		if err != nil {
 			b.log.Error().Err(err).Msg("error certifying data")

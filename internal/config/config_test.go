@@ -11,14 +11,13 @@ func TestInitConfig(t *testing.T) {
 
 	t.Run("given no config file path it should read from env", func(t *testing.T) {
 		value := "1234abcd"
-		err := os.Setenv("BLOOCK_API_PORT", value)
-		require.NoError(t, err)
-		err = os.Setenv("BLOOCK_API_HOST", value)
-		err = os.Setenv("BLOOCK_API_KEY", value)
-		err = os.Setenv("BLOOCK_WEBHOOK_URL", value)
-		err = os.Setenv("BLOOCK_WEBHOOK_SECRET_KEY", value)
-		err = os.Setenv("BLOOCK_ENFORCE_TOLERANCE", "0")
-		err = os.Setenv("BLOOCK_DB_CONNECTION_STRING", value)
+		_ = os.Setenv("BLOOCK_API_PORT", value)
+		_ = os.Setenv("BLOOCK_API_HOST", value)
+		_ = os.Setenv("BLOOCK_API_KEY", value)
+		_ = os.Setenv("BLOOCK_WEBHOOK_URL", value)
+		_ = os.Setenv("BLOOCK_WEBHOOK_SECRET_KEY", value)
+		_ = os.Setenv("BLOOCK_ENFORCE_TOLERANCE", "0")
+		_ = os.Setenv("BLOOCK_DB_CONNECTION_STRING", value)
 		config, err := InitConfig()
 
 		assert.NotEmpty(t, config)

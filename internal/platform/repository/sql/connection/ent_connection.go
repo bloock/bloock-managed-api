@@ -75,6 +75,7 @@ func open(connector SQLConnector, driver string, connectionURL string) (*ent.Cli
 
 func (c *EntConnection) Migrate() error {
 	if err := c.db.Schema.Create(context.Background()); err != nil {
+		c.logger.Err(err).Msg("")
 		return err
 	}
 	return nil

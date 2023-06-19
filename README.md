@@ -9,6 +9,8 @@ Managed api is a tool to integrate automatically in your system and include some
 - Identity
 - Availability
 
+See postman doc: https://www.postman.com/bloock/workspace/bloock-api/documentation/16945237-3566feb8-1d4b-45c1-b0a1-f7de0be9348a
+
 ## Quickstart
 
 ### Requeriments
