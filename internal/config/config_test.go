@@ -18,6 +18,7 @@ func TestInitConfig(t *testing.T) {
 		_ = os.Setenv("BLOOCK_WEBHOOK_SECRET_KEY", value)
 		_ = os.Setenv("BLOOCK_ENFORCE_TOLERANCE", "0")
 		_ = os.Setenv("BLOOCK_DB_CONNECTION_STRING", value)
+		_ = os.Setenv("BLOOCK_API_DEBUG_MODE", "true")
 		config, err := InitConfig()
 
 		assert.NotEmpty(t, config)
@@ -27,6 +28,7 @@ func TestInitConfig(t *testing.T) {
 		assert.Equal(t, value, config.DBConnectionString)
 		assert.Equal(t, value, config.WebhookURL)
 		assert.Equal(t, value, config.WebhookSecretKey)
+		assert.Equal(t, true, config.DebugMode)
 		assert.Equal(t, false, config.WebhookEnforceTolerance)
 		assert.NoError(t, err)
 
