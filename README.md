@@ -41,13 +41,14 @@ The configuration file should be named `config.yaml`. You need to provide the fi
 Sample content of `config.yaml`:
 
 ```yaml
-APIHost: "0.0.0.0"
-APIPort: "8080"
-APIKey: ""
-WebhookURL: ""
-WebhookSecretKey: ""
-WebhookEnfaultTolerance: ""
-DBConnectionString: "file:bloock?mode=memory&cache=shared&_fk=1"
+BLOOCK_DB_CONNECTION_STRING: "file:bloock?mode=memory&cache=shared&_fk=1"
+BLOOCK_API_KEY: ""
+BLOOCK_WEBHOOK_URL:
+BLOOCK_WEBHOOK_SECRET_KEY:  ""
+BLOOCK_API_HOST: "0.0.0.0"
+BLOOCK_API_PORT: "8080"
+BLOOCK_ENFORCE_TOLERANCE: true
+BLOOCK_API_DEBUG_MODE: false
 ```
 
 ### Database
