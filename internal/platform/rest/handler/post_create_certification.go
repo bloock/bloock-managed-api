@@ -23,7 +23,7 @@ func PostCreateCertification(certification create.Certification) gin.HandlerFunc
 				ctx.JSON(http.StatusInternalServerError, NewInternalServerAPIError(err.Error()))
 				return
 			}
-			jsonBytes, err := json.Marshal(request.data)
+			jsonBytes, err := json.Marshal(request.Data)
 			if err != nil {
 				ctx.JSON(http.StatusInternalServerError, NewInternalServerAPIError(err.Error()))
 				return
@@ -81,5 +81,5 @@ type CertificationJSONResponse struct {
 }
 
 type CertificationJSONRequest struct {
-	data interface{}
+	Data interface{}
 }
