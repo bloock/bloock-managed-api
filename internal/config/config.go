@@ -2,7 +2,6 @@ package config
 
 import (
 	"github.com/spf13/viper"
-	"os"
 )
 
 type Config struct {
@@ -19,11 +18,7 @@ type Config struct {
 func InitConfig() (*Config, error) {
 	var cfg = &Config{}
 
-	var cfgPath string
-	if cfgPath = os.Getenv("BLOOCK_CONFIG_PATH"); cfgPath == "" {
-		cfgPath = "./"
-	}
-	viper.AddConfigPath(cfgPath)
+	viper.AddConfigPath("./")
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
 	viper.AutomaticEnv()
