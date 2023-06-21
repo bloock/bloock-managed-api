@@ -16,15 +16,15 @@ jobs:
     name: "QA Check"
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v1
+        with:
+            fetch-depth: 1
       - name: Setup
         run: |
           go install github.com/golang/mock/mockgen@v1.6.0
           go install entgo.io/ent/cmd/ent@latest
           make cache
           make mocks
-      - uses: actions/checkout@v1
-        with:
-            fetch-depth: 1
       - uses: dominikh/staticcheck-action@v1.2.0
 
         with:
