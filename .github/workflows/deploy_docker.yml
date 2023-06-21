@@ -1,9 +1,12 @@
-name: push
+name: build_and_push
 
 on:
   push:
     tags:
       - 'v*'
+  pull_request:
+    branches:
+      - 'master'
 
 jobs:
   qa:

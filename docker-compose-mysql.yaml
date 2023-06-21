@@ -14,6 +14,8 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: bloock-managed-api
+    volumes:
+      - ./config.yml:/go/bin/config.yml:ro
     ports:
       - 8080:8080
     depends_on:
