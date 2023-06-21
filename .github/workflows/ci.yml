@@ -15,12 +15,10 @@ jobs:
     steps:
       - uses: actions/checkout@v1
         with:
-          fetch-depth: 1
-      - uses: WillAbides/setup-go-faster@v1.7.0
-        with:
-          go-version: ${{ matrix.go }}
-      - run: "make cache"
-      - run: "go vet ./..."
+            fetch-depth: 1
+      - name: Setup
+        run: |
+          make cache
       - uses: dominikh/staticcheck-action@v1.2.0
         with:
           version: "2022.1.1"
