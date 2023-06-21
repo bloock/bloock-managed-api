@@ -1,0 +1,78 @@
+name: push
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  qa:
+    name: "QA Check"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+        with:
+        fetch-depth: 1
+      - uses: WillAbides/setup-go-faster@v1.7.0
+        with:
+          go-version: ${{ matrix.go }}
+      - run: "make cache"
+      - run: "go vet ./..."
+      - uses: dominikh/staticcheck-action@v1.2.0
+        with:
+        version: "2022.1.1"
+        install-go: false
+
+
+  test:
+    runs-on: ubuntu-latest
+    name: Test
+    env:
+      GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.18
+
+      - name: Setup
+        run: |
+          go install github.com/golang/mock/mockgen@v1.6.0
+          go install entgo.io/ent/cmd/ent@latest
+          make cache
+          make mocks
+      - name: Run tests
+        run: make test
+
+  push:
+    runs-on: ubuntu-latest
+    needs: [ test ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: bloock/managed-api
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+      - name: Login to DockerHub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
