@@ -19,12 +19,13 @@ type Config struct {
 func InitConfig() (*Config, error) {
 	var cfg = &Config{}
 
-	cfgPath := os.Getenv("BLOOCK_CONFIG_PATH")
-
+	var cfgPath string
+	if cfgPath = os.Getenv("BLOOCK_CONFIG_PATH"); cfgPath == "" {
+		cfgPath = "./"
+	}
 	viper.AddConfigPath(cfgPath)
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
-	viper.AddConfigPath(cfgPath)
 	viper.AutomaticEnv()
 	err := viper.ReadInConfig()
 	if err != nil {

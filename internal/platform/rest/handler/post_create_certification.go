@@ -20,17 +20,17 @@ func PostCreateCertification(certification create.Certification) gin.HandlerFunc
 		if err != nil {
 			var request CertificationJSONRequest
 			if err := ctx.BindJSON(&request); err != nil {
-				ctx.JSON(http.StatusInternalServerError, err.Error())
+				ctx.JSON(http.StatusInternalServerError, NewInternalServerAPIError(err.Error()))
 				return
 			}
 			jsonBytes, err := json.Marshal(request.data)
 			if err != nil {
-				ctx.JSON(http.StatusInternalServerError, err.Error())
+				ctx.JSON(http.StatusInternalServerError, NewInternalServerAPIError(err.Error()))
 				return
 			}
 			files = append(files, jsonBytes)
 			if err != nil {
-				ctx.JSON(http.StatusInternalServerError, err.Error())
+				ctx.JSON(http.StatusInternalServerError, NewInternalServerAPIError(err.Error()))
 				return
 			}
 
@@ -43,7 +43,7 @@ func PostCreateCertification(certification create.Certification) gin.HandlerFunc
 
 				file, err := io.ReadAll(p)
 				if err != nil {
-					ctx.JSON(http.StatusInternalServerError, err.Error())
+					ctx.JSON(http.StatusInternalServerError, NewInternalServerAPIError(err.Error()))
 					return
 				}
 
@@ -53,7 +53,7 @@ func PostCreateCertification(certification create.Certification) gin.HandlerFunc
 
 		certificationResponse, err := certification.Certify(ctx, files)
 		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, err.Error())
+			ctx.JSON(http.StatusInternalServerError, NewInternalServerAPIError(err.Error()))
 			return
 		}
 

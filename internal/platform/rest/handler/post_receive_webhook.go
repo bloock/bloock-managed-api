@@ -14,7 +14,7 @@ func PostReceiveWebhook(certification update.CertificationAnchor, secretKey stri
 
 		var webhookRequest WebhookRequest
 		if err := ctx.BindJSON(&webhookRequest); err != nil {
-			ctx.JSON(http.StatusBadRequest, "invalid json body")
+			NewBadRequestAPIError("invalid json body")
 			return
 		}
 		bloockSignature := ctx.GetHeader("Bloock-Signature")
@@ -23,16 +23,16 @@ func PostReceiveWebhook(certification update.CertificationAnchor, secretKey stri
 		bodyBytes, err := json.Marshal(webhookRequest)
 		if err != nil {
 
-			ctx.JSON(http.StatusInternalServerError, err.Error())
+			ctx.JSON(http.StatusInternalServerError, NewInternalServerAPIError(err.Error()))
 			return
 		}
 		ok, err := webhookClient.VerifyWebhookSignature(bodyBytes, bloockSignature, secretKey, enforceTolerance)
 		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, err.Error())
+			ctx.JSON(http.StatusInternalServerError, NewInternalServerAPIError(err.Error()))
 			return
 		}
 		if !ok {
-			ctx.JSON(http.StatusBadRequest, "invalid signature")
+			ctx.JSON(http.StatusBadRequest, NewBadRequestAPIError("invalid signature"))
 			return
 		}
 
@@ -40,7 +40,7 @@ func PostReceiveWebhook(certification update.CertificationAnchor, secretKey stri
 			AnchorId: webhookRequest.Data.Network.AnchorId,
 			Payload:  webhookRequest,
 		}); err != nil {
-			ctx.JSON(http.StatusInternalServerError, err.Error())
+			ctx.JSON(http.StatusInternalServerError, NewInternalServerAPIError(err.Error()))
 			return
 		}
 
