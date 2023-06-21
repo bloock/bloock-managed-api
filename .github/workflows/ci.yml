@@ -13,20 +13,25 @@ on:
 jobs:
 
   qa:
-    name: "Run CI"
+    name: "QA Check"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
         with:
             fetch-depth: 1
       - uses: dominikh/staticcheck-action@v1.2.0
+        run: |
+          go install github.com/golang/mock/mockgen@v1.6.0
+          go install entgo.io/ent/cmd/ent@latest
+          make cache
+          make mocks
         with:
           version: "2022.1.1"
 
   test:
     runs-on: ubuntu-latest
     name: Test
-
+    needs: [qa]
     env:
       GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
     steps:
