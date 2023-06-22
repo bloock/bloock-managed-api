@@ -22,8 +22,8 @@ See postman doc: https://www.postman.com/bloock/workspace/bloock-api/documentati
 
 ### Configuration
 
-The service uses viper as a configuration manager, currently supporting environment variables and a YAML configuration file. Only environment variables with the "bloock" key prefix are supported.
-
+The service uses viper as a configuration manager, currently supporting environment variables and a YAML configuration file. If no config are provided
+we are going to use default values for `BLOOCK_API_HOST`, `BLOOCK_API_PORT`, `BLOOCK_DB_CONNECTION_STRING`, `BLOOCK_ENFORCE_TOLERANCE` and `BLOOCK_API_DEBUG_MODE`.
 ##### Variables
 
 - BLOOCK_API_PORT: The main API port; default is 8080.
@@ -33,11 +33,12 @@ The service uses viper as a configuration manager, currently supporting environm
 - BLOOCK_WEBHOOK_SECRET_KEY: Your webhook secret key.
 - BLOOCK_ENFORCE_TOLERANCE: Decide if you want to set tolerance when verifying the webhook; true or false.
 - BLOOCK_DB_CONNECTION_STRING: Your database URL; e.g., mysql://username:password@localhost:3306/mydatabase.
+- BLOOCK_API_DEBUG_MODE: debug mode prints more log information; true or false.
 
 ##### Configuration file
 
-The configuration file should be named `config.yaml`. You need to provide the file path in an environment variable called BLOOCK_CONFIG_PATH, for example: `BLOOCK_CONFIG_PATH="app/conf/"` (without the filename).
-
+The configuration file should be named `config.yaml`. You need to provide the file path as environment variable called BLOOCK_CONFIG_PATH, for example: `BLOOCK_CONFIG_PATH="app/conf/"` (without the filename).
+If no config path are provided we try to read from the root directory of the app.
 Sample content of `config.yaml`:
 
 ```yaml
@@ -82,3 +83,31 @@ To start the service with MemDB:
 docker compose -f docker-compose-memdb.yaml up
 ```
 The default Docker Compose file uses MemDB. You can execute the service with `make up` command, which will build the application and start the service in a Docker container.
+
+### Docker image
+We push all the service images at: https://hub.docker.com/repository/docker/bloock/managed-api/general
+
+You can use this image in your containerized infrastructure, we recommend to use the highest version.
+Also, you can use this image in docker compose file:
+```yaml
+services:
+  bloock-managed-api:
+    platform: linux/x86_64
+    build:
+    image: bloock/managed-api:1.0.0
+    container_name: bloock-managed-api
+    volumes:
+      - ./config.yml:/go/bin/config.yml:ro
+    ports:
+      - 8080:8080
+    environment:
+      BLOOCK_DB_CONNECTION_STRING: "file:managed?mode=memory&cache=shared&_fk=1"
+      BLOOCK_API_KEY: ""
+      BLOOCK_WEBHOOK_URL: ""
+      BLOOCK_WEBHOOK_SECRET_KEY: ""
+      BLOOCK_API_HOST: "0.0.0.0"
+      BLOOCK_API_PORT: "8080"
+      BLOOCK_ENFORCE_TOLERANCE: false
+      BLOOCK_API_DEBUG_MODE: false
+
+```
