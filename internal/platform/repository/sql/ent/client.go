@@ -11,6 +11,7 @@ import (
 	"bloock-managed-api/internal/platform/repository/sql/ent/migrate"
 
 	"bloock-managed-api/internal/platform/repository/sql/ent/certification"
+	"bloock-managed-api/internal/platform/repository/sql/ent/localkey"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
@@ -25,6 +26,8 @@ type Client struct {
 	Schema *migrate.Schema
 	// Certification is the client for interacting with the Certification builders.
 	Certification *CertificationClient
+	// LocalKey is the client for interacting with the LocalKey builders.
+	LocalKey *LocalKeyClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -39,6 +42,7 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Certification = NewCertificationClient(c.config)
+	c.LocalKey = NewLocalKeyClient(c.config)
 }
 
 type (
@@ -122,6 +126,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ctx:           ctx,
 		config:        cfg,
 		Certification: NewCertificationClient(cfg),
+		LocalKey:      NewLocalKeyClient(cfg),
 	}, nil
 }
 
@@ -142,6 +147,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		ctx:           ctx,
 		config:        cfg,
 		Certification: NewCertificationClient(cfg),
+		LocalKey:      NewLocalKeyClient(cfg),
 	}, nil
 }
 
@@ -171,12 +177,14 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	c.Certification.Use(hooks...)
+	c.LocalKey.Use(hooks...)
 }
 
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	c.Certification.Intercept(interceptors...)
+	c.LocalKey.Intercept(interceptors...)
 }
 
 // Mutate implements the ent.Mutator interface.
@@ -184,6 +192,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
 	case *CertificationMutation:
 		return c.Certification.mutate(ctx, m)
+	case *LocalKeyMutation:
+		return c.LocalKey.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
@@ -307,12 +317,130 @@ func (c *CertificationClient) mutate(ctx context.Context, m *CertificationMutati
 	}
 }
 
+// LocalKeyClient is a client for the LocalKey schema.
+type LocalKeyClient struct {
+	config
+}
+
+// NewLocalKeyClient returns a client for the LocalKey from the given config.
+func NewLocalKeyClient(c config) *LocalKeyClient {
+	return &LocalKeyClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `localkey.Hooks(f(g(h())))`.
+func (c *LocalKeyClient) Use(hooks ...Hook) {
+	c.hooks.LocalKey = append(c.hooks.LocalKey, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `localkey.Intercept(f(g(h())))`.
+func (c *LocalKeyClient) Intercept(interceptors ...Interceptor) {
+	c.inters.LocalKey = append(c.inters.LocalKey, interceptors...)
+}
+
+// Create returns a builder for creating a LocalKey entity.
+func (c *LocalKeyClient) Create() *LocalKeyCreate {
+	mutation := newLocalKeyMutation(c.config, OpCreate)
+	return &LocalKeyCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of LocalKey entities.
+func (c *LocalKeyClient) CreateBulk(builders ...*LocalKeyCreate) *LocalKeyCreateBulk {
+	return &LocalKeyCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for LocalKey.
+func (c *LocalKeyClient) Update() *LocalKeyUpdate {
+	mutation := newLocalKeyMutation(c.config, OpUpdate)
+	return &LocalKeyUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *LocalKeyClient) UpdateOne(lk *LocalKey) *LocalKeyUpdateOne {
+	mutation := newLocalKeyMutation(c.config, OpUpdateOne, withLocalKey(lk))
+	return &LocalKeyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *LocalKeyClient) UpdateOneID(id uuid.UUID) *LocalKeyUpdateOne {
+	mutation := newLocalKeyMutation(c.config, OpUpdateOne, withLocalKeyID(id))
+	return &LocalKeyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for LocalKey.
+func (c *LocalKeyClient) Delete() *LocalKeyDelete {
+	mutation := newLocalKeyMutation(c.config, OpDelete)
+	return &LocalKeyDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *LocalKeyClient) DeleteOne(lk *LocalKey) *LocalKeyDeleteOne {
+	return c.DeleteOneID(lk.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *LocalKeyClient) DeleteOneID(id uuid.UUID) *LocalKeyDeleteOne {
+	builder := c.Delete().Where(localkey.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &LocalKeyDeleteOne{builder}
+}
+
+// Query returns a query builder for LocalKey.
+func (c *LocalKeyClient) Query() *LocalKeyQuery {
+	return &LocalKeyQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeLocalKey},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a LocalKey entity by its id.
+func (c *LocalKeyClient) Get(ctx context.Context, id uuid.UUID) (*LocalKey, error) {
+	return c.Query().Where(localkey.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *LocalKeyClient) GetX(ctx context.Context, id uuid.UUID) *LocalKey {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *LocalKeyClient) Hooks() []Hook {
+	return c.hooks.LocalKey
+}
+
+// Interceptors returns the client interceptors.
+func (c *LocalKeyClient) Interceptors() []Interceptor {
+	return c.inters.LocalKey
+}
+
+func (c *LocalKeyClient) mutate(ctx context.Context, m *LocalKeyMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&LocalKeyCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&LocalKeyUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&LocalKeyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&LocalKeyDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown LocalKey mutation op: %q", m.Op())
+	}
+}
+
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Certification []ent.Hook
+		Certification, LocalKey []ent.Hook
 	}
 	inters struct {
-		Certification []ent.Interceptor
+		Certification, LocalKey []ent.Interceptor
 	}
 )

@@ -2,7 +2,7 @@ package create
 
 import (
 	"bloock-managed-api/internal/domain/repository"
-	"bloock-managed-api/internal/service/response"
+	"bloock-managed-api/internal/service/create/response"
 	"context"
 )
 
@@ -14,7 +14,6 @@ type Certification struct {
 func NewCertification(certificationRepository repository.CertificationRepository, integrityRepository repository.IntegrityRepository) *Certification {
 	return &Certification{certificationRepository: certificationRepository, integrityRepository: integrityRepository}
 }
-
 func (c Certification) Certify(ctx context.Context, files [][]byte) ([]response.CertificationResponse, error) {
 	certifications, err := c.integrityRepository.Certify(ctx, files)
 	if err != nil {

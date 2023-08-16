@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"bloock-managed-api/internal/service/update"
+	"bloock-managed-api/internal/service"
 	"bloock-managed-api/internal/service/update/request"
 	"encoding/json"
 	"github.com/bloock/bloock-sdk-go/v2/client"
@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-func PostReceiveWebhook(certification update.CertificationAnchor, secretKey string, enforceTolerance bool) gin.HandlerFunc {
+func PostReceiveWebhook(certification service.CertificateUpdateAnchorService, secretKey string, enforceTolerance bool) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 
 		var webhookRequest WebhookRequest
@@ -22,17 +22,19 @@ func PostReceiveWebhook(certification update.CertificationAnchor, secretKey stri
 		webhookClient := client.NewWebhookClient()
 		bodyBytes, err := json.Marshal(webhookRequest)
 		if err != nil {
-
-			ctx.JSON(http.StatusInternalServerError, NewInternalServerAPIError(err.Error()))
+			serverAPIError := NewInternalServerAPIError(err.Error())
+			ctx.JSON(serverAPIError.Status, serverAPIError)
 			return
 		}
 		ok, err := webhookClient.VerifyWebhookSignature(bodyBytes, bloockSignature, secretKey, enforceTolerance)
 		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, NewInternalServerAPIError(err.Error()))
+			serverAPIError := NewInternalServerAPIError(err.Error())
+			ctx.JSON(serverAPIError.Status, serverAPIError)
 			return
 		}
 		if !ok {
-			ctx.JSON(http.StatusBadRequest, NewBadRequestAPIError("invalid signature"))
+			badRequestAPIError := NewBadRequestAPIError(err.Error())
+			ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
 			return
 		}
 
@@ -40,7 +42,8 @@ func PostReceiveWebhook(certification update.CertificationAnchor, secretKey stri
 			AnchorId: webhookRequest.Data.Network.AnchorId,
 			Payload:  webhookRequest,
 		}); err != nil {
-			ctx.JSON(http.StatusInternalServerError, NewInternalServerAPIError(err.Error()))
+			serverAPIError := NewInternalServerAPIError(err.Error())
+			ctx.JSON(serverAPIError.Status, serverAPIError)
 			return
 		}
 

@@ -20,6 +20,18 @@ func (f CertificationFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Valu
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CertificationMutation", m)
 }
 
+// The LocalKeyFunc type is an adapter to allow the use of ordinary
+// function as LocalKey mutator.
+type LocalKeyFunc func(context.Context, *ent.LocalKeyMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f LocalKeyFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.LocalKeyMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LocalKeyMutation", m)
+}
+
 // Condition is a hook condition function.
 type Condition func(context.Context, ent.Mutation) bool
 

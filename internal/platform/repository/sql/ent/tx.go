@@ -14,6 +14,8 @@ type Tx struct {
 	config
 	// Certification is the client for interacting with the Certification builders.
 	Certification *CertificationClient
+	// LocalKey is the client for interacting with the LocalKey builders.
+	LocalKey *LocalKeyClient
 
 	// lazily loaded.
 	client     *Client
@@ -146,6 +148,7 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Certification = NewCertificationClient(tx.config)
+	tx.LocalKey = NewLocalKeyClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

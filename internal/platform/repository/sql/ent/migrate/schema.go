@@ -28,9 +28,29 @@ var (
 			},
 		},
 	}
+	// LocalKeysColumns holds the columns for the "local_keys" table.
+	LocalKeysColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID},
+		{Name: "local_key", Type: field.TypeJSON},
+		{Name: "key_type", Type: field.TypeString},
+	}
+	// LocalKeysTable holds the schema information for the "local_keys" table.
+	LocalKeysTable = &schema.Table{
+		Name:       "local_keys",
+		Columns:    LocalKeysColumns,
+		PrimaryKey: []*schema.Column{LocalKeysColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "localkey_id",
+				Unique:  true,
+				Columns: []*schema.Column{LocalKeysColumns[0]},
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		CertificationsTable,
+		LocalKeysTable,
 	}
 )
 

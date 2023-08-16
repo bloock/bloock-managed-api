@@ -8,3 +8,6 @@ import (
 
 // Certification is the predicate function for certification builders.
 type Certification func(*sql.Selector)
+
+// LocalKey is the predicate function for localkey builders.
+type LocalKey func(*sql.Selector)

@@ -4,6 +4,7 @@ package ent
 
 import (
 	"bloock-managed-api/internal/platform/repository/sql/ent/certification"
+	"bloock-managed-api/internal/platform/repository/sql/ent/localkey"
 	"context"
 	"errors"
 	"fmt"
@@ -74,6 +75,7 @@ func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			certification.Table: certification.ValidColumn,
+			localkey.Table:      localkey.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)

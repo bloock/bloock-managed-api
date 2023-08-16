@@ -4,6 +4,7 @@ package ent
 
 import (
 	"bloock-managed-api/internal/platform/repository/sql/ent/certification"
+	"bloock-managed-api/internal/platform/repository/sql/ent/localkey"
 	"bloock-managed-api/internal/platform/repository/sql/schema"
 
 	"github.com/google/uuid"
@@ -27,4 +28,10 @@ func init() {
 	certificationDescID := certificationFields[0].Descriptor()
 	// certification.DefaultID holds the default value on creation for the id field.
 	certification.DefaultID = certificationDescID.Default.(func() uuid.UUID)
+	localkeyFields := schema.LocalKey{}.Fields()
+	_ = localkeyFields
+	// localkeyDescID is the schema descriptor for id field.
+	localkeyDescID := localkeyFields[0].Descriptor()
+	// localkey.DefaultID holds the default value on creation for the id field.
+	localkey.DefaultID = localkeyDescID.Default.(func() uuid.UUID)
 }

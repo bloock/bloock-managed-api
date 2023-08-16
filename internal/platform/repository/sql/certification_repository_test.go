@@ -17,11 +17,7 @@ import (
 var hash = "3ea2f1d0abf3fc66cf29eebb70cbd4e7fe762ef8a09bcc06c8edf641230afec0"
 
 func TestSQLCertificationRepository_SaveCertification(t *testing.T) {
-	entConnector := connection.NewEntConnector(zerolog.Logger{})
-	conn, err := connection.NewEntConnection("file:ent?mode=memory&cache=shared&_fk=1", entConnector, zerolog.Logger{})
-	require.NoError(t, err)
-	err = conn.Migrate()
-	require.NoError(t, err)
+	conn := EntConnectorForTesting(t)
 
 	certificationRepository := NewSQLCertificationRepository(*conn, 5*time.Second, zerolog.Logger{})
 	t.Run("given certification it should be saved", func(t *testing.T) {
@@ -33,13 +29,17 @@ func TestSQLCertificationRepository_SaveCertification(t *testing.T) {
 
 }
 
-func TestSQLCertificationRepository_GetCertification(t *testing.T) {
+func EntConnectorForTesting(t *testing.T) *connection.EntConnection {
 	entConnector := connection.NewEntConnector(zerolog.Logger{})
 	conn, err := connection.NewEntConnection("file:ent?mode=memory&cache=shared&_fk=1", entConnector, zerolog.Logger{})
 	require.NoError(t, err)
 	err = conn.Migrate()
 	require.NoError(t, err)
+	return conn
+}
 
+func TestSQLCertificationRepository_GetCertification(t *testing.T) {
+	conn := EntConnectorForTesting(t)
 	certificationRepository := NewSQLCertificationRepository(*conn, 5*time.Second, zerolog.Logger{})
 	hash := "3ea2f1d0abf3fc66cf29eebb70cbd4e7fe762ef8a09bcc06c8edf641230afec0"
 	ctx := context.TODO()
@@ -77,11 +77,7 @@ func TestSQLCertificationRepository_GetCertification(t *testing.T) {
 }
 
 func TestSQLCertificationRepository_UpdateCertificationAnchor(t *testing.T) {
-	entConnector := connection.NewEntConnector(zerolog.Logger{})
-	conn, err := connection.NewEntConnection("file:ent?mode=memory&cache=shared&_fk=1", entConnector, zerolog.Logger{})
-	require.NoError(t, err)
-	err = conn.Migrate()
-	require.NoError(t, err)
+	conn := EntConnectorForTesting(t)
 	hash := "2ea2f1d0abf3fc66cf29eebb70cbd4e7fe762ef8a09bcc06c8edf641230afec0"
 
 	certificationRepository := NewSQLCertificationRepository(*conn, 5*time.Second, zerolog.Logger{})

@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"bloock-managed-api/internal/service/create"
-	"bloock-managed-api/internal/service/response"
+	"bloock-managed-api/internal/service"
+	"bloock-managed-api/internal/service/create/response"
 	"encoding/json"
 	"errors"
 	"github.com/gin-gonic/gin"
@@ -10,7 +10,7 @@ import (
 	"net/http"
 )
 
-func PostCreateCertification(certification create.Certification) gin.HandlerFunc {
+func PostCreateCertification(certification service.CertificateService) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 
 		mr, err := ctx.Request.MultipartReader()
@@ -20,17 +20,20 @@ func PostCreateCertification(certification create.Certification) gin.HandlerFunc
 		if err != nil {
 			var request CertificationJSONRequest
 			if err := ctx.BindJSON(&request); err != nil {
-				ctx.JSON(http.StatusInternalServerError, NewInternalServerAPIError(err.Error()))
+				badRequestAPIError := NewBadRequestAPIError(err.Error())
+				ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
 				return
 			}
 			jsonBytes, err := json.Marshal(request.Data)
 			if err != nil {
-				ctx.JSON(http.StatusInternalServerError, NewInternalServerAPIError(err.Error()))
+				serverAPIError := NewInternalServerAPIError(err.Error())
+				ctx.JSON(serverAPIError.Status, serverAPIError)
 				return
 			}
 			files = append(files, jsonBytes)
 			if err != nil {
-				ctx.JSON(http.StatusInternalServerError, NewInternalServerAPIError(err.Error()))
+				serverAPIError := NewInternalServerAPIError(err.Error())
+				ctx.JSON(serverAPIError.Status, serverAPIError)
 				return
 			}
 
@@ -43,7 +46,8 @@ func PostCreateCertification(certification create.Certification) gin.HandlerFunc
 
 				file, err := io.ReadAll(p)
 				if err != nil {
-					ctx.JSON(http.StatusInternalServerError, NewInternalServerAPIError(err.Error()))
+					serverAPIError := NewInternalServerAPIError(err.Error())
+					ctx.JSON(serverAPIError.Status, serverAPIError)
 					return
 				}
 
@@ -53,7 +57,8 @@ func PostCreateCertification(certification create.Certification) gin.HandlerFunc
 
 		certificationResponse, err := certification.Certify(ctx, files)
 		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, NewInternalServerAPIError(err.Error()))
+			serverAPIError := NewInternalServerAPIError(err.Error())
+			ctx.JSON(serverAPIError.Status, serverAPIError)
 			return
 		}
 
