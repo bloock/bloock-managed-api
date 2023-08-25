@@ -1,4 +1,4 @@
-package create
+package integrity
 
 import (
 	"bloock-managed-api/internal/domain"
@@ -18,14 +18,14 @@ func TestCertification_Certify(t *testing.T) {
 	integrityRepository := mock_repository.NewMockIntegrityRepository(ctrl)
 	someErr := errors.New("some error")
 
-	files := [][]byte{[]byte("test"), []byte("test2")}
+	files := []byte("test")
 	ctx := context.TODO()
 	t.Run("given files it should be certified and saved in db", func(t *testing.T) {
 		certification := domain.NewPendingCertification(1, "9c22ff5f21f0b81b113e63f7db6da94fedef11b2119b4088b89664fb9a3cb658")
 		integrityRepository.EXPECT().Certify(ctx, files).Return([]domain.Certification{*certification}, nil)
 		certificationRepository.EXPECT().SaveCertification(ctx, []domain.Certification{*certification})
 
-		_, err := NewCertification(certificationRepository, integrityRepository).Certify(ctx, files)
+		_, err := NewIntegrityService(certificationRepository, integrityRepository).Certify(ctx, files)
 
 		assert.NoError(t, err)
 	})
@@ -36,7 +36,7 @@ func TestCertification_Certify(t *testing.T) {
 		certificationRepository.EXPECT().SaveCertification(ctx, []domain.Certification{*certification}).
 			Return(someErr)
 
-		_, err := NewCertification(certificationRepository, integrityRepository).Certify(ctx, files)
+		_, err := NewIntegrityService(certificationRepository, integrityRepository).Certify(ctx, files)
 
 		assert.Error(t, err)
 	})
@@ -45,7 +45,7 @@ func TestCertification_Certify(t *testing.T) {
 
 		integrityRepository.EXPECT().Certify(ctx, files).Return([]domain.Certification{}, someErr)
 
-		_, err := NewCertification(certificationRepository, integrityRepository).Certify(ctx, files)
+		_, err := NewIntegrityService(certificationRepository, integrityRepository).Certify(ctx, files)
 
 		assert.Error(t, err)
 	})

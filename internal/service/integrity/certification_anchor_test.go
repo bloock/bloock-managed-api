@@ -1,9 +1,9 @@
-package update
+package integrity
 
 import (
 	"bloock-managed-api/internal/domain"
 	mock_repository "bloock-managed-api/internal/domain/repository/mocks"
-	"bloock-managed-api/internal/service/update/request"
+	"bloock-managed-api/internal/service/integrity/request"
 	"context"
 	"errors"
 	"github.com/bloock/bloock-sdk-go/v2/entity/integrity"
@@ -35,7 +35,7 @@ func TestCertificationAnchor_UpdateAnchor(t *testing.T) {
 			Return([]domain.Certification{*certification}, nil)
 		notificationRepository.EXPECT().NotifyCertification(hash, updateRequest.Payload)
 
-		err := NewCertificationAnchor(certificationRepository, notificationRepository, integrityRepository).
+		err := NewUpdateAnchorService(certificationRepository, notificationRepository, integrityRepository).
 			UpdateAnchor(context.TODO(), *updateRequest)
 
 		assert.NoError(t, err)
@@ -44,7 +44,7 @@ func TestCertificationAnchor_UpdateAnchor(t *testing.T) {
 	t.Run("given error getting anchor it should be returned", func(t *testing.T) {
 		integrityRepository.EXPECT().GetAnchorByID(context.TODO(), 1).Return(integrity.Anchor{}, errors.New("some error"))
 
-		err := NewCertificationAnchor(certificationRepository, notificationRepository, integrityRepository).
+		err := NewUpdateAnchorService(certificationRepository, notificationRepository, integrityRepository).
 			UpdateAnchor(context.TODO(), *updateRequest)
 
 		assert.Error(t, err)
@@ -55,7 +55,7 @@ func TestCertificationAnchor_UpdateAnchor(t *testing.T) {
 		certificationRepository.EXPECT().UpdateCertificationAnchor(context.TODO(), *anchor).
 			Return(errors.New("some error"))
 
-		err := NewCertificationAnchor(certificationRepository, notificationRepository, integrityRepository).
+		err := NewUpdateAnchorService(certificationRepository, notificationRepository, integrityRepository).
 			UpdateAnchor(context.TODO(), *updateRequest)
 
 		assert.Error(t, err)
@@ -68,7 +68,7 @@ func TestCertificationAnchor_UpdateAnchor(t *testing.T) {
 			Return([]domain.Certification{*certification}, nil)
 		notificationRepository.EXPECT().NotifyCertification(hash, updateRequest.Payload).Return(errors.New("some error"))
 
-		err := NewCertificationAnchor(certificationRepository, notificationRepository, integrityRepository).
+		err := NewUpdateAnchorService(certificationRepository, notificationRepository, integrityRepository).
 			UpdateAnchor(context.TODO(), *updateRequest)
 
 		assert.Error(t, err)

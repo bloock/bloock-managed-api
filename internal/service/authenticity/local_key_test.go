@@ -1,4 +1,4 @@
-package create
+package authenticity
 
 import (
 	"bloock-managed-api/internal/domain"

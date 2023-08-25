@@ -19,11 +19,7 @@ type Server struct {
 func NewServer(
 	host string,
 	port string,
-	keysService service.GetLocalKeysService,
-	managedKey service.ManagedKeyCreateService,
-	localKey service.LocalKeyCreateService,
-	signature service.SignService,
-	createCertification service.CertificateService,
+	processService service.BaseProcessService,
 	updateAnchor service.CertificateUpdateAnchorService,
 	webhookSecretKey string,
 	enforceTolerance bool,
@@ -41,12 +37,8 @@ func NewServer(
 	}
 
 	v1 := router.Group("/v1/")
-	v1.POST("certification", handler.PostCreateCertification(createCertification))
+	v1.POST("process", handler.PostProcess(processService))
 	v1.POST("webhook", handler.PostReceiveWebhook(updateAnchor, webhookSecretKey, enforceTolerance))
-	v1.POST("sign", handler.PostSignData(signature))
-	v1.POST("key/local", handler.PostCreateLocalKey(localKey))
-	v1.POST("key/managed", handler.PostCreateManagedKey(managedKey))
-	v1.GET("key/local", handler.GetLocalKeys(keysService))
 
 	return &Server{host: host, port: port, engine: router, debug: debug, logger: logger}, nil
 }

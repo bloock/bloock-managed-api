@@ -1,20 +1,20 @@
-package create
+package integrity
 
 import (
 	"bloock-managed-api/internal/domain/repository"
-	"bloock-managed-api/internal/service/create/response"
+	"bloock-managed-api/internal/service/integrity/response"
 	"context"
 )
 
-type Certification struct {
+type IntegrityService struct {
 	certificationRepository repository.CertificationRepository
 	integrityRepository     repository.IntegrityRepository
 }
 
-func NewCertification(certificationRepository repository.CertificationRepository, integrityRepository repository.IntegrityRepository) *Certification {
-	return &Certification{certificationRepository: certificationRepository, integrityRepository: integrityRepository}
+func NewIntegrityService(certificationRepository repository.CertificationRepository, integrityRepository repository.IntegrityRepository) *IntegrityService {
+	return &IntegrityService{certificationRepository: certificationRepository, integrityRepository: integrityRepository}
 }
-func (c Certification) Certify(ctx context.Context, files [][]byte) ([]response.CertificationResponse, error) {
+func (c IntegrityService) Certify(ctx context.Context, files []byte) ([]response.CertificationResponse, error) {
 	certifications, err := c.integrityRepository.Certify(ctx, files)
 	if err != nil {
 		return []response.CertificationResponse{}, err

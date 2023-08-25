@@ -5,14 +5,16 @@ import (
 )
 
 type Config struct {
-	DBConnectionString      string `mapstructure:"BLOOCK_DB_CONNECTION_STRING"`
-	APIKey                  string `mapstructure:"BLOOCK_API_KEY"`
-	APIHost                 string `mapstructure:"BLOOCK_API_HOST"`
-	APIPort                 string `mapstructure:"BLOOCK_API_PORT"`
-	WebhookURL              string `mapstructure:"BLOOCK_WEBHOOK_URL"`
-	WebhookSecretKey        string `mapstructure:"BLOOCK_WEBHOOK_SECRET_KEY"`
-	WebhookEnforceTolerance bool   `mapstructure:"BLOOCK_ENFORCE_TOLERANCE"`
-	DebugMode               bool   `mapstructure:"BLOOCK_API_DEBUG_MODE"`
+	DBConnectionString      string  `mapstructure:"BLOOCK_DB_CONNECTION_STRING"`
+	APIKey                  string  `mapstructure:"BLOOCK_API_KEY"`
+	APIHost                 string  `mapstructure:"BLOOCK_API_HOST"`
+	APIPort                 string  `mapstructure:"BLOOCK_API_PORT"`
+	WebhookURL              string  `mapstructure:"BLOOCK_WEBHOOK_URL"`
+	WebhookSecretKey        string  `mapstructure:"BLOOCK_WEBHOOK_SECRET_KEY"`
+	WebhookEnforceTolerance bool    `mapstructure:"BLOOCK_ENFORCE_TOLERANCE"`
+	DebugMode               bool    `mapstructure:"BLOOCK_API_DEBUG_MODE"`
+	PrivateKey              *string `mapstructure:"BLOOCK_API_PRIVATE_KEY"`
+	PublicKey               string  `mapstructure:"BLOOCK_API_PUBLIC_KEY"`
 }
 
 func InitConfig() (*Config, error) {

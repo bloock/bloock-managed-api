@@ -42,7 +42,7 @@ var (
 	DefaultID func() uuid.UUID
 )
 
-// OrderOption defines the ordering options for the LocalKey queries.
+// OrderOption defines the ordering options for the KeyID queries.
 type OrderOption func(*sql.Selector)
 
 // ByID orders the results by the id field.

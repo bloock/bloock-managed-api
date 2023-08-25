@@ -262,11 +262,11 @@ func (lkq *LocalKeyQuery) Clone() *LocalKeyQuery {
 // Example:
 //
 //	var v []struct {
-//		LocalKey *key.LocalKey `json:"local_key,omitempty"`
+//		KeyID *key.KeyID `json:"local_key,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
-//	client.LocalKey.Query().
+//	client.KeyID.Query().
 //		GroupBy(localkey.FieldLocalKey).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
@@ -285,10 +285,10 @@ func (lkq *LocalKeyQuery) GroupBy(field string, fields ...string) *LocalKeyGroup
 // Example:
 //
 //	var v []struct {
-//		LocalKey *key.LocalKey `json:"local_key,omitempty"`
+//		KeyID *key.KeyID `json:"local_key,omitempty"`
 //	}
 //
-//	client.LocalKey.Query().
+//	client.KeyID.Query().
 //		Select(localkey.FieldLocalKey).
 //		Scan(ctx, &v)
 func (lkq *LocalKeyQuery) Select(fields ...string) *LocalKeySelect {

@@ -1,8 +1,8 @@
-package create
+package authenticity
 
 import (
 	mock_repository "bloock-managed-api/internal/domain/repository/mocks"
-	"bloock-managed-api/internal/service/create/request"
+	"bloock-managed-api/internal/service/authenticity/request"
 	"errors"
 	"github.com/bloock/bloock-sdk-go/v2/entity/key"
 	"github.com/golang/mock/gomock"

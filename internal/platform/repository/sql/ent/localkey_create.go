@@ -91,10 +91,10 @@ func (lkc *LocalKeyCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (lkc *LocalKeyCreate) check() error {
 	if _, ok := lkc.mutation.LocalKey(); !ok {
-		return &ValidationError{Name: "local_key", err: errors.New(`ent: missing required field "LocalKey.local_key"`)}
+		return &ValidationError{Name: "local_key", err: errors.New(`ent: missing required field "KeyID.local_key"`)}
 	}
 	if _, ok := lkc.mutation.KeyType(); !ok {
-		return &ValidationError{Name: "key_type", err: errors.New(`ent: missing required field "LocalKey.key_type"`)}
+		return &ValidationError{Name: "key_type", err: errors.New(`ent: missing required field "KeyID.key_type"`)}
 	}
 	return nil
 }

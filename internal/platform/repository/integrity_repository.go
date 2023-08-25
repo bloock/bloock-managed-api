@@ -25,19 +25,15 @@ func NewBloockIntegrityRepository(apikey string, log zerolog.Logger) *BloockInte
 	}
 }
 
-func (b BloockIntegrityRepository) Certify(ctx context.Context, files [][]byte) (certification []domain.Certification, err error) {
-	var records []record.Record
-	for i := range files {
-		rec, err := client.NewRecordClient().FromBytes(files[i]).Build()
-		if err != nil {
-			b.log.Error().Err(err).Msg("error certifying data")
-			return []domain.Certification{}, err
-		}
+func (b BloockIntegrityRepository) Certify(ctx context.Context, file []byte) (certification []domain.Certification, err error) {
 
-		records = append(records, rec)
+	rec, err := client.NewRecordClient().FromFile(file).Build()
+	if err != nil {
+		b.log.Error().Err(err).Msg("error certifying data")
+		return []domain.Certification{}, err
 	}
 
-	receipt, err := b.integrityClient.SendRecords(records)
+	receipt, err := b.integrityClient.SendRecords([]record.Record{rec})
 	if err != nil {
 		b.log.Error().Err(err).Msg("error certifying data")
 		return []domain.Certification{}, err

@@ -28,7 +28,7 @@ const (
 
 	// Node types.
 	TypeCertification = "Certification"
-	TypeLocalKey      = "LocalKey"
+	TypeLocalKey      = "KeyID"
 )
 
 // CertificationMutation represents an operation that mutates the Certification nodes in the graph.
@@ -764,7 +764,7 @@ func (m *LocalKeyMutation) OldField(ctx context.Context, name string) (ent.Value
 	case localkey.FieldKeyType:
 		return m.OldKeyType(ctx)
 	}
-	return nil, fmt.Errorf("unknown LocalKey field %s", name)
+	return nil, fmt.Errorf("unknown KeyID field %s", name)
 }
 
 // SetField sets the value of a field with the given name. It returns an error if
@@ -787,7 +787,7 @@ func (m *LocalKeyMutation) SetField(name string, value ent.Value) error {
 		m.SetKeyType(v)
 		return nil
 	}
-	return fmt.Errorf("unknown LocalKey field %s", name)
+	return fmt.Errorf("unknown KeyID field %s", name)
 }
 
 // AddedFields returns all numeric fields that were incremented/decremented during
@@ -809,7 +809,7 @@ func (m *LocalKeyMutation) AddedField(name string) (ent.Value, bool) {
 func (m *LocalKeyMutation) AddField(name string, value ent.Value) error {
 	switch name {
 	}
-	return fmt.Errorf("unknown LocalKey numeric field %s", name)
+	return fmt.Errorf("unknown KeyID numeric field %s", name)
 }
 
 // ClearedFields returns all nullable fields that were cleared during this
@@ -828,7 +828,7 @@ func (m *LocalKeyMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *LocalKeyMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown LocalKey nullable field %s", name)
+	return fmt.Errorf("unknown KeyID nullable field %s", name)
 }
 
 // ResetField resets all changes in the mutation for the field with the given name.
@@ -842,7 +842,7 @@ func (m *LocalKeyMutation) ResetField(name string) error {
 		m.ResetKeyType()
 		return nil
 	}
-	return fmt.Errorf("unknown LocalKey field %s", name)
+	return fmt.Errorf("unknown KeyID field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
@@ -884,11 +884,11 @@ func (m *LocalKeyMutation) EdgeCleared(name string) bool {
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *LocalKeyMutation) ClearEdge(name string) error {
-	return fmt.Errorf("unknown LocalKey unique edge %s", name)
+	return fmt.Errorf("unknown KeyID unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *LocalKeyMutation) ResetEdge(name string) error {
-	return fmt.Errorf("unknown LocalKey edge %s", name)
+	return fmt.Errorf("unknown KeyID edge %s", name)
 }

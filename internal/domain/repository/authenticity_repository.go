@@ -1,15 +1,14 @@
 package repository
 
 import (
-	"bloock-managed-api/internal/domain"
+	"context"
 	"github.com/bloock/bloock-sdk-go/v2/entity/key"
 	"github.com/bloock/bloock-sdk-go/v2/entity/record"
 )
 
 type AuthenticityRepository interface {
-	CreateLocalKey(keyType key.KeyType) (domain.LocalKey, error)
-	LoadLocalKey(keyType key.KeyType, publicKey string, privateKey string) (key.LocalKey, error)
-	Sign(localKey key.LocalKey, keyType key.KeyType, commonName *string, data []byte) (record.Record, error)
-	CreateManagedKey(name string, keyType key.KeyType, expiration int, level key.KeyProtectionLevel) (key.ManagedKey, error)
-	Verify(record record.Record) (bool, error)
+	SignECWithLocalKey(ctx context.Context, data []byte, kty key.KeyType, publicKey string, privateKey *string) (string, record.Record, error)
+	SignECWithLocalKeyEns(ctx context.Context, data []byte, kty key.KeyType, publicKey string, privateKey *string) (string, record.Record, error)
+	SignECWithManagedKey(ctx context.Context, data []byte, kid string) (string, record.Record, error)
+	SignECWithManagedKeyEns(ctx context.Context, data []byte, kid string) (string, record.Record, error)
 }

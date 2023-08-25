@@ -2,7 +2,7 @@ package handler
 
 import (
 	"bloock-managed-api/internal/service"
-	"bloock-managed-api/internal/service/update/request"
+	"bloock-managed-api/internal/service/integrity/request"
 	"encoding/json"
 	"github.com/bloock/bloock-sdk-go/v2/client"
 	"github.com/gin-gonic/gin"

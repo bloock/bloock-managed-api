@@ -1,8 +1,8 @@
-package update
+package integrity
 
 import (
 	"bloock-managed-api/internal/domain/repository"
-	"bloock-managed-api/internal/service/update/request"
+	"bloock-managed-api/internal/service/integrity/request"
 	"context"
 )
 
@@ -12,7 +12,7 @@ type CertificationAnchor struct {
 	notificationRepository  repository.NotificationRepository
 }
 
-func NewCertificationAnchor(certificationRepository repository.CertificationRepository, notificationRepository repository.NotificationRepository, integrityRepository repository.IntegrityRepository) *CertificationAnchor {
+func NewUpdateAnchorService(certificationRepository repository.CertificationRepository, notificationRepository repository.NotificationRepository, integrityRepository repository.IntegrityRepository) *CertificationAnchor {
 	return &CertificationAnchor{certificationRepository: certificationRepository, integrityRepository: integrityRepository, notificationRepository: notificationRepository}
 }
 

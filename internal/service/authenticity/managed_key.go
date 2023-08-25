@@ -1,8 +1,8 @@
-package create
+package authenticity
 
 import (
 	"bloock-managed-api/internal/domain/repository"
-	"bloock-managed-api/internal/service/create/request"
+	"bloock-managed-api/internal/service/authenticity/request"
 	"github.com/bloock/bloock-sdk-go/v2/entity/key"
 )
 

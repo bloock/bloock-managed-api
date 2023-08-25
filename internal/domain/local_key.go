@@ -48,21 +48,6 @@ func (l LocalKey) KeyTypeStr() string {
 	}
 }
 
-func ValidateKeyType(_type string) (key.KeyType, error) {
-	switch _type {
-	case "EcP256k":
-		return key.EcP256k, nil
-	case "Rsa2048":
-		return key.Rsa2048, nil
-	case "Rsa3072":
-		return key.Rsa3072, nil
-	case "Rsa4096":
-		return key.Rsa4096, nil
-	default:
-		return -1, ErrInvalidKeyType(_type)
-	}
-}
-
 var ErrInvalidKeyType = func(kty string) error {
 	return errors.New(fmt.Sprintf("invalid key type: %s", kty))
 }

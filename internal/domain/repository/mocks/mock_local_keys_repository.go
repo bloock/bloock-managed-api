@@ -51,7 +51,7 @@ func (mr *MockLocalKeysRepositoryMockRecorder) FindKeyByID(ctx, id interface{}) 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindKeyByID", reflect.TypeOf((*MockLocalKeysRepository)(nil).FindKeyByID), ctx, id)
 }
 
-// GetKeys mocks base method.
+// FindKeys mocks base method.
 func (m *MockLocalKeysRepository) FindKeys(ctx context.Context) ([]domain.LocalKey, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindKeys", ctx)
@@ -60,8 +60,8 @@ func (m *MockLocalKeysRepository) FindKeys(ctx context.Context) ([]domain.LocalK
 	return ret0, ret1
 }
 
-// GetKeys indicates an expected call of GetKeys.
-func (mr *MockLocalKeysRepositoryMockRecorder) GetKeys(ctx interface{}) *gomock.Call {
+// FindKeys indicates an expected call of FindKeys.
+func (mr *MockLocalKeysRepositoryMockRecorder) FindKeys(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindKeys", reflect.TypeOf((*MockLocalKeysRepository)(nil).FindKeys), ctx)
 }

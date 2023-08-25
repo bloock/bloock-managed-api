@@ -21,7 +21,7 @@ func (f CertificationFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Valu
 }
 
 // The LocalKeyFunc type is an adapter to allow the use of ordinary
-// function as LocalKey mutator.
+// function as KeyID mutator.
 type LocalKeyFunc func(context.Context, *ent.LocalKeyMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
