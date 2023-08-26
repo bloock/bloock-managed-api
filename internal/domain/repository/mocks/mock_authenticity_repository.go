@@ -5,7 +5,7 @@
 package mock_repository
 
 import (
-	domain "bloock-managed-api/internal/domain"
+	context "context"
 	reflect "reflect"
 
 	key "github.com/bloock/bloock-sdk-go/v2/entity/key"
@@ -36,77 +36,66 @@ func (m *MockAuthenticityRepository) EXPECT() *MockAuthenticityRepositoryMockRec
 	return m.recorder
 }
 
-// CreateLocalKey mocks base method.
-func (m *MockAuthenticityRepository) CreateLocalKey(keyType key.KeyType) (domain.LocalKey, error) {
+// SignECWithLocalKey mocks base method.
+func (m *MockAuthenticityRepository) SignECWithLocalKey(ctx context.Context, data []byte, kty key.KeyType, publicKey string, privateKey *string) (string, record.Record, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateLocalKey", keyType)
-	ret0, _ := ret[0].(domain.LocalKey)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret := m.ctrl.Call(m, "SignECWithLocalKey", ctx, data, kty, publicKey, privateKey)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(record.Record)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
-// CreateLocalKey indicates an expected call of CreateLocalKey.
-func (mr *MockAuthenticityRepositoryMockRecorder) CreateLocalKey(keyType interface{}) *gomock.Call {
+// SignECWithLocalKey indicates an expected call of SignECWithLocalKey.
+func (mr *MockAuthenticityRepositoryMockRecorder) SignECWithLocalKey(ctx, data, kty, publicKey, privateKey interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateLocalKey", reflect.TypeOf((*MockAuthenticityRepository)(nil).CreateLocalKey), keyType)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignECWithLocalKey", reflect.TypeOf((*MockAuthenticityRepository)(nil).SignECWithLocalKey), ctx, data, kty, publicKey, privateKey)
 }
 
-// CreateManagedKey mocks base method.
-func (m *MockAuthenticityRepository) CreateManagedKey(name string, keyType key.KeyType, expiration int, level key.KeyProtectionLevel) (key.ManagedKey, error) {
+// SignECWithLocalKeyEns mocks base method.
+func (m *MockAuthenticityRepository) SignECWithLocalKeyEns(ctx context.Context, data []byte, kty key.KeyType, publicKey string, privateKey *string) (string, record.Record, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateManagedKey", name, keyType, expiration, level)
-	ret0, _ := ret[0].(key.ManagedKey)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret := m.ctrl.Call(m, "SignECWithLocalKeyEns", ctx, data, kty, publicKey, privateKey)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(record.Record)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
-// CreateManagedKey indicates an expected call of CreateManagedKey.
-func (mr *MockAuthenticityRepositoryMockRecorder) CreateManagedKey(name, keyType, expiration, level interface{}) *gomock.Call {
+// SignECWithLocalKeyEns indicates an expected call of SignECWithLocalKeyEns.
+func (mr *MockAuthenticityRepositoryMockRecorder) SignECWithLocalKeyEns(ctx, data, kty, publicKey, privateKey interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateManagedKey", reflect.TypeOf((*MockAuthenticityRepository)(nil).CreateManagedKey), name, keyType, expiration, level)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignECWithLocalKeyEns", reflect.TypeOf((*MockAuthenticityRepository)(nil).SignECWithLocalKeyEns), ctx, data, kty, publicKey, privateKey)
 }
 
-// LoadLocalKey mocks base method.
-func (m *MockAuthenticityRepository) LoadLocalKey(keyType key.KeyType, publicKey, privateKey string) (key.LocalKey, error) {
+// SignECWithManagedKey mocks base method.
+func (m *MockAuthenticityRepository) SignECWithManagedKey(ctx context.Context, data []byte, kid string) (string, record.Record, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "LoadLocalKey", keyType, publicKey, privateKey)
-	ret0, _ := ret[0].(key.LocalKey)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret := m.ctrl.Call(m, "SignECWithManagedKey", ctx, data, kid)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(record.Record)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
-// LoadLocalKey indicates an expected call of LoadLocalKey.
-func (mr *MockAuthenticityRepositoryMockRecorder) LoadLocalKey(keyType, publicKey, privateKey interface{}) *gomock.Call {
+// SignECWithManagedKey indicates an expected call of SignECWithManagedKey.
+func (mr *MockAuthenticityRepositoryMockRecorder) SignECWithManagedKey(ctx, data, kid interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LoadLocalKey", reflect.TypeOf((*MockAuthenticityRepository)(nil).LoadLocalKey), keyType, publicKey, privateKey)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignECWithManagedKey", reflect.TypeOf((*MockAuthenticityRepository)(nil).SignECWithManagedKey), ctx, data, kid)
 }
 
-// Sign mocks base method.
-func (m *MockAuthenticityRepository) Sign(localKey key.LocalKey, keyType key.KeyType, commonName *string, data []byte) (record.Record, error) {
+// SignECWithManagedKeyEns mocks base method.
+func (m *MockAuthenticityRepository) SignECWithManagedKeyEns(ctx context.Context, data []byte, kid string) (string, record.Record, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Sign", localKey, keyType, commonName, data)
-	ret0, _ := ret[0].(record.Record)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret := m.ctrl.Call(m, "SignECWithManagedKeyEns", ctx, data, kid)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(record.Record)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
-// Sign indicates an expected call of Sign.
-func (mr *MockAuthenticityRepositoryMockRecorder) Sign(localKey, keyType, commonName, data interface{}) *gomock.Call {
+// SignECWithManagedKeyEns indicates an expected call of SignECWithManagedKeyEns.
+func (mr *MockAuthenticityRepositoryMockRecorder) SignECWithManagedKeyEns(ctx, data, kid interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Sign", reflect.TypeOf((*MockAuthenticityRepository)(nil).Sign), localKey, keyType, commonName, data)
-}
-
-// Verify mocks base method.
-func (m *MockAuthenticityRepository) Verify(record record.Record) (bool, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Verify", record)
-	ret0, _ := ret[0].(bool)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Verify indicates an expected call of Verify.
-func (mr *MockAuthenticityRepositoryMockRecorder) Verify(record interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Verify", reflect.TypeOf((*MockAuthenticityRepository)(nil).Verify), record)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignECWithManagedKeyEns", reflect.TypeOf((*MockAuthenticityRepository)(nil).SignECWithManagedKeyEns), ctx, data, kid)
 }

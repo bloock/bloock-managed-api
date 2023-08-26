@@ -10,15 +10,14 @@ import (
 )
 
 type BloockAuthenticityRepository struct {
-	apikey             string
 	keyClient          client.KeyClient
 	authenticityClient client.AuthenticityClient
 	recordClient       client.RecordClient
 	log                zerolog.Logger
 }
 
-func NewBloockAuthenticityRepository(apikey string, keyClient client.KeyClient, authenticityClient client.AuthenticityClient, recordClient client.RecordClient, log zerolog.Logger) *BloockAuthenticityRepository {
-	return &BloockAuthenticityRepository{apikey: apikey, keyClient: keyClient, authenticityClient: authenticityClient, recordClient: recordClient, log: log}
+func NewBloockAuthenticityRepository(keyClient client.KeyClient, authenticityClient client.AuthenticityClient, recordClient client.RecordClient, log zerolog.Logger) *BloockAuthenticityRepository {
+	return &BloockAuthenticityRepository{keyClient: keyClient, authenticityClient: authenticityClient, recordClient: recordClient, log: log}
 }
 
 func (b BloockAuthenticityRepository) SignECWithLocalKey(ctx context.Context, data []byte, kty key.KeyType, publicKey string, privateKey *string) (string, record.Record, error) {

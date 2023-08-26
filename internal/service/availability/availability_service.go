@@ -1,28 +1,31 @@
 package availability
 
 import (
+	"bloock-managed-api/internal/domain/repository"
+	hosting "bloock-managed-api/internal/service"
 	"context"
-	"github.com/bloock/bloock-sdk-go/v2/client"
-	"github.com/bloock/bloock-sdk-go/v2/entity/availability"
+	"errors"
 )
 
 type AvailabilityService struct {
-	availabilityClient client.AvailabilityClient
-	recordClient       client.RecordClient
+	availabilityRepository repository.AvailabilityRepository
 }
 
-func (a AvailabilityService) UploadHosted(ctx context.Context, data []byte) (string, error) {
-	rec, err := a.recordClient.FromFile(data).Build()
-	if err != nil {
-		return "", err
-	}
-	return a.availabilityClient.Publish(rec, availability.NewHostedPublisher())
+func NewAvailabilityService(availabilityRepository repository.AvailabilityRepository) *AvailabilityService {
+	return &AvailabilityService{availabilityRepository: availabilityRepository}
 }
 
-func (a AvailabilityService) UploadIpfs(ctx context.Context, data []byte) (string, error) {
-	rec, err := a.recordClient.FromFile(data).Build()
-	if err != nil {
-		return "", err
+var ErrUnssuportedHosting = errors.New("unsupported hosting type")
+
+func (a AvailabilityService) Upload(ctx context.Context, data []byte, hostingType hosting.HostingType) (string, error) {
+	switch hostingType {
+	case hosting.HOSTED:
+		return a.availabilityRepository.UploadHosted(ctx, data)
+	case hosting.IPFS:
+		return a.availabilityRepository.UploadIpfs(ctx, data)
+	case hosting.NONE:
+		return "", nil
+	default:
+		return "", ErrUnssuportedHosting
 	}
-	return a.availabilityClient.Publish(rec, availability.NewIpfsPublisher())
 }

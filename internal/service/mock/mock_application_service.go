@@ -5,18 +5,15 @@
 package mock_service
 
 import (
-	config "bloock-managed-api/internal/config"
-	request "bloock-managed-api/internal/service"
-	request2 "bloock-managed-api/internal/service/authenticity/request"
+	service "bloock-managed-api/internal/service"
+	request "bloock-managed-api/internal/service/authenticity/request"
 	response "bloock-managed-api/internal/service/authenticity/response"
 	request0 "bloock-managed-api/internal/service/integrity/request"
 	response0 "bloock-managed-api/internal/service/integrity/response"
 	context "context"
 	reflect "reflect"
 
-	key "github.com/bloock/bloock-sdk-go/v2/entity/key"
 	gomock "github.com/golang/mock/gomock"
-	uuid "github.com/google/uuid"
 )
 
 // MockBaseProcessService is a mock of BaseProcessService interface.
@@ -43,7 +40,7 @@ func (m *MockBaseProcessService) EXPECT() *MockBaseProcessServiceMockRecorder {
 }
 
 // Process mocks base method.
-func (m *MockBaseProcessService) Process(ctx context.Context, req request.ProcessRequest) (*response.ProcessResponse, error) {
+func (m *MockBaseProcessService) Process(ctx context.Context, req service.ProcessRequest) (*response.ProcessResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Process", ctx, req)
 	ret0, _ := ret[0].(*response.ProcessResponse)
@@ -81,18 +78,19 @@ func (m *MockAuthenticityService) EXPECT() *MockAuthenticityServiceMockRecorder 
 }
 
 // Sign mocks base method.
-func (m *MockAuthenticityService) Sign(ctx context.Context, SignRequest request2.SignRequest) (string, []byte, error) {
+func (m *MockAuthenticityService) Sign(ctx context.Context, SignRequest request.SignRequest) (string, []byte, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Sign", cfg, keyID, kty, keyType, data, useEnsResolution)
+	ret := m.ctrl.Call(m, "Sign", ctx, SignRequest)
 	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(error)
-	return ret0, nil, ret1
+	ret1, _ := ret[1].([]byte)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // Sign indicates an expected call of Sign.
-func (mr *MockAuthenticityServiceMockRecorder) Sign(cfg, keyID, kty, keyType, data, useEnsResolution interface{}) *gomock.Call {
+func (mr *MockAuthenticityServiceMockRecorder) Sign(ctx, SignRequest interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Sign", reflect.TypeOf((*MockAuthenticityService)(nil).Sign), cfg, keyID, kty, keyType, data, useEnsResolution)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Sign", reflect.TypeOf((*MockAuthenticityService)(nil).Sign), ctx, SignRequest)
 }
 
 // MockIntegrityService is a mock of IntegrityService interface.

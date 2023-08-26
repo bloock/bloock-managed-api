@@ -2,6 +2,7 @@ package service
 
 import (
 	"bloock-managed-api/internal/config"
+	"bloock-managed-api/internal/service/authenticity/request"
 	"bloock-managed-api/internal/service/authenticity/response"
 	"context"
 )
@@ -10,7 +11,6 @@ type ProcessService struct {
 	integrityService    IntegrityService
 	authenticityService AuthenticityService
 	availabilityService AvailabilityService
-	cfg                 config.Config
 }
 
 func NewProcessService(integrityService IntegrityService, authenticityService AuthenticityService,
@@ -34,8 +34,16 @@ func (s ProcessService) Process(ctx context.Context, req ProcessRequest) (*respo
 	}
 
 	if req.IsAuthenticityEnabled() {
-		signature, signedData, err := s.authenticityService.
-			Sign(nil)
+		var signature, signedData, err = s.authenticityService.
+			Sign(ctx, *request.NewSignRequest(
+				config.Configuration.PublicKey,
+				config.Configuration.PrivateKey,
+				req.KeyID(),
+				req.Kty(),
+				req.KeyType(),
+				req.Data(),
+				req.UseEnsResolution(),
+			))
 		if err != nil {
 			return nil, err
 		}

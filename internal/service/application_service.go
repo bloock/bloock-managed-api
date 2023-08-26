@@ -21,8 +21,7 @@ type IntegrityService interface {
 }
 
 type AvailabilityService interface {
-	UploadHosted(ctx context.Context, data []byte) (string, error)
-	UploadIpfs(ctx context.Context, data []byte) (string, error)
+	Upload(ctx context.Context, data []byte, hostingType HostingType) (string, error)
 }
 type CertificateUpdateAnchorService interface {
 	UpdateAnchor(ctx context.Context, updateRequest update_request.UpdateCertificationAnchorRequest) error

@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/bloock/bloock-sdk-go/v2"
 	"github.com/spf13/viper"
 )
 
@@ -17,8 +18,9 @@ type Config struct {
 	PublicKey               string  `mapstructure:"BLOOCK_API_PUBLIC_KEY"`
 }
 
+var Configuration = &Config{}
+
 func InitConfig() (*Config, error) {
-	var cfg = &Config{}
 
 	viper.AddConfigPath("./")
 	viper.SetConfigName("config")
@@ -29,12 +31,13 @@ func InitConfig() (*Config, error) {
 		setDefaultConfigValues()
 	}
 
-	err = viper.Unmarshal(cfg)
+	err = viper.Unmarshal(Configuration)
 	if err != nil {
 		return &Config{}, err
 	}
 
-	return cfg, nil
+	bloock.ApiKey = Configuration.APIKey
+	return Configuration, nil
 }
 
 func setDefaultConfigValues() {

@@ -3,7 +3,6 @@ package repository
 import (
 	"bloock-managed-api/internal/domain"
 	"context"
-	"github.com/bloock/bloock-sdk-go/v2"
 	"github.com/bloock/bloock-sdk-go/v2/client"
 	"github.com/bloock/bloock-sdk-go/v2/entity/integrity"
 	"github.com/bloock/bloock-sdk-go/v2/entity/record"
@@ -11,18 +10,12 @@ import (
 )
 
 type BloockIntegrityRepository struct {
-	apikey          string
 	integrityClient client.IntegrityClient
 	log             zerolog.Logger
 }
 
-func NewBloockIntegrityRepository(apikey string, log zerolog.Logger) *BloockIntegrityRepository {
-	bloock.ApiKey = apikey
-	return &BloockIntegrityRepository{
-		apikey:          apikey,
-		integrityClient: client.NewIntegrityClient(),
-		log:             log,
-	}
+func NewBloockIntegrityRepository(integrityClient client.IntegrityClient, log zerolog.Logger) *BloockIntegrityRepository {
+	return &BloockIntegrityRepository{integrityClient: integrityClient, log: log}
 }
 
 func (b BloockIntegrityRepository) Certify(ctx context.Context, file []byte) (certification []domain.Certification, err error) {

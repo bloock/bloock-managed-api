@@ -16,6 +16,10 @@ type SignRequest struct {
 	useEnsResolution bool
 }
 
+func NewSignRequest(publicKey string, privateKey *string, keyID uuid.UUID, kty key.KeyType, keyType service.KeyType, data []byte, useEnsResolution bool) *SignRequest {
+	return &SignRequest{publicKey: publicKey, privateKey: privateKey, keyID: keyID, kty: kty, keyType: keyType, data: data, useEnsResolution: useEnsResolution}
+}
+
 func (s SignRequest) PublicKey() string {
 	return s.publicKey
 }
