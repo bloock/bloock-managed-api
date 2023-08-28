@@ -7,10 +7,10 @@ import (
 	"bloock-managed-api/internal/platform/repository/sql"
 	"bloock-managed-api/internal/platform/repository/sql/connection"
 	"bloock-managed-api/internal/platform/rest"
-	"bloock-managed-api/internal/service"
 	"bloock-managed-api/internal/service/authenticity"
 	"bloock-managed-api/internal/service/availability"
 	"bloock-managed-api/internal/service/integrity"
+	"bloock-managed-api/internal/service/process"
 	"github.com/bloock/bloock-sdk-go/v2/client"
 	"github.com/rs/zerolog"
 	"net/http"
@@ -50,7 +50,7 @@ func main() {
 	authenticityService := authenticity.NewAuthenticityService(authenticityRepository)
 	updateAnchorService := integrity.NewUpdateAnchorService(certificationRepository, notificationRepository, integrityRepository)
 	availabilityService := availability.NewAvailabilityService(availabilityRepository)
-	processService := service.NewProcessService(integrityService, authenticityService, availabilityService)
+	processService := process.NewProcessService(integrityService, authenticityService, availabilityService)
 
 	server, err := rest.NewServer(cfg.APIHost, cfg.APIPort, processService, updateAnchorService, cfg.WebhookSecretKey, cfg.WebhookEnforceTolerance, logger, cfg.DebugMode)
 	if err != nil {

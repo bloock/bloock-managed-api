@@ -1,10 +1,13 @@
 package response
 
-import "bloock-managed-api/internal/service/integrity/response"
+import (
+	response2 "bloock-managed-api/internal/service/authenticity/response"
+	"bloock-managed-api/internal/service/integrity/response"
+)
 
 type ProcessResponse struct {
 	certificationResponse []response.CertificationResponse
-	signResponse          SignResponse
+	signResponse          response2.SignResponse
 	availabilityResponse  string
 }
 
@@ -23,7 +26,7 @@ func (b *ProcessResponseBuilder) CertificationResponse(certificationResponse []r
 	return b
 }
 
-func (b *ProcessResponseBuilder) SignResponse(signResponse SignResponse) *ProcessResponseBuilder {
+func (b *ProcessResponseBuilder) SignResponse(signResponse response2.SignResponse) *ProcessResponseBuilder {
 	b.processResponse.signResponse = signResponse
 	return b
 }

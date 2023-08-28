@@ -3,6 +3,7 @@ package handler
 import (
 	"bloock-managed-api/internal/service"
 	"bloock-managed-api/internal/service/authenticity/response"
+	"bloock-managed-api/internal/service/process/request"
 	"errors"
 	"github.com/gin-gonic/gin"
 	"io"
@@ -69,7 +70,7 @@ func PostProcess(processService service.BaseProcessService) gin.HandlerFunc {
 			}
 		}
 
-		signRequest, err := service.NewProcessRequest(
+		signRequest, err := request.NewProcessRequest(
 			file,
 			isIntegrityEnabled,
 			isAuthenticityEnabled,

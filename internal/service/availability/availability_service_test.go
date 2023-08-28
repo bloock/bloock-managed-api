@@ -1,8 +1,8 @@
 package availability_test
 
 import (
+	"bloock-managed-api/internal/domain"
 	mock_repository "bloock-managed-api/internal/domain/repository/mocks"
-	"bloock-managed-api/internal/service"
 	"bloock-managed-api/internal/service/availability"
 	"context"
 	"github.com/golang/mock/gomock"
@@ -19,7 +19,7 @@ func TestAvailabilityService_Upload(t *testing.T) {
 		response := "url"
 		availabilityRepository.EXPECT().UploadHosted(gomock.Any(), data).Return(response, nil)
 
-		url, err := availability.NewAvailabilityService(availabilityRepository).Upload(context.TODO(), data, service.HOSTED)
+		url, err := availability.NewAvailabilityService(availabilityRepository).Upload(context.TODO(), data, domain.HOSTED)
 
 		assert.NoError(t, err)
 		assert.Equal(t, response, url)

@@ -4,7 +4,6 @@ import (
 	"bloock-managed-api/internal/domain"
 	"bloock-managed-api/internal/platform/repository/sql/connection"
 	"bloock-managed-api/internal/platform/repository/sql/ent"
-	"bloock-managed-api/internal/service"
 	"context"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
@@ -37,7 +36,7 @@ func (s SQLLocalKeyRepository) FindKeyByID(ctx context.Context, id uuid.UUID) (*
 	if err != nil {
 		return nil, err
 	}
-	keyType, err := service.ValidateKeyType(localKey.KeyType)
+	keyType, err := domain.ValidateKeyType(localKey.KeyType)
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +55,7 @@ func (s SQLLocalKeyRepository) FindKeys(ctx context.Context) ([]domain.LocalKey,
 func toLocalKeys(keys []*ent.LocalKey) ([]domain.LocalKey, error) {
 	var localKeys []domain.LocalKey
 	for _, localKey := range keys {
-		keyType, err := service.ValidateKeyType(localKey.KeyType)
+		keyType, err := domain.ValidateKeyType(localKey.KeyType)
 		if err != nil {
 			return nil, err
 		}

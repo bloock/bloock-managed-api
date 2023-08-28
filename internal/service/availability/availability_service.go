@@ -1,8 +1,8 @@
 package availability
 
 import (
+	"bloock-managed-api/internal/domain"
 	"bloock-managed-api/internal/domain/repository"
-	hosting "bloock-managed-api/internal/service"
 	"context"
 	"errors"
 )
@@ -17,13 +17,13 @@ func NewAvailabilityService(availabilityRepository repository.AvailabilityReposi
 
 var ErrUnssuportedHosting = errors.New("unsupported hosting type")
 
-func (a AvailabilityService) Upload(ctx context.Context, data []byte, hostingType hosting.HostingType) (string, error) {
+func (a AvailabilityService) Upload(ctx context.Context, data []byte, hostingType domain.HostingType) (string, error) {
 	switch hostingType {
-	case hosting.HOSTED:
+	case domain.HOSTED:
 		return a.availabilityRepository.UploadHosted(ctx, data)
-	case hosting.IPFS:
+	case domain.IPFS:
 		return a.availabilityRepository.UploadIpfs(ctx, data)
-	case hosting.NONE:
+	case domain.NONE:
 		return "", nil
 	default:
 		return "", ErrUnssuportedHosting

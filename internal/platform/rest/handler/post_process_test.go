@@ -1,12 +1,13 @@
 package handler_test
 
 import (
+	"bloock-managed-api/internal/domain"
 	"bloock-managed-api/internal/platform/rest"
 	"bloock-managed-api/internal/platform/rest/handler/test_utils/fixtures"
-	"bloock-managed-api/internal/service"
-	"bloock-managed-api/internal/service/authenticity/response"
 	"bloock-managed-api/internal/service/integrity"
 	mock_service "bloock-managed-api/internal/service/mock"
+	"bloock-managed-api/internal/service/process/request"
+	"bloock-managed-api/internal/service/process/response"
 	"bytes"
 	"errors"
 	"fmt"
@@ -44,12 +45,12 @@ func TestProcessServiceError(t *testing.T) {
 		useEnsResolution := "true"
 		data := []byte("Hello World")
 		ecp256k := "EcP256k"
-		hosted := service.HOSTED.String()
-		managedKey := service.MANAGED_KEY.String()
+		hosted := domain.HOSTED.String()
+		managedKey := domain.MANAGED_KEY.String()
 		integrityEnabled := "true"
 		authenticityEnabled := "true"
 
-		processRequest, err := service.NewProcessRequest(
+		processRequest, err := request.NewProcessRequest(
 			data,
 			integrityEnabled,
 			authenticityEnabled,
@@ -116,12 +117,12 @@ func TestPostProcessWithMultipart(t *testing.T) {
 			useEnsResolution := "true"
 			data := []byte("Hello World")
 			ecp256k := "EcP256k"
-			hosted := service.HOSTED.String()
-			managedKey := service.MANAGED_KEY.String()
+			hosted := domain.HOSTED.String()
+			managedKey := domain.MANAGED_KEY.String()
 			integrityEnabled := "true"
 			authenticityEnabled := "true"
 
-			processRequest, err := service.NewProcessRequest(data, integrityEnabled, authenticityEnabled, managedKey, ecp256k, kid, hosted, useEnsResolution)
+			processRequest, err := request.NewProcessRequest(data, integrityEnabled, authenticityEnabled, managedKey, ecp256k, kid, hosted, useEnsResolution)
 			require.NoError(t, err)
 			processResponse := response.NewProcessResponseBuilder().Build()
 			signApplicationService.EXPECT().Process(gomock.Any(), *processRequest).Return(processResponse, nil)
@@ -177,8 +178,8 @@ func TestPostProcess(t *testing.T) {
 	ensResolutionEnabled := "true"
 	data := fixtures.PDFContent
 	ecp256k := "EcP256k"
-	hosted := service.HOSTED.String()
-	managedKey := service.MANAGED_KEY.String()
+	hosted := domain.HOSTED.String()
+	managedKey := domain.HOSTED.String()
 	integrityEnabled := "true"
 	authenticityEnabled := "true"
 	tests := []struct {

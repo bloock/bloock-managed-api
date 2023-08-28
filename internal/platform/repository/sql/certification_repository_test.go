@@ -1,7 +1,8 @@
-package sql
+package sql_test
 
 import (
 	"bloock-managed-api/internal/domain"
+	"bloock-managed-api/internal/platform/repository/sql"
 	"bloock-managed-api/internal/platform/repository/sql/connection"
 	"bloock-managed-api/internal/platform/repository/sql/ent/certification"
 	"context"
@@ -19,7 +20,7 @@ var hash = "3ea2f1d0abf3fc66cf29eebb70cbd4e7fe762ef8a09bcc06c8edf641230afec0"
 func TestSQLCertificationRepository_SaveCertification(t *testing.T) {
 	conn := EntConnectorForTesting(t)
 
-	certificationRepository := NewSQLCertificationRepository(*conn, 5*time.Second, zerolog.Logger{})
+	certificationRepository := sql.NewSQLCertificationRepository(*conn, 5*time.Second, zerolog.Logger{})
 	t.Run("given certification it should be saved", func(t *testing.T) {
 		certification := domain.NewPendingCertification(1, hash)
 		err := certificationRepository.SaveCertification(context.TODO(), []domain.Certification{*certification})
@@ -40,7 +41,7 @@ func EntConnectorForTesting(t *testing.T) *connection.EntConnection {
 
 func TestSQLCertificationRepository_GetCertification(t *testing.T) {
 	conn := EntConnectorForTesting(t)
-	certificationRepository := NewSQLCertificationRepository(*conn, 5*time.Second, zerolog.Logger{})
+	certificationRepository := sql.NewSQLCertificationRepository(*conn, 5*time.Second, zerolog.Logger{})
 	hash := "3ea2f1d0abf3fc66cf29eebb70cbd4e7fe762ef8a09bcc06c8edf641230afec0"
 	ctx := context.TODO()
 	t.Run("given anchor and hash it should be returned when exists", func(t *testing.T) {
@@ -80,7 +81,7 @@ func TestSQLCertificationRepository_UpdateCertificationAnchor(t *testing.T) {
 	conn := EntConnectorForTesting(t)
 	hash := "2ea2f1d0abf3fc66cf29eebb70cbd4e7fe762ef8a09bcc06c8edf641230afec0"
 
-	certificationRepository := NewSQLCertificationRepository(*conn, 5*time.Second, zerolog.Logger{})
+	certificationRepository := sql.NewSQLCertificationRepository(*conn, 5*time.Second, zerolog.Logger{})
 	anchorID := 3
 	smallAnchorID := 2
 	anchor := &integrity.Anchor{

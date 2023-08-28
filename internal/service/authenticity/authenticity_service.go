@@ -1,8 +1,8 @@
 package authenticity
 
 import (
+	"bloock-managed-api/internal/domain"
 	"bloock-managed-api/internal/domain/repository"
-	"bloock-managed-api/internal/service"
 	"bloock-managed-api/internal/service/authenticity/request"
 	"context"
 	"errors"
@@ -21,7 +21,7 @@ var ErrKeyTypeNotSupported = errors.New("key type not supported for signing")
 
 func (s AuthenticityService) Sign(ctx context.Context, request request.SignRequest) (string, []byte, error) {
 	switch request.KeyType() {
-	case service.LOCAL_KEY:
+	case domain.LOCAL_KEY:
 		if request.Kty() == key.EcP256k && !request.UseEnsResolution() {
 			signature, record, err := s.authenticityRepository.
 				SignECWithLocalKey(ctx, request.Data(), request.Kty(), request.PublicKey(), request.PrivateKey())
@@ -40,7 +40,7 @@ func (s AuthenticityService) Sign(ctx context.Context, request request.SignReque
 			return signature, record.Retrieve(), nil
 		}
 
-	case service.MANAGED_KEY:
+	case domain.MANAGED_KEY:
 		if request.Kty() == key.EcP256k && !request.UseEnsResolution() {
 			signature, record, err := s.authenticityRepository.
 				SignECWithManagedKey(ctx, request.Data(), request.KeyID().String())
@@ -59,9 +59,9 @@ func (s AuthenticityService) Sign(ctx context.Context, request request.SignReque
 			return signature, record.Retrieve(), nil
 		}
 
-	case service.LOCAL_CERTIFICATE:
+	case domain.LOCAL_CERTIFICATE:
 		return "", nil, nil
-	case service.MANAGED_CERTIFICATE:
+	case domain.MANAGED_CERTIFICATE:
 		if request.Kty() == key.EcP256k && !request.UseEnsResolution() {
 			signature, record, err := s.authenticityRepository.
 				SignECWithManagedKey(ctx, request.Data(), request.KeyID().String())

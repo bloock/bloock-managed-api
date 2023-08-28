@@ -1,7 +1,7 @@
 package request
 
 import (
-	"bloock-managed-api/internal/service"
+	"bloock-managed-api/internal/domain"
 	"github.com/bloock/bloock-sdk-go/v2/entity/key"
 	"github.com/google/uuid"
 )
@@ -11,12 +11,12 @@ type SignRequest struct {
 	privateKey       *string
 	keyID            uuid.UUID
 	kty              key.KeyType
-	keyType          service.KeyType
+	keyType          domain.KeyType
 	data             []byte
 	useEnsResolution bool
 }
 
-func NewSignRequest(publicKey string, privateKey *string, keyID uuid.UUID, kty key.KeyType, keyType service.KeyType, data []byte, useEnsResolution bool) *SignRequest {
+func NewSignRequest(publicKey string, privateKey *string, keyID uuid.UUID, kty key.KeyType, keyType domain.KeyType, data []byte, useEnsResolution bool) *SignRequest {
 	return &SignRequest{publicKey: publicKey, privateKey: privateKey, keyID: keyID, kty: kty, keyType: keyType, data: data, useEnsResolution: useEnsResolution}
 }
 
@@ -36,7 +36,7 @@ func (s SignRequest) Kty() key.KeyType {
 	return s.kty
 }
 
-func (s SignRequest) KeyType() service.KeyType {
+func (s SignRequest) KeyType() domain.KeyType {
 	return s.keyType
 }
 

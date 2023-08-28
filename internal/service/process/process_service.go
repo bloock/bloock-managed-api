@@ -1,20 +1,24 @@
-package service
+package process
 
 import (
 	"bloock-managed-api/internal/config"
+	"bloock-managed-api/internal/domain"
+	"bloock-managed-api/internal/service"
 	"bloock-managed-api/internal/service/authenticity/request"
 	"bloock-managed-api/internal/service/authenticity/response"
+	request2 "bloock-managed-api/internal/service/process/request"
+	response2 "bloock-managed-api/internal/service/process/response"
 	"context"
 )
 
 type ProcessService struct {
-	integrityService    IntegrityService
-	authenticityService AuthenticityService
-	availabilityService AvailabilityService
+	integrityService    service.IntegrityService
+	authenticityService service.AuthenticityService
+	availabilityService service.AvailabilityService
 }
 
-func NewProcessService(integrityService IntegrityService, authenticityService AuthenticityService,
-	availabilityService AvailabilityService) *ProcessService {
+func NewProcessService(integrityService service.IntegrityService, authenticityService service.AuthenticityService,
+	availabilityService service.AvailabilityService) *ProcessService {
 	return &ProcessService{
 		integrityService:    integrityService,
 		authenticityService: authenticityService,
@@ -22,8 +26,8 @@ func NewProcessService(integrityService IntegrityService, authenticityService Au
 	}
 }
 
-func (s ProcessService) Process(ctx context.Context, req ProcessRequest) (*response.ProcessResponse, error) {
-	responseBuilder := response.NewProcessResponseBuilder()
+func (s ProcessService) Process(ctx context.Context, req request2.ProcessRequest) (*response2.ProcessResponse, error) {
+	responseBuilder := response2.NewProcessResponseBuilder()
 
 	if req.IsIntegrityEnabled() {
 		certifications, err := s.integrityService.Certify(ctx, req.Data())
@@ -52,23 +56,12 @@ func (s ProcessService) Process(ctx context.Context, req ProcessRequest) (*respo
 		responseBuilder.SignResponse(*response.NewSignResponse(signature))
 	}
 
-	if req.HostingType() != NONE {
-		switch req.HostingType() {
-		case IPFS:
-			uploadedDataUrl, err := s.availabilityService.UploadIpfs(ctx, req.Data())
-			if err != nil {
-				return nil, err
-			}
-			responseBuilder.AvailabilityResponse(uploadedDataUrl)
-			break
-		case HOSTED:
-			uploadedDataUrl, err := s.availabilityService.UploadHosted(ctx, req.Data())
-			if err != nil {
-				return nil, err
-			}
-			responseBuilder.AvailabilityResponse(uploadedDataUrl)
-			break
+	if req.HostingType() != domain.NONE {
+		dataID, err := s.availabilityService.Upload(ctx, req.Data(), req.HostingType())
+		if err != nil {
+			return nil, err
 		}
+		responseBuilder.AvailabilityResponse(dataID)
 	}
 
 	return responseBuilder.Build(), nil

@@ -1,7 +1,8 @@
-package sql
+package sql_test
 
 import (
 	"bloock-managed-api/internal/domain"
+	"bloock-managed-api/internal/platform/repository/sql"
 	"context"
 	"github.com/bloock/bloock-sdk-go/v2/entity/key"
 	"github.com/google/uuid"
@@ -29,7 +30,7 @@ func TestSQLLocalKeyRepository_GetKeyByID(t *testing.T) {
 			Save(ctx)
 		require.NoError(t, err)
 
-		localKeyRepository := NewSQLLocalKeyRepository(*conn, 5*time.Second, zerolog.Logger{})
+		localKeyRepository := sql.NewSQLLocalKeyRepository(*conn, 5*time.Second, zerolog.Logger{})
 		keyByID, err := localKeyRepository.FindKeyByID(ctx, keyID)
 		assert.NoError(t, err)
 		assert.Equal(t, keyByID.Id(), keyID)
@@ -45,7 +46,7 @@ func TestSQLLocalKeyRepository_SaveKey(t *testing.T) {
 		PrivateKey: "p",
 	}
 	t.Run("given localKey it should be saved correctly", func(t *testing.T) {
-		localKeyRepository := NewSQLLocalKeyRepository(*conn, 5*time.Second, zerolog.Logger{})
+		localKeyRepository := sql.NewSQLLocalKeyRepository(*conn, 5*time.Second, zerolog.Logger{})
 		localKey := domain.NewLocalKey(localKey, key.Rsa4096, uuid.New())
 
 		err := localKeyRepository.SaveKey(ctx, *localKey)
@@ -79,7 +80,7 @@ func TestSQLLocalKeyRepository_GetKeys(t *testing.T) {
 		SetLocalKey(&localKey).SetKeyType(keyType).
 		Save(ctx)
 
-	localKeyRepository := NewSQLLocalKeyRepository(*conn, 5*time.Second, zerolog.Logger{})
+	localKeyRepository := sql.NewSQLLocalKeyRepository(*conn, 5*time.Second, zerolog.Logger{})
 	localKeys, err := localKeyRepository.FindKeys(ctx)
 
 	assert.NotEmpty(t, localKeys)

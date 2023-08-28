@@ -5,11 +5,11 @@
 package mock_service
 
 import (
-	service "bloock-managed-api/internal/service"
-	request "bloock-managed-api/internal/service/authenticity/request"
-	response "bloock-managed-api/internal/service/authenticity/response"
+	"bloock-managed-api/internal/service/authenticity/request"
 	request0 "bloock-managed-api/internal/service/integrity/request"
 	response0 "bloock-managed-api/internal/service/integrity/response"
+	request2 "bloock-managed-api/internal/service/process/request"
+	"bloock-managed-api/internal/service/process/response"
 	context "context"
 	reflect "reflect"
 
@@ -40,7 +40,7 @@ func (m *MockBaseProcessService) EXPECT() *MockBaseProcessServiceMockRecorder {
 }
 
 // Process mocks base method.
-func (m *MockBaseProcessService) Process(ctx context.Context, req service.ProcessRequest) (*response.ProcessResponse, error) {
+func (m *MockBaseProcessService) Process(ctx context.Context, req request2.ProcessRequest) (*response.ProcessResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Process", ctx, req)
 	ret0, _ := ret[0].(*response.ProcessResponse)
