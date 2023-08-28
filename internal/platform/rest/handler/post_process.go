@@ -3,6 +3,7 @@ package handler
 import (
 	"bloock-managed-api/internal/service"
 	"bloock-managed-api/internal/service/process/request"
+	"bloock-managed-api/internal/service/process/response"
 	"errors"
 	"github.com/gin-gonic/gin"
 	"io"
@@ -84,14 +85,18 @@ func PostProcess(processService service.BaseProcessService) gin.HandlerFunc {
 			return
 		}
 
-		ctx.JSON(http.StatusAccepted, ProcessResponse{
-			Certifications: CertificationJSONResponse{
-				Hash:     processResponse.CertificationResponse().Hash(),
-				AnchorId: processResponse.CertificationResponse().AnchorID(),
-			},
-			SignResponse:         processResponse.SignResponse().Signature(),
-			AvailabilityResponse: processResponse.AvailabilityResponse(),
-		})
+		ctx.JSON(http.StatusAccepted, toProcessJsonResponse(processResponse))
+	}
+}
+
+func toProcessJsonResponse(processResponse *response.ProcessResponse) ProcessResponse {
+	return ProcessResponse{
+		Integrity: IntegrityJSONResponse{
+			Hash:     processResponse.CertificationResponse().Hash(),
+			AnchorId: processResponse.CertificationResponse().AnchorID(),
+		},
+		Authenticity: AuthenticityJSONResponse{processResponse.SignResponse().Signature()},
+		Availability: AvailabilityJSONResponse{processResponse.AvailabilityResponse()},
 	}
 }
 
@@ -106,16 +111,22 @@ func readProp(ctx *gin.Context, p *multipart.Part) string {
 }
 
 type ProcessResponse struct {
-	Certifications       CertificationJSONResponse `json:"integrity"`
-	SignResponse         string                    `json:"signature"`
-	AvailabilityResponse string                    `json:"data_availability_id"`
+	Integrity    IntegrityJSONResponse    `json:"integrity"`
+	Authenticity AuthenticityJSONResponse `json:"authenticity"`
+	Availability AvailabilityJSONResponse `json:"availability"`
 }
 
-type CertificationJSONResponse struct {
+type IntegrityJSONResponse struct {
 	Hash     string `json:"hash"`
 	AnchorId int    `json:"anchor_id"`
 }
 
+type AuthenticityJSONResponse struct {
+	Signature string `json:"signature"`
+}
+type AvailabilityJSONResponse struct {
+	ID string `json:"ID"`
+}
 type CertificationJSONRequest struct {
 	Data interface{}
 }
