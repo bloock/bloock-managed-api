@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	entgo.io/ent v0.12.3
-	github.com/bloock/bloock-sdk-go/v2 v2.5.7
+	github.com/bloock/bloock-sdk-go/v2 v2.6.0-beta.6
 	github.com/gin-gonic/gin v1.7.7
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/golang/mock v1.6.0

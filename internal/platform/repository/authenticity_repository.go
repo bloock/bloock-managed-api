@@ -13,27 +13,30 @@ type BloockAuthenticityRepository struct {
 	keyClient          client.KeyClient
 	authenticityClient client.AuthenticityClient
 	recordClient       client.RecordClient
-	log                zerolog.Logger
+	logger             zerolog.Logger
 }
 
 func NewBloockAuthenticityRepository(keyClient client.KeyClient, authenticityClient client.AuthenticityClient, recordClient client.RecordClient, log zerolog.Logger) *BloockAuthenticityRepository {
-	return &BloockAuthenticityRepository{keyClient: keyClient, authenticityClient: authenticityClient, recordClient: recordClient, log: log}
+	return &BloockAuthenticityRepository{keyClient: keyClient, authenticityClient: authenticityClient, recordClient: recordClient, logger: log}
 }
 
 func (b BloockAuthenticityRepository) SignECWithLocalKey(ctx context.Context, data []byte, kty key.KeyType, publicKey string, privateKey *string) (string, record.Record, error) {
 	signerArgs := authenticity.SignerArgs{}
 	localKey, err := b.keyClient.LoadLocalKey(kty, publicKey, privateKey)
 	if err != nil {
+		b.logger.Error().Err(err).Msg("")
 		return "", record.Record{}, err
 	}
 	signerArgs.LocalKey = &localKey
 	signer := authenticity.NewEcdsaSigner(signerArgs)
 	rec, err := b.recordClient.FromBytes(data).WithSigner(signer).Build()
 	if err != nil {
+		b.logger.Error().Err(err).Msg("")
 		return "", record.Record{}, err
 	}
 	signature, err := b.authenticityClient.Sign(rec, signer)
 	if err != nil {
+		b.logger.Error().Err(err).Msg("")
 		return "", record.Record{}, err
 	}
 	return signature.Signature, rec, nil
@@ -45,15 +48,18 @@ func (b BloockAuthenticityRepository) SignECWithLocalKeyEns(ctx context.Context,
 
 	localKey, err := b.keyClient.LoadLocalKey(kty, publicKey, privateKey)
 	if err != nil {
+		b.logger.Error().Err(err).Msg("")
 		return "", record.Record{}, err
 	}
 	signerArgs.LocalKey = &localKey
 	rec, err := b.recordClient.FromBytes(data).WithSigner(signer).Build()
 	if err != nil {
+		b.logger.Error().Err(err).Msg("")
 		return "", record.Record{}, err
 	}
 	signature, err := b.authenticityClient.Sign(rec, signer)
 	if err != nil {
+		b.logger.Error().Err(err).Msg("")
 		return "", record.Record{}, err
 	}
 	return signature.Signature, rec, nil
@@ -64,6 +70,7 @@ func (b BloockAuthenticityRepository) SignECWithManagedKey(ctx context.Context, 
 
 	managedKey, err := b.keyClient.LoadManagedKey(kid)
 	if err != nil {
+		b.logger.Error().Err(err).Msg("")
 		return "", record.Record{}, err
 	}
 	signerArgs.ManagedKey = &managedKey
@@ -71,10 +78,12 @@ func (b BloockAuthenticityRepository) SignECWithManagedKey(ctx context.Context, 
 	signer := authenticity.NewEcdsaSigner(signerArgs)
 	rec, err := b.recordClient.FromBytes(data).WithSigner(signer).Build()
 	if err != nil {
+		b.logger.Error().Err(err).Msg("")
 		return "", record.Record{}, err
 	}
 	signature, err := b.authenticityClient.Sign(rec, signer)
 	if err != nil {
+		b.logger.Error().Err(err).Msg("")
 		return "", record.Record{}, err
 	}
 	return signature.Signature, rec, nil
@@ -85,6 +94,7 @@ func (b BloockAuthenticityRepository) SignECWithManagedKeyEns(ctx context.Contex
 
 	managedKey, err := b.keyClient.LoadManagedKey(kid)
 	if err != nil {
+		b.logger.Error().Err(err).Msg("")
 		return "", record.Record{}, err
 	}
 	signerArgs.ManagedKey = &managedKey
@@ -92,10 +102,12 @@ func (b BloockAuthenticityRepository) SignECWithManagedKeyEns(ctx context.Contex
 	signer := authenticity.NewEnsSigner(signerArgs)
 	rec, err := b.recordClient.FromBytes(data).WithSigner(signer).Build()
 	if err != nil {
+		b.logger.Error().Err(err).Msg("")
 		return "", record.Record{}, err
 	}
 	signature, err := b.authenticityClient.Sign(rec, signer)
 	if err != nil {
+		b.logger.Error().Err(err).Msg("")
 		return "", record.Record{}, err
 	}
 	return signature.Signature, rec, nil

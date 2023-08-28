@@ -6,7 +6,7 @@ import (
 )
 
 type ProcessResponse struct {
-	certificationResponse []response.CertificationResponse
+	certificationResponse response.CertificationResponse
 	signResponse          response2.SignResponse
 	availabilityResponse  string
 }
@@ -21,7 +21,7 @@ func NewProcessResponseBuilder() *ProcessResponseBuilder {
 	return b
 }
 
-func (b *ProcessResponseBuilder) CertificationResponse(certificationResponse []response.CertificationResponse) *ProcessResponseBuilder {
+func (b *ProcessResponseBuilder) CertificationResponse(certificationResponse response.CertificationResponse) *ProcessResponseBuilder {
 	b.processResponse.certificationResponse = certificationResponse
 	return b
 }
@@ -38,4 +38,16 @@ func (b *ProcessResponseBuilder) Build() *ProcessResponse {
 func (b *ProcessResponseBuilder) AvailabilityResponse(url string) *ProcessResponse {
 	b.processResponse.availabilityResponse = url
 	return b.processResponse
+}
+
+func (p ProcessResponse) CertificationResponse() response.CertificationResponse {
+	return p.certificationResponse
+}
+
+func (p ProcessResponse) SignResponse() response2.SignResponse {
+	return p.signResponse
+}
+
+func (p ProcessResponse) AvailabilityResponse() string {
+	return p.availabilityResponse
 }

@@ -2,7 +2,6 @@ package handler
 
 import (
 	"bloock-managed-api/internal/service"
-	"bloock-managed-api/internal/service/authenticity/response"
 	"bloock-managed-api/internal/service/process/request"
 	"errors"
 	"github.com/gin-gonic/gin"
@@ -15,13 +14,13 @@ func PostProcess(processService service.BaseProcessService) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 
 		var file []byte
-		var isIntegrityEnabled string
-		var isAuthenticityEnabled string
+		var isIntegrityEnabled = "false"
+		var isAuthenticityEnabled = "false"
 		var authenticityKeyType string
 		var keyType string
 		var authenticityKeyID string
 		var availabilityType string
-		var useEnsResolution string
+		var useEnsResolution string = "false"
 
 		mr, err := ctx.Request.MultipartReader()
 		multipartIsEmpty := err != nil
@@ -70,16 +69,7 @@ func PostProcess(processService service.BaseProcessService) gin.HandlerFunc {
 			}
 		}
 
-		signRequest, err := request.NewProcessRequest(
-			file,
-			isIntegrityEnabled,
-			isAuthenticityEnabled,
-			authenticityKeyType,
-			keyType,
-			authenticityKeyID,
-			availabilityType,
-			useEnsResolution,
-		)
+		signRequest, err := request.NewProcessRequest(file, isIntegrityEnabled, isAuthenticityEnabled, authenticityKeyType, keyType, authenticityKeyID, availabilityType, useEnsResolution)
 
 		if err != nil {
 			badRequestAPIError := NewBadRequestAPIError(err.Error())
@@ -91,9 +81,17 @@ func PostProcess(processService service.BaseProcessService) gin.HandlerFunc {
 		if err != nil {
 			serverAPIError := NewInternalServerAPIError(err.Error())
 			ctx.JSON(serverAPIError.Status, serverAPIError)
+			return
 		}
 
-		ctx.JSON(http.StatusAccepted, processResponse)
+		ctx.JSON(http.StatusAccepted, ProcessResponse{
+			Certifications: CertificationJSONResponse{
+				Hash:     processResponse.CertificationResponse().Hash(),
+				AnchorId: processResponse.CertificationResponse().AnchorID(),
+			},
+			SignResponse:         processResponse.SignResponse().Signature(),
+			AvailabilityResponse: processResponse.AvailabilityResponse(),
+		})
 	}
 }
 
@@ -108,9 +106,9 @@ func readProp(ctx *gin.Context, p *multipart.Part) string {
 }
 
 type ProcessResponse struct {
-	Certifications       []CertificationJSONResponse
-	SignResponse         []response.SignResponse
-	AvailabilityResponse []string
+	Certifications       CertificationJSONResponse `json:"integrity"`
+	SignResponse         string                    `json:"signature"`
+	AvailabilityResponse string                    `json:"data_availability_id"`
 }
 
 type CertificationJSONResponse struct {

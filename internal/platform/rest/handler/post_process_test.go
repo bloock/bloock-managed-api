@@ -50,16 +50,7 @@ func TestProcessServiceError(t *testing.T) {
 		integrityEnabled := "true"
 		authenticityEnabled := "true"
 
-		processRequest, err := request.NewProcessRequest(
-			data,
-			integrityEnabled,
-			authenticityEnabled,
-			managedKey,
-			ecp256k,
-			kid,
-			hosted,
-			useEnsResolution,
-		)
+		processRequest, err := request.NewProcessRequest(data, integrityEnabled, authenticityEnabled, managedKey, ecp256k, kid, hosted, useEnsResolution)
 		require.NoError(t, err)
 		processService.EXPECT().Process(gomock.Any(), *processRequest).Return(nil, errors.New("some error"))
 		buf := new(bytes.Buffer)

@@ -11,24 +11,24 @@ import (
 
 type BloockIntegrityRepository struct {
 	integrityClient client.IntegrityClient
-	log             zerolog.Logger
+	logger          zerolog.Logger
 }
 
 func NewBloockIntegrityRepository(integrityClient client.IntegrityClient, log zerolog.Logger) *BloockIntegrityRepository {
-	return &BloockIntegrityRepository{integrityClient: integrityClient, log: log}
+	return &BloockIntegrityRepository{integrityClient: integrityClient, logger: log}
 }
 
 func (b BloockIntegrityRepository) Certify(ctx context.Context, file []byte) (certification []domain.Certification, err error) {
 
 	rec, err := client.NewRecordClient().FromFile(file).Build()
 	if err != nil {
-		b.log.Error().Err(err).Msg("error certifying data")
+		b.logger.Error().Err(err).Msg("error certifying data")
 		return []domain.Certification{}, err
 	}
 
 	receipt, err := b.integrityClient.SendRecords([]record.Record{rec})
 	if err != nil {
-		b.log.Error().Err(err).Msg("error certifying data")
+		b.logger.Error().Err(err).Msg(err.Error())
 		return []domain.Certification{}, err
 	}
 
@@ -44,7 +44,7 @@ func (b BloockIntegrityRepository) Certify(ctx context.Context, file []byte) (ce
 func (b BloockIntegrityRepository) GetAnchorByID(ctx context.Context, anchorID int) (integrity.Anchor, error) {
 	anchor, err := b.integrityClient.GetAnchor(int64(anchorID))
 	if err != nil {
-		b.log.Error().Err(err).Msg("error getting anchor")
+		b.logger.Error().Err(err).Msg("error getting anchor")
 		return integrity.Anchor{}, err
 	}
 

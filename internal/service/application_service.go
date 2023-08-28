@@ -19,7 +19,7 @@ type AuthenticityService interface {
 }
 
 type IntegrityService interface {
-	Certify(ctx context.Context, files []byte) ([]create_response.CertificationResponse, error)
+	Certify(ctx context.Context, files []byte) (create_response.CertificationResponse, error)
 }
 
 type AvailabilityService interface {

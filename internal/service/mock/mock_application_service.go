@@ -5,11 +5,12 @@
 package mock_service
 
 import (
-	"bloock-managed-api/internal/service/authenticity/request"
+	domain "bloock-managed-api/internal/domain"
+	request "bloock-managed-api/internal/service/authenticity/request"
 	request0 "bloock-managed-api/internal/service/integrity/request"
-	response0 "bloock-managed-api/internal/service/integrity/response"
-	request2 "bloock-managed-api/internal/service/process/request"
-	"bloock-managed-api/internal/service/process/response"
+	response "bloock-managed-api/internal/service/integrity/response"
+	request1 "bloock-managed-api/internal/service/process/request"
+	response0 "bloock-managed-api/internal/service/process/response"
 	context "context"
 	reflect "reflect"
 
@@ -40,10 +41,10 @@ func (m *MockBaseProcessService) EXPECT() *MockBaseProcessServiceMockRecorder {
 }
 
 // Process mocks base method.
-func (m *MockBaseProcessService) Process(ctx context.Context, req request2.ProcessRequest) (*response.ProcessResponse, error) {
+func (m *MockBaseProcessService) Process(ctx context.Context, req request1.ProcessRequest) (*response0.ProcessResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Process", ctx, req)
-	ret0, _ := ret[0].(*response.ProcessResponse)
+	ret0, _ := ret[0].(*response0.ProcessResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -117,10 +118,10 @@ func (m *MockIntegrityService) EXPECT() *MockIntegrityServiceMockRecorder {
 }
 
 // Certify mocks base method.
-func (m *MockIntegrityService) Certify(ctx context.Context, files []byte) ([]response0.CertificationResponse, error) {
+func (m *MockIntegrityService) Certify(ctx context.Context, files []byte) (response.CertificationResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Certify", ctx, files)
-	ret0, _ := ret[0].([]response0.CertificationResponse)
+	ret0, _ := ret[0].(response.CertificationResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -154,34 +155,19 @@ func (m *MockAvailabilityService) EXPECT() *MockAvailabilityServiceMockRecorder 
 	return m.recorder
 }
 
-// UploadHosted mocks base method.
-func (m *MockAvailabilityService) UploadHosted(ctx context.Context, data []byte) (string, error) {
+// Upload mocks base method.
+func (m *MockAvailabilityService) Upload(ctx context.Context, data []byte, hostingType domain.HostingType) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UploadHosted", ctx, data)
+	ret := m.ctrl.Call(m, "Upload", ctx, data, hostingType)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// UploadHosted indicates an expected call of UploadHosted.
-func (mr *MockAvailabilityServiceMockRecorder) UploadHosted(ctx, data interface{}) *gomock.Call {
+// Upload indicates an expected call of Upload.
+func (mr *MockAvailabilityServiceMockRecorder) Upload(ctx, data, hostingType interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UploadHosted", reflect.TypeOf((*MockAvailabilityService)(nil).UploadHosted), ctx, data)
-}
-
-// UploadIpfs mocks base method.
-func (m *MockAvailabilityService) UploadIpfs(ctx context.Context, data []byte) (string, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UploadIpfs", ctx, data)
-	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// UploadIpfs indicates an expected call of UploadIpfs.
-func (mr *MockAvailabilityServiceMockRecorder) UploadIpfs(ctx, data interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UploadIpfs", reflect.TypeOf((*MockAvailabilityService)(nil).UploadIpfs), ctx, data)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Upload", reflect.TypeOf((*MockAvailabilityService)(nil).Upload), ctx, data, hostingType)
 }
 
 // MockCertificateUpdateAnchorService is a mock of CertificateUpdateAnchorService interface.

@@ -14,6 +14,7 @@ import (
 	"github.com/bloock/bloock-sdk-go/v2/client"
 	"github.com/rs/zerolog"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -22,8 +23,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
-	logger := zerolog.Logger{}
+	logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}).With().Timestamp().Logger()
 	entConnector := connection.NewEntConnector(logger)
 	conn, err := connection.NewEntConnection(cfg.DBConnectionString, entConnector, logger)
 	if err != nil {
@@ -44,7 +44,7 @@ func main() {
 	integrityRepository := repository.NewBloockIntegrityRepository(integrityClient, logger)
 	notificationRepository := http_repository.NewHttpNotificationRepository(http.Client{}, cfg.WebhookURL, logger)
 	authenticityRepository := repository.NewBloockAuthenticityRepository(keyClient, authenticityClient, recordClient, logger)
-	availabilityRepository := repository.NewBloockAvailabilityRepository(recordClient, availabilityClient)
+	availabilityRepository := repository.NewBloockAvailabilityRepository(recordClient, availabilityClient, logger)
 
 	integrityService := integrity.NewIntegrityService(certificationRepository, integrityRepository)
 	authenticityService := authenticity.NewAuthenticityService(authenticityRepository)

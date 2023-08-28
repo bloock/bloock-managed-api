@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"bloock-managed-api/internal/platform/rest/handler/test_utils/fixtures"
 	"context"
 	"github.com/bloock/bloock-sdk-go/v2"
 	"github.com/bloock/bloock-sdk-go/v2/client"
@@ -10,12 +11,12 @@ import (
 )
 
 func TestBloockIntegrityRepository_Certify(t *testing.T) {
-	data := []byte("Hello World!")
+	data := fixtures.PDFContent
 
 	apiKey := "Nm1sFmrojcrRgfZ4v0H0w0d1d22GookjcJl7y-2jr51qx0RioCR3nVm1z74hDEzZ"
 	bloock.ApiKey = apiKey
 	t.Run("given data to certify it should be certified with no errors", func(t *testing.T) {
-		expectedHash := "3ea2f1d0abf3fc66cf29eebb70cbd4e7fe762ef8a09bcc06c8edf641230afec0"
+		expectedHash := "c5a2180e2f97506550f1bba5d863bc6ed05ad8b51daf6fca1ac7d396ef3183c5"
 		data := data
 
 		certification, err := NewBloockIntegrityRepository(client.NewIntegrityClient(), zerolog.Logger{}).Certify(context.TODO(), data)

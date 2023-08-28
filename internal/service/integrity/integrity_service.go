@@ -14,14 +14,14 @@ type IntegrityService struct {
 func NewIntegrityService(certificationRepository repository.CertificationRepository, integrityRepository repository.IntegrityRepository) *IntegrityService {
 	return &IntegrityService{certificationRepository: certificationRepository, integrityRepository: integrityRepository}
 }
-func (c IntegrityService) Certify(ctx context.Context, files []byte) ([]response.CertificationResponse, error) {
+func (c IntegrityService) Certify(ctx context.Context, files []byte) (response.CertificationResponse, error) {
 	certifications, err := c.integrityRepository.Certify(ctx, files)
 	if err != nil {
-		return []response.CertificationResponse{}, err
+		return response.CertificationResponse{}, err
 	}
 
 	if err := c.certificationRepository.SaveCertification(ctx, certifications); err != nil {
-		return []response.CertificationResponse{}, err
+		return response.CertificationResponse{}, err
 	}
 
 	var responses []response.CertificationResponse
@@ -29,5 +29,5 @@ func (c IntegrityService) Certify(ctx context.Context, files []byte) ([]response
 		responses = append(responses, *response.NewCertificationResponse(crt.Hash(), crt.AnchorID()))
 	}
 
-	return responses, nil
+	return responses[0], nil
 }
