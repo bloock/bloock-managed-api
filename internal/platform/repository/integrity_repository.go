@@ -14,8 +14,9 @@ type BloockIntegrityRepository struct {
 	logger          zerolog.Logger
 }
 
-func NewBloockIntegrityRepository(integrityClient client.IntegrityClient, log zerolog.Logger) *BloockIntegrityRepository {
-	return &BloockIntegrityRepository{integrityClient: integrityClient, logger: log}
+func NewBloockIntegrityRepository(integrityClient client.IntegrityClient, logger zerolog.Logger) *BloockIntegrityRepository {
+	logger.With().Caller().Str("component", "integrity-repository").Logger()
+	return &BloockIntegrityRepository{integrityClient: integrityClient, logger: logger}
 }
 
 func (b BloockIntegrityRepository) Certify(ctx context.Context, file []byte) (certification []domain.Certification, err error) {

@@ -16,8 +16,9 @@ type BloockAuthenticityRepository struct {
 	logger             zerolog.Logger
 }
 
-func NewBloockAuthenticityRepository(keyClient client.KeyClient, authenticityClient client.AuthenticityClient, recordClient client.RecordClient, log zerolog.Logger) *BloockAuthenticityRepository {
-	return &BloockAuthenticityRepository{keyClient: keyClient, authenticityClient: authenticityClient, recordClient: recordClient, logger: log}
+func NewBloockAuthenticityRepository(keyClient client.KeyClient, authenticityClient client.AuthenticityClient, recordClient client.RecordClient, logger zerolog.Logger) *BloockAuthenticityRepository {
+	logger.With().Caller().Str("component", "authenticity-repository").Logger()
+	return &BloockAuthenticityRepository{keyClient: keyClient, authenticityClient: authenticityClient, recordClient: recordClient, logger: logger}
 }
 
 func (b BloockAuthenticityRepository) SignECWithLocalKey(ctx context.Context, data []byte, kty key.KeyType, publicKey string, privateKey *string) (string, record.Record, error) {

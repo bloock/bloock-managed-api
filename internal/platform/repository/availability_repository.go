@@ -14,6 +14,7 @@ type BloockAvailabilityRepository struct {
 }
 
 func NewBloockAvailabilityRepository(recordClient client.RecordClient, availabilityClient client.AvailabilityClient, logger zerolog.Logger) *BloockAvailabilityRepository {
+	logger.With().Caller().Str("component", "availability-repository").Logger()
 	return &BloockAvailabilityRepository{recordClient: recordClient, availabilityClient: availabilityClient, logger: logger}
 }
 

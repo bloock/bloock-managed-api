@@ -19,6 +19,8 @@ import (
 )
 
 func main() {
+	os.Setenv("BLOOCK_API_KEY", "Nm1sFmrojcrRgfZ4v0H0w0d1d22GookjcJl7y-2jr51qx0RioCR3nVm1z74hDEzZ")
+
 	cfg, err := config.InitConfig()
 	if err != nil {
 		panic(err)

@@ -19,6 +19,8 @@ type ProcessRequest struct {
 }
 
 func NewProcessRequest(data []byte, integrityEnabled string, authenticityEnabled string, keyType string, kty string, kid string, availabilityType string, ensRes string) (*ProcessRequest, error) {
+	processRequestInstance := &ProcessRequest{}
+
 	isIntegrityEnabled, err := strconv.ParseBool(integrityEnabled)
 	if err != nil {
 		return nil, err
@@ -28,10 +30,31 @@ func NewProcessRequest(data []byte, integrityEnabled string, authenticityEnabled
 	if err != nil {
 		return nil, err
 	}
+	processRequestInstance.isAuthenticityEnabled = isAuthenticityEnabled
+	if isAuthenticityEnabled {
 
-	useEnsResolution, err := strconv.ParseBool(ensRes)
-	if err != nil {
-		return nil, err
+		keyID, err := uuid.Parse(kid)
+		if err != nil {
+			return nil, err
+		}
+		processRequestInstance.keyID = keyID
+		ktyp, err := domain.ValidateKeyType(kty)
+		if err != nil {
+			return nil, err
+		}
+		processRequestInstance.kty = ktyp
+		authenticityKeyType, err := domain.ParseKeyType(keyType)
+		if err != nil {
+			return nil, err
+		}
+		processRequestInstance.keyType = authenticityKeyType
+
+		useEnsResolution, err := strconv.ParseBool(ensRes)
+		if err != nil {
+			return nil, err
+		}
+		processRequestInstance.useEnsResolution = useEnsResolution
+
 	}
 
 	hostingType, err := domain.ParseHostingType(availabilityType)
@@ -39,29 +62,14 @@ func NewProcessRequest(data []byte, integrityEnabled string, authenticityEnabled
 		return nil, err
 	}
 
-	keyID, err := uuid.Parse(kid)
-	if err != nil {
-		return nil, err
-	}
-
-	ktyp, err := domain.ValidateKeyType(kty)
-	if err != nil {
-		return nil, err
-	}
-
-	authenticityKeyType, err := domain.ParseKeyType(keyType)
-	if err != nil {
-		return nil, err
-	}
+	processRequestInstance.file = data
+	processRequestInstance.hostingType = hostingType
+	processRequestInstance.isIntegrityEnabled = isIntegrityEnabled
 	return &ProcessRequest{
 		file:                  data,
 		isIntegrityEnabled:    isIntegrityEnabled,
 		isAuthenticityEnabled: isAuthenticityEnabled,
-		keyType:               authenticityKeyType,
-		kty:                   ktyp,
-		keyID:                 keyID,
 		hostingType:           hostingType,
-		useEnsResolution:      useEnsResolution,
 	}, nil
 }
 

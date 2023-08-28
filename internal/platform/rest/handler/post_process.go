@@ -1,13 +1,12 @@
 package handler
 
 import (
+	"bloock-managed-api/internal/config"
 	"bloock-managed-api/internal/service"
 	"bloock-managed-api/internal/service/process/request"
 	"bloock-managed-api/internal/service/process/response"
-	"errors"
 	"github.com/gin-gonic/gin"
 	"io"
-	"mime/multipart"
 	"net/http"
 )
 
@@ -20,8 +19,8 @@ func PostProcess(processService service.BaseProcessService) gin.HandlerFunc {
 		var authenticityKeyType string
 		var keyType string
 		var authenticityKeyID string
-		var availabilityType string
-		var useEnsResolution string = "false"
+		var availabilityType = "NONE"
+		var useEnsResolution = "false"
 
 		mr, err := ctx.Request.MultipartReader()
 		multipartIsEmpty := err != nil
@@ -31,44 +30,64 @@ func PostProcess(processService service.BaseProcessService) gin.HandlerFunc {
 			return
 		}
 
-		for {
-
-			p, err := mr.NextPart()
-			if errors.Is(err, io.EOF) {
-				break
-			}
-
-			if p.FormName() == "file" {
-				file, err = io.ReadAll(p)
-				if err != nil {
-					serverAPIError := NewInternalServerAPIError(err.Error())
-					ctx.JSON(serverAPIError.Status, serverAPIError)
-					return
-				}
-			}
-
-			if p.FormName() == "integrity.enabled" {
-				isIntegrityEnabled = readProp(ctx, p)
-			}
-			if p.FormName() == "authenticity.enabled" {
-				isAuthenticityEnabled = readProp(ctx, p)
-			}
-			if p.FormName() == "authenticity.keyType" {
-				authenticityKeyType = readProp(ctx, p)
-			}
-			if p.FormName() == "authenticity.kty" {
-				keyType = readProp(ctx, p)
-			}
-			if p.FormName() == "authenticity.key" {
-				authenticityKeyID = readProp(ctx, p)
-			}
-			if p.FormName() == "availability.type" {
-				availabilityType = readProp(ctx, p)
-			}
-			if p.FormName() == "authenticity.useEnsResolution" {
-				useEnsResolution = readProp(ctx, p)
-			}
+		form, err := mr.ReadForm(config.Configuration.MaxMemory)
+		if err != nil {
+			badRequestAPIError := NewBadRequestAPIError(err.Error())
+			ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
+			return
 		}
+		headers := form.File["file"]
+		if len(headers) == 0 {
+			badRequestAPIError := NewBadRequestAPIError("file must be provided")
+			ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
+			return
+		}
+		fileReader, err := headers[0].Open()
+		if err != nil {
+			badRequestAPIError := NewBadRequestAPIError(err.Error())
+			ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
+			return
+		}
+		file, err = io.ReadAll(fileReader)
+		if err != nil {
+			serverAPIError := NewInternalServerAPIError(err.Error())
+			ctx.JSON(serverAPIError.Status, serverAPIError)
+			return
+		}
+		if len(file) == 0 {
+			badRequestAPIError := NewBadRequestAPIError("file must be a valid file")
+			ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
+			return
+		}
+
+		isIntegrityEnabled = form.Value["integrity.enabled"][0]
+
+		isAuthenticityEnabled = form.Value["authenticity.enabled"][0]
+		if isAuthenticityEnabled == "true" {
+			authenticityKeyType = form.Value["authenticity.keyType"][0]
+			if authenticityKeyType == "" {
+				badRequestAPIError := NewBadRequestAPIError("authenticity.keyType must be provided")
+				ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
+				return
+			}
+
+			keyType = form.Value["authenticity.kty"][0]
+			if keyType == "" {
+				badRequestAPIError := NewBadRequestAPIError("authenticity.kty must be provided")
+				ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
+				return
+			}
+
+			authenticityKeyID = form.Value["authenticity.key"][0]
+			if authenticityKeyID == "" {
+				badRequestAPIError := NewBadRequestAPIError("authenticity.key must be provided")
+				ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
+				return
+			}
+			useEnsResolution = form.Value["authenticity.useEnsResolution"][0]
+		}
+
+		availabilityType = form.Value["availability.type"][0]
 
 		signRequest, err := request.NewProcessRequest(file, isIntegrityEnabled, isAuthenticityEnabled, authenticityKeyType, keyType, authenticityKeyID, availabilityType, useEnsResolution)
 
@@ -100,16 +119,6 @@ func toProcessJsonResponse(processResponse *response.ProcessResponse) ProcessRes
 	}
 }
 
-func readProp(ctx *gin.Context, p *multipart.Part) string {
-	bytes, err := io.ReadAll(p)
-	if err != nil {
-		serverAPIError := NewInternalServerAPIError(err.Error())
-		ctx.JSON(serverAPIError.Status, serverAPIError)
-		return ""
-	}
-	return string(bytes)
-}
-
 type ProcessResponse struct {
 	Integrity    IntegrityJSONResponse    `json:"integrity"`
 	Authenticity AuthenticityJSONResponse `json:"authenticity"`
@@ -125,7 +134,7 @@ type AuthenticityJSONResponse struct {
 	Signature string `json:"signature"`
 }
 type AvailabilityJSONResponse struct {
-	ID string `json:"ID"`
+	ID string `json:"id"`
 }
 type CertificationJSONRequest struct {
 	Data interface{}
