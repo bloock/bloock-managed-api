@@ -44,7 +44,7 @@ func (s ProcessService) Process(ctx context.Context, req process_request.Process
 		var signature, signedData, err = s.authenticityService.
 			Sign(ctx, *request.NewSignRequest(
 				config.Configuration.PublicKey,
-				config.Configuration.PrivateKey,
+				&config.Configuration.PrivateKey,
 				req.KeyID(),
 				req.Kty(),
 				req.KeyType(),
@@ -71,7 +71,7 @@ func (s ProcessService) Process(ctx context.Context, req process_request.Process
 		responseBuilder.AvailabilityResponse(dataID)
 	} else {
 
-		if err := s.fileService.SaveFile(ctx, req.Data(), responseBuilder.CertificationHash()); err != nil {
+		if err := s.fileService.SaveFile(ctx, req.Data()); err != nil {
 			return nil, err
 		}
 	}
