@@ -3,7 +3,7 @@ package handler_test
 import (
 	"bloock-managed-api/internal/domain"
 	"bloock-managed-api/internal/platform/rest"
-	"bloock-managed-api/internal/platform/rest/handler/test_utils/fixtures"
+	"bloock-managed-api/internal/platform/test_utils/fixtures"
 	"bloock-managed-api/internal/service/integrity"
 	mock_service "bloock-managed-api/internal/service/mock"
 	"bloock-managed-api/internal/service/process/request"

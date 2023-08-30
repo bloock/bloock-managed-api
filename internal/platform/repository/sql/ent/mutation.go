@@ -28,7 +28,7 @@ const (
 
 	// Node types.
 	TypeCertification = "Certification"
-	TypeLocalKey      = "KeyID"
+	TypeLocalKey      = "LocalKey"
 )
 
 // CertificationMutation represents an operation that mutates the Certification nodes in the graph.
@@ -41,6 +41,7 @@ type CertificationMutation struct {
 	addanchor_id  *int
 	anchor        **integrity.Anchor
 	hash          *string
+	data_id       *string
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*Certification, error)
@@ -279,6 +280,42 @@ func (m *CertificationMutation) ResetHash() {
 	m.hash = nil
 }
 
+// SetDataID sets the "data_id" field.
+func (m *CertificationMutation) SetDataID(s string) {
+	m.data_id = &s
+}
+
+// DataID returns the value of the "data_id" field in the mutation.
+func (m *CertificationMutation) DataID() (r string, exists bool) {
+	v := m.data_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDataID returns the old "data_id" field's value of the Certification entity.
+// If the Certification object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CertificationMutation) OldDataID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDataID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDataID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDataID: %w", err)
+	}
+	return oldValue.DataID, nil
+}
+
+// ResetDataID resets all changes to the "data_id" field.
+func (m *CertificationMutation) ResetDataID() {
+	m.data_id = nil
+}
+
 // Where appends a list predicates to the CertificationMutation builder.
 func (m *CertificationMutation) Where(ps ...predicate.Certification) {
 	m.predicates = append(m.predicates, ps...)
@@ -313,7 +350,7 @@ func (m *CertificationMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CertificationMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+	fields := make([]string, 0, 4)
 	if m.anchor_id != nil {
 		fields = append(fields, certification.FieldAnchorID)
 	}
@@ -322,6 +359,9 @@ func (m *CertificationMutation) Fields() []string {
 	}
 	if m.hash != nil {
 		fields = append(fields, certification.FieldHash)
+	}
+	if m.data_id != nil {
+		fields = append(fields, certification.FieldDataID)
 	}
 	return fields
 }
@@ -337,6 +377,8 @@ func (m *CertificationMutation) Field(name string) (ent.Value, bool) {
 		return m.Anchor()
 	case certification.FieldHash:
 		return m.Hash()
+	case certification.FieldDataID:
+		return m.DataID()
 	}
 	return nil, false
 }
@@ -352,6 +394,8 @@ func (m *CertificationMutation) OldField(ctx context.Context, name string) (ent.
 		return m.OldAnchor(ctx)
 	case certification.FieldHash:
 		return m.OldHash(ctx)
+	case certification.FieldDataID:
+		return m.OldDataID(ctx)
 	}
 	return nil, fmt.Errorf("unknown Certification field %s", name)
 }
@@ -381,6 +425,13 @@ func (m *CertificationMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetHash(v)
+		return nil
+	case certification.FieldDataID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDataID(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Certification field %s", name)
@@ -454,6 +505,9 @@ func (m *CertificationMutation) ResetField(name string) error {
 		return nil
 	case certification.FieldHash:
 		m.ResetHash()
+		return nil
+	case certification.FieldDataID:
+		m.ResetDataID()
 		return nil
 	}
 	return fmt.Errorf("unknown Certification field %s", name)
@@ -764,7 +818,7 @@ func (m *LocalKeyMutation) OldField(ctx context.Context, name string) (ent.Value
 	case localkey.FieldKeyType:
 		return m.OldKeyType(ctx)
 	}
-	return nil, fmt.Errorf("unknown KeyID field %s", name)
+	return nil, fmt.Errorf("unknown LocalKey field %s", name)
 }
 
 // SetField sets the value of a field with the given name. It returns an error if
@@ -787,7 +841,7 @@ func (m *LocalKeyMutation) SetField(name string, value ent.Value) error {
 		m.SetKeyType(v)
 		return nil
 	}
-	return fmt.Errorf("unknown KeyID field %s", name)
+	return fmt.Errorf("unknown LocalKey field %s", name)
 }
 
 // AddedFields returns all numeric fields that were incremented/decremented during
@@ -809,7 +863,7 @@ func (m *LocalKeyMutation) AddedField(name string) (ent.Value, bool) {
 func (m *LocalKeyMutation) AddField(name string, value ent.Value) error {
 	switch name {
 	}
-	return fmt.Errorf("unknown KeyID numeric field %s", name)
+	return fmt.Errorf("unknown LocalKey numeric field %s", name)
 }
 
 // ClearedFields returns all nullable fields that were cleared during this
@@ -828,7 +882,7 @@ func (m *LocalKeyMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *LocalKeyMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown KeyID nullable field %s", name)
+	return fmt.Errorf("unknown LocalKey nullable field %s", name)
 }
 
 // ResetField resets all changes in the mutation for the field with the given name.
@@ -842,7 +896,7 @@ func (m *LocalKeyMutation) ResetField(name string) error {
 		m.ResetKeyType()
 		return nil
 	}
-	return fmt.Errorf("unknown KeyID field %s", name)
+	return fmt.Errorf("unknown LocalKey field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
@@ -884,11 +938,11 @@ func (m *LocalKeyMutation) EdgeCleared(name string) bool {
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *LocalKeyMutation) ClearEdge(name string) error {
-	return fmt.Errorf("unknown KeyID unique edge %s", name)
+	return fmt.Errorf("unknown LocalKey unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *LocalKeyMutation) ResetEdge(name string) error {
-	return fmt.Errorf("unknown KeyID edge %s", name)
+	return fmt.Errorf("unknown LocalKey edge %s", name)
 }

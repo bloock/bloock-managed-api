@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"bloock-managed-api/internal/platform/rest/handler/test_utils/fixtures"
+	"bloock-managed-api/internal/platform/test_utils/fixtures"
 	"context"
 	"github.com/bloock/bloock-sdk-go/v2"
 	"github.com/bloock/bloock-sdk-go/v2/client"
@@ -22,8 +22,8 @@ func TestBloockIntegrityRepository_Certify(t *testing.T) {
 		certification, err := NewBloockIntegrityRepository(client.NewIntegrityClient(), zerolog.Logger{}).Certify(context.TODO(), data)
 
 		assert.NoError(t, err)
-		assert.Equal(t, expectedHash, certification[0].Hash())
-		assert.Greater(t, certification[0].AnchorID(), 0)
+		assert.Equal(t, expectedHash, certification.Hash())
+		assert.Greater(t, certification.AnchorID(), 0)
 	})
 
 	t.Run("given error certifying it should be returned", func(t *testing.T) {

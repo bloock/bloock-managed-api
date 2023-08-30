@@ -39,6 +39,12 @@ func (cc *CertificationCreate) SetHash(s string) *CertificationCreate {
 	return cc
 }
 
+// SetDataID sets the "data_id" field.
+func (cc *CertificationCreate) SetDataID(s string) *CertificationCreate {
+	cc.mutation.SetDataID(s)
+	return cc
+}
+
 // SetID sets the "id" field.
 func (cc *CertificationCreate) SetID(u uuid.UUID) *CertificationCreate {
 	cc.mutation.SetID(u)
@@ -115,6 +121,9 @@ func (cc *CertificationCreate) check() error {
 			return &ValidationError{Name: "hash", err: fmt.Errorf(`ent: validator failed for field "Certification.hash": %w`, err)}
 		}
 	}
+	if _, ok := cc.mutation.DataID(); !ok {
+		return &ValidationError{Name: "data_id", err: errors.New(`ent: missing required field "Certification.data_id"`)}
+	}
 	return nil
 }
 
@@ -161,6 +170,10 @@ func (cc *CertificationCreate) createSpec() (*Certification, *sqlgraph.CreateSpe
 	if value, ok := cc.mutation.Hash(); ok {
 		_spec.SetField(certification.FieldHash, field.TypeString, value)
 		_node.Hash = value
+	}
+	if value, ok := cc.mutation.DataID(); ok {
+		_spec.SetField(certification.FieldDataID, field.TypeString, value)
+		_node.DataID = value
 	}
 	return _node, _spec
 }

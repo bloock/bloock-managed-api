@@ -52,7 +52,7 @@ func (mr *MockCertificationRepositoryMockRecorder) GetCertificationsByAnchorID(c
 }
 
 // SaveCertification mocks base method.
-func (m *MockCertificationRepository) SaveCertification(ctx context.Context, certification []domain.Certification) error {
+func (m *MockCertificationRepository) SaveCertification(ctx context.Context, certification domain.Certification) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SaveCertification", ctx, certification)
 	ret0, _ := ret[0].(error)
@@ -77,4 +77,18 @@ func (m *MockCertificationRepository) UpdateCertificationAnchor(ctx context.Cont
 func (mr *MockCertificationRepositoryMockRecorder) UpdateCertificationAnchor(ctx, anchor interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateCertificationAnchor", reflect.TypeOf((*MockCertificationRepository)(nil).UpdateCertificationAnchor), ctx, anchor)
+}
+
+// UpdateCertificationDataID mocks base method.
+func (m *MockCertificationRepository) UpdateCertificationDataID(ctx context.Context, hash, dataID string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateCertificationDataID", ctx, hash, dataID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateCertificationDataID indicates an expected call of UpdateCertificationDataID.
+func (mr *MockCertificationRepositoryMockRecorder) UpdateCertificationDataID(ctx, hash, dataID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateCertificationDataID", reflect.TypeOf((*MockCertificationRepository)(nil).UpdateCertificationDataID), ctx, hash, dataID)
 }

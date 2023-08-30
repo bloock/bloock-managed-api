@@ -20,6 +20,7 @@ type AuthenticityService interface {
 
 type IntegrityService interface {
 	Certify(ctx context.Context, files []byte) (create_response.CertificationResponse, error)
+	SetDataIDToCertification(ctx context.Context, hash string, id string) error
 }
 
 type AvailabilityService interface {
@@ -28,4 +29,8 @@ type AvailabilityService interface {
 
 type CertificateUpdateAnchorService interface {
 	UpdateAnchor(ctx context.Context, updateRequest update_request.UpdateCertificationAnchorRequest) error
+}
+
+type FileService interface {
+	SaveFile(ctx context.Context, file []byte) error
 }

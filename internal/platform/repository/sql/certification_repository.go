@@ -3,7 +3,6 @@ package sql
 import (
 	"bloock-managed-api/internal/domain"
 	"bloock-managed-api/internal/platform/repository/sql/connection"
-	"bloock-managed-api/internal/platform/repository/sql/ent"
 	"bloock-managed-api/internal/platform/repository/sql/ent/certification"
 	"context"
 	"github.com/bloock/bloock-sdk-go/v2/entity/integrity"
@@ -21,17 +20,15 @@ func NewSQLCertificationRepository(connection connection.EntConnection, dbTimeou
 	return &SQLCertificationRepository{connection: connection, dbTimeout: dbTimeout, logger: logger}
 }
 
-func (s SQLCertificationRepository) SaveCertification(ctx context.Context, certifications []domain.Certification) error {
-	var certificationsCreate []*ent.CertificationCreate
-	for _, crt := range certifications {
-		certificationsCreate = append(certificationsCreate, s.connection.DB().
-			Certification.Create().
-			SetHash(crt.Hash()).
-			SetAnchorID(crt.AnchorID()).
-			SetAnchor(crt.Anchor()))
-	}
+func (s SQLCertificationRepository) SaveCertification(ctx context.Context, certification domain.Certification) error {
+	crt := s.connection.DB().
+		Certification.Create().
+		SetHash(certification.Hash()).
+		SetAnchorID(certification.AnchorID()).
+		SetDataID("").
+		SetAnchor(certification.Anchor())
 
-	if _, err := s.connection.DB().Certification.CreateBulk(certificationsCreate...).Save(ctx); err != nil {
+	if _, err := crt.Save(ctx); err != nil {
 		s.logger.Error().Err(err).Msg("")
 		return err
 	}
@@ -61,6 +58,15 @@ func (s SQLCertificationRepository) UpdateCertificationAnchor(ctx context.Contex
 		Where(certification.AnchorIDLTE(int(anchor.Id))).
 		Save(ctx); err != nil {
 		s.logger.Error().Err(err).Msg("")
+		return err
+	}
+
+	return nil
+}
+
+func (s SQLCertificationRepository) UpdateCertificationDataID(ctx context.Context, hash string, dataID string) error {
+	if _, err := s.connection.DB().Certification.Update().SetDataID(dataID).
+		Where(certification.HashEQ(hash)).Save(ctx); err != nil {
 		return err
 	}
 

@@ -19,6 +19,7 @@ func (Certification) Fields() []ent.Field {
 		field.Int("anchor_id").NonNegative(),
 		field.JSON("anchor", &integrity.Anchor{}),
 		field.String("hash").NotEmpty(),
+		field.String("data_id"),
 	}
 }
 

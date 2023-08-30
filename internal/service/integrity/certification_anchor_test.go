@@ -1,6 +1,7 @@
 package integrity
 
 import (
+	"bloock-managed-api/internal/config"
 	"bloock-managed-api/internal/domain"
 	mock_repository "bloock-managed-api/internal/domain/repository/mocks"
 	"bloock-managed-api/internal/service/integrity/request"
@@ -18,6 +19,8 @@ func TestCertificationAnchor_UpdateAnchor(t *testing.T) {
 	certificationRepository := mock_repository.NewMockCertificationRepository(ctrl)
 	notificationRepository := mock_repository.NewMockNotificationRepository(ctrl)
 	integrityRepository := mock_repository.NewMockIntegrityRepository(ctrl)
+	availabilityRepository := mock_repository.NewMockAvailabilityRepository(ctrl)
+	storageRepository := mock_repository.NewMockLocalStorageRepository(ctrl)
 	anchor := &integrity.Anchor{
 		Id:         int64(1),
 		BlockRoots: []string{""},
@@ -33,9 +36,18 @@ func TestCertificationAnchor_UpdateAnchor(t *testing.T) {
 		certificationRepository.EXPECT().UpdateCertificationAnchor(context.TODO(), *anchor)
 		certificationRepository.EXPECT().GetCertificationsByAnchorID(context.TODO(), int(anchor.Id)).
 			Return([]domain.Certification{*certification}, nil)
-		notificationRepository.EXPECT().NotifyCertification(hash, updateRequest.Payload)
+		notificationRepository.EXPECT().NotifyCertification(hash, updateRequest.Payload, []byte("data"))
+		availabilityRepository.EXPECT().FindFile(context.TODO(), certification.DataID()).Return(nil, nil)
+		storageRepository.EXPECT().Retrieve(context.TODO(), config.Configuration.FileDir, certification.Hash()).
+			Return([]byte("data"), nil)
 
-		err := NewUpdateAnchorService(certificationRepository, notificationRepository, integrityRepository).
+		err := NewUpdateAnchorService(
+			certificationRepository,
+			notificationRepository,
+			integrityRepository,
+			availabilityRepository,
+			storageRepository,
+		).
 			UpdateAnchor(context.TODO(), *updateRequest)
 
 		assert.NoError(t, err)
@@ -44,7 +56,13 @@ func TestCertificationAnchor_UpdateAnchor(t *testing.T) {
 	t.Run("given error getting anchor it should be returned", func(t *testing.T) {
 		integrityRepository.EXPECT().GetAnchorByID(context.TODO(), 1).Return(integrity.Anchor{}, errors.New("some error"))
 
-		err := NewUpdateAnchorService(certificationRepository, notificationRepository, integrityRepository).
+		err := NewUpdateAnchorService(
+			certificationRepository,
+			notificationRepository,
+			integrityRepository,
+			availabilityRepository,
+			storageRepository,
+		).
 			UpdateAnchor(context.TODO(), *updateRequest)
 
 		assert.Error(t, err)
@@ -55,7 +73,13 @@ func TestCertificationAnchor_UpdateAnchor(t *testing.T) {
 		certificationRepository.EXPECT().UpdateCertificationAnchor(context.TODO(), *anchor).
 			Return(errors.New("some error"))
 
-		err := NewUpdateAnchorService(certificationRepository, notificationRepository, integrityRepository).
+		err := NewUpdateAnchorService(
+			certificationRepository,
+			notificationRepository,
+			integrityRepository,
+			availabilityRepository,
+			storageRepository,
+		).
 			UpdateAnchor(context.TODO(), *updateRequest)
 
 		assert.Error(t, err)
@@ -66,9 +90,15 @@ func TestCertificationAnchor_UpdateAnchor(t *testing.T) {
 		certificationRepository.EXPECT().UpdateCertificationAnchor(context.TODO(), *anchor)
 		certificationRepository.EXPECT().GetCertificationsByAnchorID(context.TODO(), int(anchor.Id)).
 			Return([]domain.Certification{*certification}, nil)
-		notificationRepository.EXPECT().NotifyCertification(hash, updateRequest.Payload).Return(errors.New("some error"))
+		notificationRepository.EXPECT().NotifyCertification(hash, updateRequest.Payload, []byte("data")).Return(errors.New("some error"))
 
-		err := NewUpdateAnchorService(certificationRepository, notificationRepository, integrityRepository).
+		err := NewUpdateAnchorService(
+			certificationRepository,
+			notificationRepository,
+			integrityRepository,
+			availabilityRepository,
+			storageRepository,
+		).
 			UpdateAnchor(context.TODO(), *updateRequest)
 
 		assert.Error(t, err)

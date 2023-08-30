@@ -37,10 +37,10 @@ func (m *MockIntegrityRepository) EXPECT() *MockIntegrityRepositoryMockRecorder 
 }
 
 // Certify mocks base method.
-func (m *MockIntegrityRepository) Certify(ctx context.Context, bytes []byte) ([]domain.Certification, error) {
+func (m *MockIntegrityRepository) Certify(ctx context.Context, bytes []byte) (domain.Certification, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Certify", ctx, bytes)
-	ret0, _ := ret[0].([]domain.Certification)
+	ret0, _ := ret[0].(domain.Certification)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

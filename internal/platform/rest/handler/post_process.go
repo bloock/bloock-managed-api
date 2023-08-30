@@ -89,7 +89,7 @@ func PostProcess(processService service.BaseProcessService) gin.HandlerFunc {
 
 		availabilityType = form.Value["availability.type"][0]
 
-		signRequest, err := request.NewProcessRequest(file, isIntegrityEnabled, isAuthenticityEnabled, authenticityKeyType, keyType, authenticityKeyID, availabilityType, useEnsResolution)
+		processRequest, err := request.NewProcessRequest(file, isIntegrityEnabled, isAuthenticityEnabled, authenticityKeyType, keyType, authenticityKeyID, availabilityType, useEnsResolution)
 
 		if err != nil {
 			badRequestAPIError := NewBadRequestAPIError(err.Error())
@@ -97,8 +97,9 @@ func PostProcess(processService service.BaseProcessService) gin.HandlerFunc {
 			return
 		}
 
-		processResponse, err := processService.Process(ctx, *signRequest)
+		processResponse, err := processService.Process(ctx, *processRequest)
 		if err != nil {
+
 			serverAPIError := NewInternalServerAPIError(err.Error())
 			ctx.JSON(serverAPIError.Status, serverAPIError)
 			return

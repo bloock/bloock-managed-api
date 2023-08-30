@@ -17,6 +17,7 @@ type Config struct {
 	PrivateKey              *string `mapstructure:"BLOOCK_API_PRIVATE_KEY"`
 	PublicKey               string  `mapstructure:"BLOOCK_API_PUBLIC_KEY"`
 	MaxMemory               int64   `mapstructure:"BLOOCK_API_MAX_MEMORY"`
+	FileDir                 string  `mapstructure:"BLOOCK_API_FILE_DIR"`
 }
 
 var Configuration = &Config{}
@@ -28,6 +29,7 @@ func InitConfig() (*Config, error) {
 	viper.SetConfigType("yaml")
 	viper.AutomaticEnv()
 	err := viper.ReadInConfig()
+	setDefaultConfigValues()
 	if err != nil {
 		setDefaultConfigValues()
 	}
@@ -42,13 +44,14 @@ func InitConfig() (*Config, error) {
 }
 
 func setDefaultConfigValues() {
-	viper.SetDefault("bloock_db_connection_string", "file:managed?mode=memory&cache=shared&_fk=1")
+	viper.SetDefault("bloock_api_db_connection_string", "file:managed?mode=memory&cache=shared&_fk=1")
 	viper.SetDefault("bloock_api_key", "")
-	viper.SetDefault("bloock_webhook_url", "")
-	viper.SetDefault("bloock_webhook_secret_key", "")
+	viper.SetDefault("bloock_api_webhook_url", "")
+	viper.SetDefault("bloock_api_webhook_secret_key", "")
 	viper.SetDefault("bloock_api_host", "0.0.0.0")
 	viper.SetDefault("bloock_api_port", "8080")
-	viper.SetDefault("bloock_webhook_enforce_tolerance", false)
+	viper.SetDefault("bloock_api_webhook_enforce_tolerance", false)
 	viper.SetDefault("bloock_api_debug_mode", false)
-	viper.SetDefault("bloock_max_memory", "10*1024*1024")
+	viper.SetDefault("bloock_api_max_memory", 10<<20) //10MB
+	viper.SetDefault("bloock_api_file_dir", "./")
 }

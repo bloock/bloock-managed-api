@@ -431,7 +431,7 @@ func (c *LocalKeyClient) mutate(ctx context.Context, m *LocalKeyMutation) (Value
 	case OpDelete, OpDeleteOne:
 		return (&LocalKeyDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
-		return nil, fmt.Errorf("ent: unknown KeyID mutation op: %q", m.Op())
+		return nil, fmt.Errorf("ent: unknown LocalKey mutation op: %q", m.Op())
 	}
 }
 

@@ -132,6 +132,20 @@ func (mr *MockIntegrityServiceMockRecorder) Certify(ctx, files interface{}) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Certify", reflect.TypeOf((*MockIntegrityService)(nil).Certify), ctx, files)
 }
 
+// SetDataIDToCertification mocks base method.
+func (m *MockIntegrityService) SetDataIDToCertification(ctx context.Context, hash, id string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetDataIDToCertification", ctx, hash, id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SetDataIDToCertification indicates an expected call of SetDataIDToCertification.
+func (mr *MockIntegrityServiceMockRecorder) SetDataIDToCertification(ctx, hash, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetDataIDToCertification", reflect.TypeOf((*MockIntegrityService)(nil).SetDataIDToCertification), ctx, hash, id)
+}
+
 // MockAvailabilityService is a mock of AvailabilityService interface.
 type MockAvailabilityService struct {
 	ctrl     *gomock.Controller
@@ -205,4 +219,41 @@ func (m *MockCertificateUpdateAnchorService) UpdateAnchor(ctx context.Context, u
 func (mr *MockCertificateUpdateAnchorServiceMockRecorder) UpdateAnchor(ctx, updateRequest interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAnchor", reflect.TypeOf((*MockCertificateUpdateAnchorService)(nil).UpdateAnchor), ctx, updateRequest)
+}
+
+// MockFileService is a mock of FileService interface.
+type MockFileService struct {
+	ctrl     *gomock.Controller
+	recorder *MockFileServiceMockRecorder
+}
+
+// MockFileServiceMockRecorder is the mock recorder for MockFileService.
+type MockFileServiceMockRecorder struct {
+	mock *MockFileService
+}
+
+// NewMockFileService creates a new mock instance.
+func NewMockFileService(ctrl *gomock.Controller) *MockFileService {
+	mock := &MockFileService{ctrl: ctrl}
+	mock.recorder = &MockFileServiceMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockFileService) EXPECT() *MockFileServiceMockRecorder {
+	return m.recorder
+}
+
+// SaveFile mocks base method.
+func (m *MockFileService) SaveFile(ctx context.Context, file []byte, filename string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SaveFile", ctx, file, filename)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SaveFile indicates an expected call of SaveFile.
+func (mr *MockFileServiceMockRecorder) SaveFile(ctx, file, filename interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveFile", reflect.TypeOf((*MockFileService)(nil).SaveFile), ctx, file, filename)
 }

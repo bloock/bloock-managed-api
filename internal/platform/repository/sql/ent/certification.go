@@ -24,7 +24,9 @@ type Certification struct {
 	// Anchor holds the value of the "anchor" field.
 	Anchor *integrity.Anchor `json:"anchor,omitempty"`
 	// Hash holds the value of the "hash" field.
-	Hash         string `json:"hash,omitempty"`
+	Hash string `json:"hash,omitempty"`
+	// DataID holds the value of the "data_id" field.
+	DataID       string `json:"data_id,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -37,7 +39,7 @@ func (*Certification) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case certification.FieldAnchorID:
 			values[i] = new(sql.NullInt64)
-		case certification.FieldHash:
+		case certification.FieldHash, certification.FieldDataID:
 			values[i] = new(sql.NullString)
 		case certification.FieldID:
 			values[i] = new(uuid.UUID)
@@ -81,6 +83,12 @@ func (c *Certification) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field hash", values[i])
 			} else if value.Valid {
 				c.Hash = value.String
+			}
+		case certification.FieldDataID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field data_id", values[i])
+			} else if value.Valid {
+				c.DataID = value.String
 			}
 		default:
 			c.selectValues.Set(columns[i], values[i])
@@ -126,6 +134,9 @@ func (c *Certification) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("hash=")
 	builder.WriteString(c.Hash)
+	builder.WriteString(", ")
+	builder.WriteString("data_id=")
+	builder.WriteString(c.DataID)
 	builder.WriteByte(')')
 	return builder.String()
 }

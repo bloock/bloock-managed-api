@@ -53,6 +53,12 @@ func (cu *CertificationUpdate) SetHash(s string) *CertificationUpdate {
 	return cu
 }
 
+// SetDataID sets the "data_id" field.
+func (cu *CertificationUpdate) SetDataID(s string) *CertificationUpdate {
+	cu.mutation.SetDataID(s)
+	return cu
+}
+
 // Mutation returns the CertificationMutation object of the builder.
 func (cu *CertificationUpdate) Mutation() *CertificationMutation {
 	return cu.mutation
@@ -124,6 +130,9 @@ func (cu *CertificationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := cu.mutation.Hash(); ok {
 		_spec.SetField(certification.FieldHash, field.TypeString, value)
 	}
+	if value, ok := cu.mutation.DataID(); ok {
+		_spec.SetField(certification.FieldDataID, field.TypeString, value)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{certification.Label}
@@ -166,6 +175,12 @@ func (cuo *CertificationUpdateOne) SetAnchor(i *integrity.Anchor) *Certification
 // SetHash sets the "hash" field.
 func (cuo *CertificationUpdateOne) SetHash(s string) *CertificationUpdateOne {
 	cuo.mutation.SetHash(s)
+	return cuo
+}
+
+// SetDataID sets the "data_id" field.
+func (cuo *CertificationUpdateOne) SetDataID(s string) *CertificationUpdateOne {
+	cuo.mutation.SetDataID(s)
 	return cuo
 }
 
@@ -269,6 +284,9 @@ func (cuo *CertificationUpdateOne) sqlSave(ctx context.Context) (_node *Certific
 	}
 	if value, ok := cuo.mutation.Hash(); ok {
 		_spec.SetField(certification.FieldHash, field.TypeString, value)
+	}
+	if value, ok := cuo.mutation.DataID(); ok {
+		_spec.SetField(certification.FieldDataID, field.TypeString, value)
 	}
 	_node = &Certification{config: cuo.config}
 	_spec.Assign = _node.assignValues

@@ -19,27 +19,21 @@ func NewBloockIntegrityRepository(integrityClient client.IntegrityClient, logger
 	return &BloockIntegrityRepository{integrityClient: integrityClient, logger: logger}
 }
 
-func (b BloockIntegrityRepository) Certify(ctx context.Context, file []byte) (certification []domain.Certification, err error) {
+func (b BloockIntegrityRepository) Certify(ctx context.Context, file []byte) (certification domain.Certification, err error) {
 
 	rec, err := client.NewRecordClient().FromFile(file).Build()
 	if err != nil {
 		b.logger.Error().Err(err).Msg("error certifying data")
-		return []domain.Certification{}, err
+		return domain.Certification{}, err
 	}
 
 	receipt, err := b.integrityClient.SendRecords([]record.Record{rec})
 	if err != nil {
 		b.logger.Error().Err(err).Msg(err.Error())
-		return []domain.Certification{}, err
+		return domain.Certification{}, err
 	}
 
-	var certifications []domain.Certification
-	for _, recordReceipt := range receipt {
-		crts := *domain.NewPendingCertification(int(recordReceipt.Anchor), recordReceipt.Record)
-		certifications = append(certifications, crts)
-	}
-
-	return certifications, nil
+	return *domain.NewPendingCertification(int(receipt[0].Anchor), receipt[0].Record, file), nil
 }
 
 func (b BloockIntegrityRepository) GetAnchorByID(ctx context.Context, anchorID int) (integrity.Anchor, error) {

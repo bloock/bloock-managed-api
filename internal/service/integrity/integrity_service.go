@@ -14,20 +14,19 @@ type IntegrityService struct {
 func NewIntegrityService(certificationRepository repository.CertificationRepository, integrityRepository repository.IntegrityRepository) *IntegrityService {
 	return &IntegrityService{certificationRepository: certificationRepository, integrityRepository: integrityRepository}
 }
-func (c IntegrityService) Certify(ctx context.Context, files []byte) (response.CertificationResponse, error) {
-	certifications, err := c.integrityRepository.Certify(ctx, files)
+func (c IntegrityService) Certify(ctx context.Context, file []byte) (response.CertificationResponse, error) {
+	certification, err := c.integrityRepository.Certify(ctx, file)
 	if err != nil {
 		return response.CertificationResponse{}, err
 	}
 
-	if err := c.certificationRepository.SaveCertification(ctx, certifications); err != nil {
+	if err := c.certificationRepository.SaveCertification(ctx, certification); err != nil {
 		return response.CertificationResponse{}, err
 	}
 
-	var responses []response.CertificationResponse
-	for _, crt := range certifications {
-		responses = append(responses, *response.NewCertificationResponse(crt.Hash(), crt.AnchorID()))
-	}
+	return *response.NewCertificationResponse(certification.Hash(), certification.AnchorID()), nil
+}
 
-	return responses[0], nil
+func (c IntegrityService) SetDataIDToCertification(ctx context.Context, hash string, id string) error {
+	return c.certificationRepository.UpdateCertificationDataID(ctx, hash, id)
 }

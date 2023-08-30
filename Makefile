@@ -1,5 +1,6 @@
 mocks:
 	mockgen -source=internal/service/application_service.go -destination=internal/service/mock/mock_application_service.go
+	mockgen -source=internal/domain/repository/local_storage_repository.go -destination=internal/domain/repository/mocks/mock_local_storage_repository.go
 	mockgen -source=internal/domain/repository/availability_repository.go -destination=internal/domain/repository/mocks/mock_availability_repository.go
 	mockgen -source=internal/domain/repository/authenticity_repository.go -destination=internal/domain/repository/mocks/mock_authenticity_repository.go
 	mockgen -source=internal/domain/repository/certification_repository.go -destination=internal/domain/repository/mocks/mock_certification_repository.go

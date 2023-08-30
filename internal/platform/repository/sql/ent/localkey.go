@@ -97,7 +97,7 @@ func (lk *LocalKey) Update() *LocalKeyUpdateOne {
 func (lk *LocalKey) Unwrap() *LocalKey {
 	_tx, ok := lk.config.driver.(*txDriver)
 	if !ok {
-		panic("ent: KeyID is not a transactional entity")
+		panic("ent: LocalKey is not a transactional entity")
 	}
 	lk.config.driver = _tx.drv
 	return lk
@@ -106,7 +106,7 @@ func (lk *LocalKey) Unwrap() *LocalKey {
 // String implements the fmt.Stringer.
 func (lk *LocalKey) String() string {
 	var builder strings.Builder
-	builder.WriteString("KeyID(")
+	builder.WriteString("LocalKey(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", lk.ID))
 	builder.WriteString("local_key=")
 	builder.WriteString(fmt.Sprintf("%v", lk.LocalKey))

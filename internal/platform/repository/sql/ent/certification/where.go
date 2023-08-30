@@ -64,6 +64,11 @@ func Hash(v string) predicate.Certification {
 	return predicate.Certification(sql.FieldEQ(FieldHash, v))
 }
 
+// DataID applies equality check predicate on the "data_id" field. It's identical to DataIDEQ.
+func DataID(v string) predicate.Certification {
+	return predicate.Certification(sql.FieldEQ(FieldDataID, v))
+}
+
 // AnchorIDEQ applies the EQ predicate on the "anchor_id" field.
 func AnchorIDEQ(v int) predicate.Certification {
 	return predicate.Certification(sql.FieldEQ(FieldAnchorID, v))
@@ -167,6 +172,71 @@ func HashEqualFold(v string) predicate.Certification {
 // HashContainsFold applies the ContainsFold predicate on the "hash" field.
 func HashContainsFold(v string) predicate.Certification {
 	return predicate.Certification(sql.FieldContainsFold(FieldHash, v))
+}
+
+// DataIDEQ applies the EQ predicate on the "data_id" field.
+func DataIDEQ(v string) predicate.Certification {
+	return predicate.Certification(sql.FieldEQ(FieldDataID, v))
+}
+
+// DataIDNEQ applies the NEQ predicate on the "data_id" field.
+func DataIDNEQ(v string) predicate.Certification {
+	return predicate.Certification(sql.FieldNEQ(FieldDataID, v))
+}
+
+// DataIDIn applies the In predicate on the "data_id" field.
+func DataIDIn(vs ...string) predicate.Certification {
+	return predicate.Certification(sql.FieldIn(FieldDataID, vs...))
+}
+
+// DataIDNotIn applies the NotIn predicate on the "data_id" field.
+func DataIDNotIn(vs ...string) predicate.Certification {
+	return predicate.Certification(sql.FieldNotIn(FieldDataID, vs...))
+}
+
+// DataIDGT applies the GT predicate on the "data_id" field.
+func DataIDGT(v string) predicate.Certification {
+	return predicate.Certification(sql.FieldGT(FieldDataID, v))
+}
+
+// DataIDGTE applies the GTE predicate on the "data_id" field.
+func DataIDGTE(v string) predicate.Certification {
+	return predicate.Certification(sql.FieldGTE(FieldDataID, v))
+}
+
+// DataIDLT applies the LT predicate on the "data_id" field.
+func DataIDLT(v string) predicate.Certification {
+	return predicate.Certification(sql.FieldLT(FieldDataID, v))
+}
+
+// DataIDLTE applies the LTE predicate on the "data_id" field.
+func DataIDLTE(v string) predicate.Certification {
+	return predicate.Certification(sql.FieldLTE(FieldDataID, v))
+}
+
+// DataIDContains applies the Contains predicate on the "data_id" field.
+func DataIDContains(v string) predicate.Certification {
+	return predicate.Certification(sql.FieldContains(FieldDataID, v))
+}
+
+// DataIDHasPrefix applies the HasPrefix predicate on the "data_id" field.
+func DataIDHasPrefix(v string) predicate.Certification {
+	return predicate.Certification(sql.FieldHasPrefix(FieldDataID, v))
+}
+
+// DataIDHasSuffix applies the HasSuffix predicate on the "data_id" field.
+func DataIDHasSuffix(v string) predicate.Certification {
+	return predicate.Certification(sql.FieldHasSuffix(FieldDataID, v))
+}
+
+// DataIDEqualFold applies the EqualFold predicate on the "data_id" field.
+func DataIDEqualFold(v string) predicate.Certification {
+	return predicate.Certification(sql.FieldEqualFold(FieldDataID, v))
+}
+
+// DataIDContainsFold applies the ContainsFold predicate on the "data_id" field.
+func DataIDContainsFold(v string) predicate.Certification {
+	return predicate.Certification(sql.FieldContainsFold(FieldDataID, v))
 }
 
 // And groups predicates with the AND operator between them.

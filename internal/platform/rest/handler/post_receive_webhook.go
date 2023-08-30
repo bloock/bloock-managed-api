@@ -38,6 +38,8 @@ func PostReceiveWebhook(certification service.CertificateUpdateAnchorService, se
 			return
 		}
 
+		//call file service to find the file i need the hash or dataID
+
 		if err := certification.UpdateAnchor(ctx, request.UpdateCertificationAnchorRequest{
 			AnchorId: webhookRequest.Data.Network.AnchorId,
 			Payload:  webhookRequest,

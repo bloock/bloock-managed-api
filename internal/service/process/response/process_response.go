@@ -35,6 +35,10 @@ func (b *ProcessResponseBuilder) Build() *ProcessResponse {
 	return b.processResponse
 }
 
+func (b *ProcessResponseBuilder) CertificationHash() string {
+	return b.processResponse.certificationResponse.Hash()
+}
+
 func (b *ProcessResponseBuilder) AvailabilityResponse(url string) *ProcessResponse {
 	b.processResponse.availabilityResponse = url
 	return b.processResponse

@@ -2,6 +2,7 @@ package request
 
 import (
 	"bloock-managed-api/internal/domain"
+	"errors"
 	"github.com/bloock/bloock-sdk-go/v2/entity/key"
 	"github.com/google/uuid"
 	"strconv"
@@ -17,6 +18,8 @@ type ProcessRequest struct {
 	hostingType           domain.HostingType
 	useEnsResolution      bool
 }
+
+var ErrIntegrityMiss = errors.New("integrity required for hosting feature")
 
 func NewProcessRequest(data []byte, integrityEnabled string, authenticityEnabled string, keyType string, kty string, kid string, availabilityType string, ensRes string) (*ProcessRequest, error) {
 	processRequestInstance := &ProcessRequest{}
@@ -62,6 +65,9 @@ func NewProcessRequest(data []byte, integrityEnabled string, authenticityEnabled
 		return nil, err
 	}
 
+	if hostingType != domain.NONE && !isIntegrityEnabled {
+		return nil, ErrIntegrityMiss
+	}
 	processRequestInstance.file = data
 	processRequestInstance.hostingType = hostingType
 	processRequestInstance.isIntegrityEnabled = isIntegrityEnabled

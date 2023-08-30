@@ -6,10 +6,12 @@ type Certification struct {
 	anchorID int
 	anchor   *integrity.Anchor
 	hash     string
+	dataID   string
+	data     []byte
 }
 
-func NewPendingCertification(anchorID int, hash string) *Certification {
-	return &Certification{anchorID: anchorID, hash: hash}
+func NewPendingCertification(anchorID int, hash string, data []byte) *Certification {
+	return &Certification{anchorID: anchorID, hash: hash, data: data}
 }
 
 func NewCertification(anchorID int, hash string, anchor *integrity.Anchor) *Certification {
@@ -26,4 +28,15 @@ func (c Certification) Anchor() *integrity.Anchor {
 
 func (c Certification) Hash() string {
 	return c.hash
+}
+
+func (c Certification) Data() []byte {
+	return c.data
+}
+
+func (c Certification) DataID() string {
+	return c.dataID
+}
+func (c Certification) WithDataID(dataID string) {
+	c.dataID = dataID
 }

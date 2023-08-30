@@ -7,7 +7,8 @@ import (
 )
 
 type CertificationRepository interface {
-	SaveCertification(ctx context.Context, certification []domain.Certification) error
+	SaveCertification(ctx context.Context, certification domain.Certification) error
 	GetCertificationsByAnchorID(ctx context.Context, anchor int) (certification []domain.Certification, err error)
 	UpdateCertificationAnchor(ctx context.Context, anchor integrity.Anchor) error
+	UpdateCertificationDataID(ctx context.Context, hash string, dataID string) error
 }

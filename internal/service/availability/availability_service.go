@@ -20,9 +20,17 @@ var ErrUnssuportedHosting = errors.New("unsupported hosting type")
 func (a AvailabilityService) Upload(ctx context.Context, data []byte, hostingType domain.HostingType) (string, error) {
 	switch hostingType {
 	case domain.HOSTED:
-		return a.availabilityRepository.UploadHosted(ctx, data)
+		hostedID, err := a.availabilityRepository.UploadHosted(ctx, data)
+		if err != nil {
+			return "", err
+		}
+		return hostedID, err
 	case domain.IPFS:
-		return a.availabilityRepository.UploadIpfs(ctx, data)
+		ipfsID, err := a.availabilityRepository.UploadIpfs(ctx, data)
+		if err != nil {
+			return "", err
+		}
+		return ipfsID, err
 	case domain.NONE:
 		return "", nil
 	default:

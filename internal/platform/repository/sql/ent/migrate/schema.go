@@ -14,6 +14,7 @@ var (
 		{Name: "anchor_id", Type: field.TypeInt},
 		{Name: "anchor", Type: field.TypeJSON},
 		{Name: "hash", Type: field.TypeString},
+		{Name: "data_id", Type: field.TypeString},
 	}
 	// CertificationsTable holds the schema information for the "certifications" table.
 	CertificationsTable = &schema.Table{

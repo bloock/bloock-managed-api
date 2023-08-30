@@ -168,7 +168,7 @@ func (lkuo *LocalKeyUpdateOne) sqlSave(ctx context.Context) (_node *LocalKey, er
 	_spec := sqlgraph.NewUpdateSpec(localkey.Table, localkey.Columns, sqlgraph.NewFieldSpec(localkey.FieldID, field.TypeUUID))
 	id, ok := lkuo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "KeyID.id" for update`)}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "LocalKey.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := lkuo.fields; len(fields) > 0 {

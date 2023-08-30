@@ -22,8 +22,8 @@ func TestSQLCertificationRepository_SaveCertification(t *testing.T) {
 
 	certificationRepository := sql.NewSQLCertificationRepository(*conn, 5*time.Second, zerolog.Logger{})
 	t.Run("given certification it should be saved", func(t *testing.T) {
-		certification := domain.NewPendingCertification(1, hash)
-		err := certificationRepository.SaveCertification(context.TODO(), []domain.Certification{*certification})
+		certification := domain.NewPendingCertification(1, hash, nil)
+		err := certificationRepository.SaveCertification(context.TODO(), *certification)
 
 		assert.NoError(t, err)
 	})
@@ -57,6 +57,7 @@ func TestSQLCertificationRepository_GetCertification(t *testing.T) {
 			SetAnchor(anchor).
 			SetHash(hash).
 			SetAnchorID(anchorID).
+			SetDataID("").
 			Save(ctx)
 		require.NoError(t, err)
 
@@ -104,12 +105,14 @@ func TestSQLCertificationRepository_UpdateCertificationAnchor(t *testing.T) {
 			SetAnchor(anchor).
 			SetHash(hash).
 			SetAnchorID(anchorID).
+			SetDataID("").
 			Save(context.TODO())
 		require.NoError(t, err)
 		_, err = conn.DB().Certification.Create().
 			SetAnchor(anchor).
 			SetHash(hash).
 			SetAnchorID(smallAnchorID).
+			SetDataID("").
 			Save(context.TODO())
 		require.NoError(t, err)
 
@@ -123,5 +126,36 @@ func TestSQLCertificationRepository_UpdateCertificationAnchor(t *testing.T) {
 		assert.Equal(t, anchorID, certifications[0].AnchorID)
 		assert.Equal(t, hash, certifications[0].Hash)
 		assert.Equal(t, updatedAnchor, certifications[1].Anchor)
+	})
+}
+
+func TestSQLCertificationRepository_UpdateCertificationDataID(t *testing.T) {
+	conn := EntConnectorForTesting(t)
+	certificationRepository := sql.NewSQLCertificationRepository(*conn, 5*time.Second, zerolog.Logger{})
+	anchor := &integrity.Anchor{
+		Id:         int64(1),
+		BlockRoots: []string{""},
+		Networks:   []integrity.AnchorNetwork{},
+		Root:       "root",
+		Status:     "pending",
+	}
+
+	t.Run("given hash and data id it should update data id for existent certification", func(t *testing.T) {
+		crt, err := conn.DB().Certification.Create().
+			SetAnchor(anchor).
+			SetHash(hash).
+			SetAnchorID(1).
+			SetDataID("").
+			Save(context.TODO())
+		require.NoError(t, err)
+
+		dataID := "a47ef5f4-26ba-4bbe-b53a-2e73a4d69001"
+		err = certificationRepository.UpdateCertificationDataID(ctx, hash, dataID)
+		assert.NoError(t, err)
+
+		expectedCrt, err := conn.DB().Certification.Get(ctx, crt.ID)
+		require.NoError(t, err)
+		assert.NotEmpty(t, expectedCrt.DataID)
+		assert.Equal(t, expectedCrt.DataID, dataID)
 	})
 }
