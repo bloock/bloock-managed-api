@@ -90,6 +90,7 @@ func TestCertificationAnchor_UpdateAnchor(t *testing.T) {
 		certificationRepository.EXPECT().UpdateCertificationAnchor(context.TODO(), *anchor)
 		certificationRepository.EXPECT().GetCertificationsByAnchorID(context.TODO(), int(anchor.Id)).
 			Return([]domain.Certification{*certification}, nil)
+		availabilityRepository.EXPECT().FindFile(gomock.Any(), gomock.Any()).Return([]byte("data"), nil)
 		notificationRepository.EXPECT().NotifyCertification(hash, updateRequest.Payload, []byte("data")).Return(errors.New("some error"))
 
 		err := NewUpdateAnchorService(
