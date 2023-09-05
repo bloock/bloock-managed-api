@@ -19,10 +19,10 @@ func TestCertification_Certify(t *testing.T) {
 	someErr := errors.New("some error")
 	file := []byte("test")
 	hash := "9c22ff5f21f0b81b113e63f7db6da94fedef11b2119b4088b89664fb9a3cb658"
-	certification := domain.Certification {
+	certification := domain.Certification{
 		AnchorID: 1,
-		Hash: hash,
-		Data: file,
+		Hash:     hash,
+		Data:     file,
 	}
 
 	t.Run("given files it should be certified and saved in db", func(t *testing.T) {

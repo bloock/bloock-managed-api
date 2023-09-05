@@ -15,7 +15,7 @@ type FileService struct {
 func NewFileService(localStorageRepository repository.LocalStorageRepository) *FileService {
 	return &FileService{
 		localStorageRepository: localStorageRepository,
-		recordClient: client.NewRecordClient(),
+		recordClient:           client.NewRecordClient(),
 	}
 }
 

@@ -20,10 +20,10 @@ func NewBloockAuthenticityRepository(logger zerolog.Logger) *BloockAuthenticityR
 	logger.With().Caller().Str("component", "authenticity-repository").Logger()
 
 	return &BloockAuthenticityRepository{
-		keyClient: client.NewKeyClient(),
+		keyClient:          client.NewKeyClient(),
 		authenticityClient: client.NewAuthenticityClient(),
-		recordClient: client.NewRecordClient(),
-		logger: logger,
+		recordClient:       client.NewRecordClient(),
+		logger:             logger,
 	}
 }
 

@@ -50,7 +50,7 @@ func InitConfig() (*Config, error) {
 func setDefaultConfigValues() {
 	viper.SetDefault("bloock_db_connection_string", "file:managed?mode=memory&cache=shared&_fk=1")
 	viper.SetDefault("bloock_api_key", "")
-	viper.SetDefault("bloock_webhook_url", "")
+	viper.SetDefault("bloock_client_endpoint_url", "")
 	viper.SetDefault("bloock_webhook_secret_key", "")
 	viper.SetDefault("bloock_api_host", "0.0.0.0")
 	viper.SetDefault("bloock_api_port", "8080")

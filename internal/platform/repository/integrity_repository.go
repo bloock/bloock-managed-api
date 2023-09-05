@@ -18,7 +18,7 @@ func NewBloockIntegrityRepository(logger zerolog.Logger) *BloockIntegrityReposit
 	logger.With().Caller().Str("component", "integrity-repository").Logger()
 	return &BloockIntegrityRepository{
 		integrityClient: client.NewIntegrityClient(),
-		logger: logger,
+		logger:          logger,
 	}
 }
 

@@ -22,8 +22,8 @@ func TestSQLCertificationRepository_SaveCertification(t *testing.T) {
 	t.Run("given certification it should be saved", func(t *testing.T) {
 		certification := domain.Certification{
 			AnchorID: 1,
-			Hash: hash,
-			Data: nil,
+			Hash:     hash,
+			Data:     nil,
 		}
 		err := certificationRepository.SaveCertification(context.Background(), certification)
 
@@ -84,8 +84,8 @@ func TestSQLCertificationRepository_UpdateCertificationDataID(t *testing.T) {
 
 		updateCertification := domain.Certification{
 			AnchorID: 1,
-			Hash: hash,
-			DataID: "a47ef5f4-26ba-4bbe-b53a-2e73a4d69001",
+			Hash:     hash,
+			DataID:   "a47ef5f4-26ba-4bbe-b53a-2e73a4d69001",
 		}
 		err = certificationRepository.UpdateCertificationDataID(ctx, updateCertification)
 		assert.NoError(t, err)

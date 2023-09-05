@@ -17,7 +17,7 @@ func TestHttpNotificationRepository_NotifyCertification(t *testing.T) {
 	server := MockServer{}.Expect(t, expectedWhResp, pdfContent)
 
 	err := NewHttpNotificationRepository(http.Client{}, server.URL, zerolog.Logger{}).
-		NotifyCertification("testHash", "test", pdfContent)
+		NotifyCertification("testHash", pdfContent)
 
 	assert.NoError(t, err)
 }
@@ -35,18 +35,6 @@ func (s MockServer) Expect(t *testing.T, expectedWhResp string, expectedFile []b
 			http.Error(w, "Unable to parse form", http.StatusBadRequest)
 			return
 		}
-
-		whPart, err := m.NextPart()
-		if err != nil {
-			http.Error(w, "wh_response not found", http.StatusBadRequest)
-			return
-		}
-		whRespContent, err := io.ReadAll(whPart)
-		if err != nil {
-			http.Error(w, "wh_response not found", http.StatusBadRequest)
-			return
-		}
-		assert.Equal(t, expectedWhResp, string(whRespContent))
 
 		file, err := m.NextPart()
 		if err != nil {
