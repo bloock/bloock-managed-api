@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -48,7 +47,6 @@ func Debug() gin.HandlerFunc {
 		}
 
 		fileName := formData.File.Filename
-		fmt.Println(fileName)
 		pattern := "^[a-fA-F0-9]{64}$"
 		regex := regexp.MustCompile(pattern)
 		if !regex.MatchString(fileName) {
