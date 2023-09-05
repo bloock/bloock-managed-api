@@ -51,9 +51,8 @@ func Debug() gin.HandlerFunc {
 		fmt.Println(fileName)
 		pattern := "^[a-fA-F0-9]{64}$"
 		regex := regexp.MustCompile(pattern)
-		if regex.MatchString(fileName) {
+		if !regex.MatchString(fileName) {
 			badRequestAPIError := NewBadRequestAPIError("invalid sha256 hash file name")
-			fmt.Printf("3-> %+v", err)
 			ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
 			return
 		}
