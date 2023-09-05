@@ -21,7 +21,7 @@ func init() {
 	// certification.AnchorIDValidator is a validator for the "anchor_id" field. It is called by the builders before save.
 	certification.AnchorIDValidator = certificationDescAnchorID.Validators[0].(func(int) error)
 	// certificationDescHash is the schema descriptor for hash field.
-	certificationDescHash := certificationFields[3].Descriptor()
+	certificationDescHash := certificationFields[2].Descriptor()
 	// certification.HashValidator is a validator for the "hash" field. It is called by the builders before save.
 	certification.HashValidator = certificationDescHash.Validators[0].(func(string) error)
 	// certificationDescID is the schema descriptor for id field.

@@ -3,8 +3,6 @@ package service
 import (
 	"bloock-managed-api/internal/domain"
 	"bloock-managed-api/internal/service/authenticity/request"
-	update_request "bloock-managed-api/internal/service/integrity/request"
-	create_response "bloock-managed-api/internal/service/integrity/response"
 	request2 "bloock-managed-api/internal/service/process/request"
 	"bloock-managed-api/internal/service/process/response"
 	"context"
@@ -19,8 +17,8 @@ type AuthenticityService interface {
 }
 
 type IntegrityService interface {
-	Certify(ctx context.Context, files []byte) (create_response.CertificationResponse, error)
-	SetDataIDToCertification(ctx context.Context, hash string, id string) error
+	CertifyData(ctx context.Context, data []byte) (domain.Certification, error)
+	UpdateCertification(ctx context.Context, certification domain.Certification) error
 }
 
 type AvailabilityService interface {
@@ -28,10 +26,14 @@ type AvailabilityService interface {
 }
 
 type CertificateUpdateAnchorService interface {
-	UpdateAnchor(ctx context.Context, updateRequest update_request.UpdateCertificationAnchorRequest) error
+	UpdateAnchor(ctx context.Context, anchorID int) ([]domain.Certification, error)
 }
 
 type FileService interface {
 	GetFileHash(ctx context.Context, file []byte) (string, error)
-	SaveFile(ctx context.Context, file []byte) error
+	SaveFile(ctx context.Context, file []byte, hash string) error
+}
+
+type NotifyService interface {
+	NotifyClient(ctx context.Context, certifications []domain.Certification) error
 }

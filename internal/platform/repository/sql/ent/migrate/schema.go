@@ -12,7 +12,6 @@ var (
 	CertificationsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID},
 		{Name: "anchor_id", Type: field.TypeInt},
-		{Name: "anchor", Type: field.TypeJSON},
 		{Name: "hash", Type: field.TypeString},
 		{Name: "data_id", Type: field.TypeString},
 	}
@@ -25,7 +24,7 @@ var (
 			{
 				Name:    "certification_id_hash_anchor_id",
 				Unique:  true,
-				Columns: []*schema.Column{CertificationsColumns[0], CertificationsColumns[3], CertificationsColumns[1]},
+				Columns: []*schema.Column{CertificationsColumns[0], CertificationsColumns[2], CertificationsColumns[1]},
 			},
 		},
 	}

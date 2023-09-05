@@ -4,7 +4,6 @@ import (
 	"bloock-managed-api/internal/domain"
 	"bloock-managed-api/internal/platform/rest"
 	"bloock-managed-api/internal/platform/test_utils/fixtures"
-	"bloock-managed-api/internal/service/integrity"
 	mock_service "bloock-managed-api/internal/service/mock"
 	"bloock-managed-api/internal/service/process/request"
 	"bloock-managed-api/internal/service/process/response"
@@ -27,11 +26,14 @@ import (
 func TestProcessServiceError(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	processService := mock_service.NewMockBaseProcessService(ctrl)
+	notifyService := mock_service.NewMockNotifyService(ctrl)
+	updateAnchor := mock_service.NewMockCertificateUpdateAnchorService(ctrl)
 	server, err := rest.NewServer(
 		"localhost",
 		"8085",
 		processService,
-		integrity.CertificationAnchor{},
+		updateAnchor,
+		notifyService,
 		"",
 		true,
 		zerolog.Logger{},
@@ -84,11 +86,14 @@ func TestProcessServiceError(t *testing.T) {
 func TestPostProcessMultipart(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	signApplicationService := mock_service.NewMockBaseProcessService(ctrl)
+	notifyService := mock_service.NewMockNotifyService(ctrl)
+	updateAnchor := mock_service.NewMockCertificateUpdateAnchorService(ctrl)
 	server, err := rest.NewServer(
 		"localhost",
 		"8085",
 		signApplicationService,
-		integrity.CertificationAnchor{},
+		updateAnchor,
+		notifyService,
 		"",
 		true,
 		zerolog.Logger{},
@@ -151,11 +156,14 @@ func TestPostProcessMultipart(t *testing.T) {
 func TestPostProcessBadRequests(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	processService := mock_service.NewMockBaseProcessService(ctrl)
+	notifyService := mock_service.NewMockNotifyService(ctrl)
+	updateAnchor := mock_service.NewMockCertificateUpdateAnchorService(ctrl)
 	server, err := rest.NewServer(
 		"localhost",
 		"8085",
 		processService,
-		integrity.CertificationAnchor{},
+		updateAnchor,
+		notifyService,
 		"",
 		true,
 		zerolog.Logger{},
@@ -226,11 +234,14 @@ func TestPostProcessBadRequests(t *testing.T) {
 func TestWithoutFile(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	signApplicationService := mock_service.NewMockBaseProcessService(ctrl)
+	notifyService := mock_service.NewMockNotifyService(ctrl)
+	updateAnchor := mock_service.NewMockCertificateUpdateAnchorService(ctrl)
 	server, err := rest.NewServer(
 		"localhost",
 		"8085",
 		signApplicationService,
-		integrity.CertificationAnchor{},
+		updateAnchor,
+		notifyService,
 		"",
 		true,
 		zerolog.Logger{},

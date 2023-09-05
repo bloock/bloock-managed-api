@@ -20,8 +20,6 @@ type ProcessRequest struct {
 	useEnsResolution      bool
 }
 
-var ErrIntegrityMiss = errors.New("integrity required for hosting feature")
-
 func NewProcessRequest(data []byte, integrityEnabled bool, authenticityEnabled bool, keySource string, keyType string, kid string, useEns bool, availabilityType string) (*ProcessRequest, error) {
 	processRequestInstance := &ProcessRequest{}
 

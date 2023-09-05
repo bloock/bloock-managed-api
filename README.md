@@ -29,7 +29,7 @@ we are going to use default values for `BLOOCK_API_HOST`, `BLOOCK_API_PORT`, `BL
 - BLOOCK_API_PORT: The main API port; default is 8080.
 - BLOOCK_API_HOST: The main API host IP; default is 10.0.5.23.
 - BLOOCK_API_KEY: Your Bloock API key.
-- BLOOCK_WEBHOOK_URL: Your webhook URL.
+- BLOOCK_CLIENT_ENDPOINT_URL: Your api endpoint URL where you want to receive the response.
 - BLOOCK_WEBHOOK_SECRET_KEY: Your webhook secret key.
 - BLOOCK_ENFORCE_TOLERANCE: Decide if you want to set tolerance when verifying the webhook; true or false.
 - BLOOCK_DB_CONNECTION_STRING: Your database URL; e.g., mysql://username:password@localhost:3306/mydatabase.

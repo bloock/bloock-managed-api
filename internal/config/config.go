@@ -3,7 +3,6 @@ package config
 import (
 	"log"
 
-	"github.com/bloock/bloock-sdk-go/v2"
 	"github.com/go-playground/validator/v10"
 	"github.com/spf13/viper"
 )
@@ -13,7 +12,7 @@ type Config struct {
 	APIKey                  string `mapstructure:"BLOOCK_API_KEY" validate:"required"`
 	APIHost                 string `mapstructure:"BLOOCK_API_HOST"`
 	APIPort                 string `mapstructure:"BLOOCK_API_PORT"`
-	WebhookURL              string `mapstructure:"BLOOCK_WEBHOOK_URL"`
+	ClientEndpointUrl       string `mapstructure:"BLOOCK_CLIENT_ENDPOINT_URL"`
 	WebhookSecretKey        string `mapstructure:"BLOOCK_WEBHOOK_SECRET_KEY"`
 	WebhookEnforceTolerance bool   `mapstructure:"BLOOCK_ENFORCE_TOLERANCE"`
 	DebugMode               bool   `mapstructure:"BLOOCK_API_DEBUG_MODE"`
@@ -45,7 +44,6 @@ func InitConfig() (*Config, error) {
 		log.Fatalf("Missing required attributes %v\n", err)
 	}
 
-	bloock.ApiKey = Configuration.APIKey
 	return Configuration, nil
 }
 

@@ -23,13 +23,11 @@ func (h HardDriveLocalStorageRepository) Save(ctx context.Context, data []byte, 
 	if err != nil {
 		if !errors.Is(err, os.ErrExist) {
 			h.logger.Log().Err(err).Msg("")
-			msg := "error creating directory"
-			err := errors.New(msg)
-			return err
+			return errors.New("error creating directory")
 		}
 	}
 
-	if err := os.WriteFile(fmt.Sprintf("%s/%s", h.directory, hash), data, 0644); err != nil {
+	if err = os.WriteFile(fmt.Sprintf("%s/%s", h.directory, hash), data, 0644); err != nil {
 		h.logger.Log().Err(err).Msg("")
 		return err
 	}
@@ -40,9 +38,7 @@ func (h HardDriveLocalStorageRepository) Retrieve(ctx context.Context, directory
 	file, err := os.ReadFile(fmt.Sprintf("%s/%s", directory, filename))
 	if err != nil {
 		h.logger.Log().Err(err).Msg("")
-		msg := "error retrieving the file"
-		err := errors.New(msg)
-		return nil, err
+		return nil, errors.New("error retrieving the file")
 	}
 
 	return file, nil

@@ -12,7 +12,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/bloock/bloock-sdk-go/v2/entity/integrity"
 )
 
 // CertificationUpdate is the builder for updating Certification entities.
@@ -38,12 +37,6 @@ func (cu *CertificationUpdate) SetAnchorID(i int) *CertificationUpdate {
 // AddAnchorID adds i to the "anchor_id" field.
 func (cu *CertificationUpdate) AddAnchorID(i int) *CertificationUpdate {
 	cu.mutation.AddAnchorID(i)
-	return cu
-}
-
-// SetAnchor sets the "anchor" field.
-func (cu *CertificationUpdate) SetAnchor(i *integrity.Anchor) *CertificationUpdate {
-	cu.mutation.SetAnchor(i)
 	return cu
 }
 
@@ -124,9 +117,6 @@ func (cu *CertificationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := cu.mutation.AddedAnchorID(); ok {
 		_spec.AddField(certification.FieldAnchorID, field.TypeInt, value)
 	}
-	if value, ok := cu.mutation.Anchor(); ok {
-		_spec.SetField(certification.FieldAnchor, field.TypeJSON, value)
-	}
 	if value, ok := cu.mutation.Hash(); ok {
 		_spec.SetField(certification.FieldHash, field.TypeString, value)
 	}
@@ -163,12 +153,6 @@ func (cuo *CertificationUpdateOne) SetAnchorID(i int) *CertificationUpdateOne {
 // AddAnchorID adds i to the "anchor_id" field.
 func (cuo *CertificationUpdateOne) AddAnchorID(i int) *CertificationUpdateOne {
 	cuo.mutation.AddAnchorID(i)
-	return cuo
-}
-
-// SetAnchor sets the "anchor" field.
-func (cuo *CertificationUpdateOne) SetAnchor(i *integrity.Anchor) *CertificationUpdateOne {
-	cuo.mutation.SetAnchor(i)
 	return cuo
 }
 
@@ -278,9 +262,6 @@ func (cuo *CertificationUpdateOne) sqlSave(ctx context.Context) (_node *Certific
 	}
 	if value, ok := cuo.mutation.AddedAnchorID(); ok {
 		_spec.AddField(certification.FieldAnchorID, field.TypeInt, value)
-	}
-	if value, ok := cuo.mutation.Anchor(); ok {
-		_spec.SetField(certification.FieldAnchor, field.TypeJSON, value)
 	}
 	if value, ok := cuo.mutation.Hash(); ok {
 		_spec.SetField(certification.FieldHash, field.TypeString, value)

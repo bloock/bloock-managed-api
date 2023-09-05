@@ -13,7 +13,6 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/bloock/bloock-sdk-go/v2/entity/integrity"
 	"github.com/bloock/bloock-sdk-go/v2/entity/key"
 	"github.com/google/uuid"
 )
@@ -39,7 +38,6 @@ type CertificationMutation struct {
 	id            *uuid.UUID
 	anchor_id     *int
 	addanchor_id  *int
-	anchor        **integrity.Anchor
 	hash          *string
 	data_id       *string
 	clearedFields map[string]struct{}
@@ -208,42 +206,6 @@ func (m *CertificationMutation) ResetAnchorID() {
 	m.addanchor_id = nil
 }
 
-// SetAnchor sets the "anchor" field.
-func (m *CertificationMutation) SetAnchor(i *integrity.Anchor) {
-	m.anchor = &i
-}
-
-// Anchor returns the value of the "anchor" field in the mutation.
-func (m *CertificationMutation) Anchor() (r *integrity.Anchor, exists bool) {
-	v := m.anchor
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldAnchor returns the old "anchor" field's value of the Certification entity.
-// If the Certification object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CertificationMutation) OldAnchor(ctx context.Context) (v *integrity.Anchor, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldAnchor is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldAnchor requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldAnchor: %w", err)
-	}
-	return oldValue.Anchor, nil
-}
-
-// ResetAnchor resets all changes to the "anchor" field.
-func (m *CertificationMutation) ResetAnchor() {
-	m.anchor = nil
-}
-
 // SetHash sets the "hash" field.
 func (m *CertificationMutation) SetHash(s string) {
 	m.hash = &s
@@ -350,12 +312,9 @@ func (m *CertificationMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CertificationMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 3)
 	if m.anchor_id != nil {
 		fields = append(fields, certification.FieldAnchorID)
-	}
-	if m.anchor != nil {
-		fields = append(fields, certification.FieldAnchor)
 	}
 	if m.hash != nil {
 		fields = append(fields, certification.FieldHash)
@@ -373,8 +332,6 @@ func (m *CertificationMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case certification.FieldAnchorID:
 		return m.AnchorID()
-	case certification.FieldAnchor:
-		return m.Anchor()
 	case certification.FieldHash:
 		return m.Hash()
 	case certification.FieldDataID:
@@ -390,8 +347,6 @@ func (m *CertificationMutation) OldField(ctx context.Context, name string) (ent.
 	switch name {
 	case certification.FieldAnchorID:
 		return m.OldAnchorID(ctx)
-	case certification.FieldAnchor:
-		return m.OldAnchor(ctx)
 	case certification.FieldHash:
 		return m.OldHash(ctx)
 	case certification.FieldDataID:
@@ -411,13 +366,6 @@ func (m *CertificationMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetAnchorID(v)
-		return nil
-	case certification.FieldAnchor:
-		v, ok := value.(*integrity.Anchor)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetAnchor(v)
 		return nil
 	case certification.FieldHash:
 		v, ok := value.(string)
@@ -499,9 +447,6 @@ func (m *CertificationMutation) ResetField(name string) error {
 	switch name {
 	case certification.FieldAnchorID:
 		m.ResetAnchorID()
-		return nil
-	case certification.FieldAnchor:
-		m.ResetAnchor()
 		return nil
 	case certification.FieldHash:
 		m.ResetHash()

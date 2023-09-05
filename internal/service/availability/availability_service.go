@@ -7,6 +7,8 @@ import (
 	"errors"
 )
 
+var ErrUnsupportedHosting = errors.New("unsupported hosting type")
+
 type AvailabilityService struct {
 	availabilityRepository repository.AvailabilityRepository
 }
@@ -14,8 +16,6 @@ type AvailabilityService struct {
 func NewAvailabilityService(availabilityRepository repository.AvailabilityRepository) *AvailabilityService {
 	return &AvailabilityService{availabilityRepository: availabilityRepository}
 }
-
-var ErrUnssuportedHosting = errors.New("unsupported hosting type")
 
 func (a AvailabilityService) Upload(ctx context.Context, data []byte, hostingType domain.HostingType) (string, error) {
 	switch hostingType {
@@ -34,6 +34,6 @@ func (a AvailabilityService) Upload(ctx context.Context, data []byte, hostingTyp
 	case domain.NONE:
 		return "", nil
 	default:
-		return "", ErrUnssuportedHosting
+		return "", ErrUnsupportedHosting
 	}
 }

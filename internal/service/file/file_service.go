@@ -12,8 +12,11 @@ type FileService struct {
 	recordClient           client.RecordClient
 }
 
-func NewFileService(localStorageRepository repository.LocalStorageRepository, recordClient client.RecordClient) *FileService {
-	return &FileService{localStorageRepository: localStorageRepository, recordClient: recordClient}
+func NewFileService(localStorageRepository repository.LocalStorageRepository) *FileService {
+	return &FileService{
+		localStorageRepository: localStorageRepository,
+		recordClient: client.NewRecordClient(),
+	}
 }
 
 func (f FileService) GetFileHash(ctx context.Context, file []byte) (string, error) {
@@ -29,15 +32,6 @@ func (f FileService) GetFileHash(ctx context.Context, file []byte) (string, erro
 	return hash, nil
 }
 
-func (f FileService) SaveFile(ctx context.Context, file []byte) error {
-	record, err := f.recordClient.FromFile(file).Build()
-	if err != nil {
-		return err
-	}
-	hash, err := record.GetHash()
-	if err != nil {
-		return err
-	}
-
+func (f FileService) SaveFile(ctx context.Context, file []byte, hash string) error {
 	return f.localStorageRepository.Save(ctx, file, hash)
 }

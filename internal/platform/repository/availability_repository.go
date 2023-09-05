@@ -3,11 +3,10 @@ package repository
 import (
 	"context"
 	"errors"
-	"strings"
-
 	"github.com/bloock/bloock-sdk-go/v2/client"
 	"github.com/bloock/bloock-sdk-go/v2/entity/availability"
 	"github.com/rs/zerolog"
+	"strings"
 )
 
 type BloockAvailabilityRepository struct {
@@ -16,9 +15,13 @@ type BloockAvailabilityRepository struct {
 	logger             zerolog.Logger
 }
 
-func NewBloockAvailabilityRepository(recordClient client.RecordClient, availabilityClient client.AvailabilityClient, logger zerolog.Logger) *BloockAvailabilityRepository {
+func NewBloockAvailabilityRepository(logger zerolog.Logger) *BloockAvailabilityRepository {
 	logger.With().Caller().Str("component", "availability-repository").Logger()
-	return &BloockAvailabilityRepository{recordClient: recordClient, availabilityClient: availabilityClient, logger: logger}
+	return &BloockAvailabilityRepository{
+		recordClient: client.NewRecordClient(),
+		availabilityClient: client.NewAvailabilityClient(),
+		logger: logger,
+	}
 }
 
 func (b BloockAvailabilityRepository) UploadHosted(ctx context.Context, data []byte) (string, error) {
@@ -43,22 +46,17 @@ func (b BloockAvailabilityRepository) UploadIpfs(ctx context.Context, data []byt
 func (b BloockAvailabilityRepository) FindFile(ctx context.Context, dataID string) ([]byte, error) {
 	record, err := b.availabilityClient.Retrieve(availability.NewHostedLoader(dataID))
 	if err != nil {
-		if strings.Contains(err.Error(), "not found") {
-			record, err = b.availabilityClient.Retrieve(availability.NewIpfsLoader(dataID))
-			if err != nil {
-				if strings.Contains(err.Error(), "not found") {
-					return nil, errFileNotFound
-				}
-				b.logger.Error().Err(err).Msg("")
-				return nil, errUnknown
+		record, err = b.availabilityClient.Retrieve(availability.NewIpfsLoader(dataID))
+		if err != nil {
+			if strings.Contains(err.Error(), "not found") {
+				return nil, nil
 			}
-			return record.Retrieve(), nil
+			return nil, err
 		}
-		return nil, errUnknown
+		return record.Retrieve(), nil
 	}
 
 	return record.Retrieve(), nil
 }
 
-var errFileNotFound = errors.New("file not found in hosting")
 var errUnknown = errors.New("availability unknown error")

@@ -7,7 +7,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/bloock/bloock-sdk-go/v2/entity/integrity"
 	"github.com/rs/zerolog"
 )
 
@@ -24,10 +23,9 @@ func NewSQLCertificationRepository(connection connection.EntConnection, dbTimeou
 func (s SQLCertificationRepository) SaveCertification(ctx context.Context, certification domain.Certification) error {
 	crt := s.connection.DB().
 		Certification.Create().
-		SetHash(certification.Hash()).
-		SetAnchorID(certification.AnchorID()).
-		SetDataID(certification.DataID()).
-		SetAnchor(certification.Anchor())
+		SetHash(certification.Hash).
+		SetAnchorID(certification.AnchorID).
+		SetDataID(certification.DataID)
 
 	if _, err := crt.Save(ctx); err != nil {
 		s.logger.Error().Err(err).Msg("")
@@ -37,9 +35,9 @@ func (s SQLCertificationRepository) SaveCertification(ctx context.Context, certi
 	return nil
 }
 
-func (s SQLCertificationRepository) GetCertificationsByAnchorID(ctx context.Context, anchor int) ([]domain.Certification, error) {
+func (s SQLCertificationRepository) GetCertificationsByAnchorID(ctx context.Context, anchorID int) ([]domain.Certification, error) {
 	certificationsSchema, err := s.connection.DB().Certification.Query().
-		Where(certification.AnchorID(anchor)).All(ctx)
+		Where(certification.AnchorID(anchorID)).All(ctx)
 	if err != nil {
 		s.logger.Error().Err(err).Msg("")
 		return []domain.Certification{}, err
@@ -47,27 +45,32 @@ func (s SQLCertificationRepository) GetCertificationsByAnchorID(ctx context.Cont
 
 	var certifications []domain.Certification
 	for _, crt := range certificationsSchema {
-		newCrt := domain.NewCertification(crt.AnchorID, crt.Hash, crt.Anchor)
-		certifications = append(certifications, *newCrt)
+		newCrt := domain.Certification{
+			AnchorID: crt.AnchorID,
+			Hash:     crt.Hash,
+		}
+		certifications = append(certifications, newCrt)
 	}
 
 	return certifications, nil
 }
 
-func (s SQLCertificationRepository) UpdateCertificationAnchor(ctx context.Context, anchor integrity.Anchor) error {
-	if _, err := s.connection.DB().Certification.Update().SetAnchor(&anchor).
-		Where(certification.AnchorIDLTE(int(anchor.Id))).
-		Save(ctx); err != nil {
+func (s SQLCertificationRepository) ExistCertificationByHash(ctx context.Context, hash string) (bool, error) {
+	exist, err := s.connection.DB().Certification.Query().
+		Where(certification.HashEQ(hash)).Exist(ctx)
+	if err != nil {
 		s.logger.Error().Err(err).Msg("")
-		return err
+		return false, err
 	}
 
-	return nil
+	return exist, nil
 }
 
-func (s SQLCertificationRepository) UpdateCertificationDataID(ctx context.Context, hash string, dataID string) error {
-	if _, err := s.connection.DB().Certification.Update().SetDataID(dataID).
-		Where(certification.HashEQ(hash)).Save(ctx); err != nil {
+func (s SQLCertificationRepository) UpdateCertificationDataID(ctx context.Context, cert domain.Certification) error {
+	if _, err := s.connection.DB().Certification.Update().
+		SetDataID(cert.DataID).
+		SetAnchorID(cert.AnchorID).
+		Where(certification.HashEQ(cert.Hash)).Save(ctx); err != nil {
 		return err
 	}
 

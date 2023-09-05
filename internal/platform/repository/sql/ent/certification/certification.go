@@ -14,8 +14,6 @@ const (
 	FieldID = "id"
 	// FieldAnchorID holds the string denoting the anchor_id field in the database.
 	FieldAnchorID = "anchor_id"
-	// FieldAnchor holds the string denoting the anchor field in the database.
-	FieldAnchor = "anchor"
 	// FieldHash holds the string denoting the hash field in the database.
 	FieldHash = "hash"
 	// FieldDataID holds the string denoting the data_id field in the database.
@@ -28,7 +26,6 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldAnchorID,
-	FieldAnchor,
 	FieldHash,
 	FieldDataID,
 }

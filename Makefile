@@ -11,6 +11,9 @@ mocks:
 schemas:
 	go run -mod=mod entgo.io/ent/cmd/ent generate --target ./internal/platform/repository/sql/ent ./internal/platform/repository/sql/schema
 
+down:
+	docker compose down
+
 up:
 	docker-compose up -d --build
 

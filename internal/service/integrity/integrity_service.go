@@ -1,8 +1,8 @@
 package integrity
 
 import (
+	"bloock-managed-api/internal/domain"
 	"bloock-managed-api/internal/domain/repository"
-	"bloock-managed-api/internal/service/integrity/response"
 	"context"
 )
 
@@ -11,22 +11,34 @@ type IntegrityService struct {
 	integrityRepository     repository.IntegrityRepository
 }
 
-func NewIntegrityService(certificationRepository repository.CertificationRepository, integrityRepository repository.IntegrityRepository) *IntegrityService {
-	return &IntegrityService{certificationRepository: certificationRepository, integrityRepository: integrityRepository}
+func NewIntegrityService(cr repository.CertificationRepository, ir repository.IntegrityRepository) *IntegrityService {
+	return &IntegrityService{
+		certificationRepository: cr,
+		integrityRepository:     ir,
+	}
 }
-func (c IntegrityService) Certify(ctx context.Context, file []byte) (response.CertificationResponse, error) {
-	certification, err := c.integrityRepository.Certify(ctx, file)
+
+func (c IntegrityService) CertifyData(ctx context.Context, data []byte) (domain.Certification, error) {
+	certification, err := c.integrityRepository.Certify(ctx, data)
 	if err != nil {
-		return response.CertificationResponse{}, err
+		return domain.Certification{}, err
 	}
 
-	if err := c.certificationRepository.SaveCertification(ctx, certification); err != nil {
-		return response.CertificationResponse{}, err
+	if err = c.certificationRepository.SaveCertification(ctx, certification); err != nil {
+		return domain.Certification{}, err
 	}
 
-	return *response.NewCertificationResponse(certification.Hash(), certification.AnchorID()), nil
+	return certification, nil
 }
 
-func (c IntegrityService) SetDataIDToCertification(ctx context.Context, hash string, id string) error {
-	return c.certificationRepository.UpdateCertificationDataID(ctx, hash, id)
+func (c IntegrityService) UpdateCertification(ctx context.Context, certification domain.Certification) error {
+	exist, err := c.certificationRepository.ExistCertificationByHash(ctx, certification.Hash)
+	if err != nil {
+		return err
+	}
+	if !exist {
+		return c.certificationRepository.SaveCertification(ctx, certification)
+	} else {
+		return c.certificationRepository.UpdateCertificationDataID(ctx, certification)
+	}
 }

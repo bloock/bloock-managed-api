@@ -15,7 +15,9 @@ type AuthenticityService struct {
 }
 
 func NewAuthenticityService(authenticityRepository repository.AuthenticityRepository) *AuthenticityService {
-	return &AuthenticityService{authenticityRepository: authenticityRepository}
+	return &AuthenticityService{
+		authenticityRepository: authenticityRepository,
+	}
 }
 
 var ErrKeyTypeNotSupported = errors.New("key type not supported for signing")

@@ -16,16 +16,7 @@ type Server struct {
 	logger zerolog.Logger
 }
 
-func NewServer(
-	host string,
-	port string,
-	processService service.BaseProcessService,
-	updateAnchor service.CertificateUpdateAnchorService,
-	webhookSecretKey string,
-	enforceTolerance bool,
-	logger zerolog.Logger,
-	debug bool,
-) (*Server, error) {
+func NewServer(host string, port string, processService service.BaseProcessService, updateAnchor service.CertificateUpdateAnchorService, notify service.NotifyService, webhookSecretKey string, enforceTolerance bool, logger zerolog.Logger, debug bool) (*Server, error) {
 	router := gin.Default()
 	if debug {
 		gin.SetMode(gin.DebugMode)
@@ -38,7 +29,10 @@ func NewServer(
 
 	v1 := router.Group("/v1/")
 	v1.POST("process", handler.PostProcess(processService))
-	v1.POST("webhook", handler.PostReceiveWebhook(updateAnchor, webhookSecretKey, enforceTolerance))
+	v1.POST("webhook", handler.PostReceiveWebhook(updateAnchor, notify, webhookSecretKey, enforceTolerance))
+	if debug {
+		v1.POST("certification", handler.Debug())
+	}
 
 	return &Server{host: host, port: port, engine: router, debug: debug, logger: logger}, nil
 }

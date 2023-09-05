@@ -2,7 +2,6 @@ package http
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
 	"github.com/rs/zerolog"
 	"mime/multipart"
@@ -12,73 +11,41 @@ import (
 var ErrNotification = errors.New("notification couldn't send")
 
 type HttpNotificationRepository struct {
-	httpClient     http.Client
-	destinationURL string
-	logger         zerolog.Logger
+	httpClient        http.Client
+	clientEndpointURL string
+	logger            zerolog.Logger
 }
 
-func NewHttpNotificationRepository(httpClient http.Client, destinationURL string, logger zerolog.Logger) *HttpNotificationRepository {
-	return &HttpNotificationRepository{httpClient: httpClient, destinationURL: destinationURL, logger: logger}
+func NewHttpNotificationRepository(httpClient http.Client, clientEndpointURL string, logger zerolog.Logger) *HttpNotificationRepository {
+	return &HttpNotificationRepository{httpClient: httpClient, clientEndpointURL: clientEndpointURL, logger: logger}
 }
 
-func (h HttpNotificationRepository) NotifyCertification(hash string, whResponse interface{}, file []byte) error {
-	notificationJsonBody := NotificationJsonBody{
-		Hash:       hash,
-		WhResponse: whResponse,
-	}
-	bodyBytes, err := json.Marshal(&notificationJsonBody)
-	if err != nil {
-		h.logger.Error().Err(err).Msg("")
-		return err
-	}
-
+func (h HttpNotificationRepository) NotifyCertification(hash string, file []byte) error {
 	buf := new(bytes.Buffer)
 	writer := multipart.NewWriter(buf)
-	whResponsePart, err := writer.CreateFormFile("wh_response", "wh_response.json")
-	if err != nil {
-		h.logger.Error().Err(err).Msg("")
-		err := ErrNotification
-		return err
-	}
-	_, err = whResponsePart.Write(bodyBytes)
-	if err != nil {
-		h.logger.Error().Err(err).Msg("")
-		err := ErrNotification
-		return err
-	}
 	filePart, err := writer.CreateFormFile("file", hash)
 	if err != nil {
 		h.logger.Error().Err(err).Msg("")
-		err := ErrNotification
-
-		return err
+		return ErrNotification
 	}
 	_, err = filePart.Write(file)
 	if err != nil {
 		h.logger.Error().Err(err).Msg("")
-		err := ErrNotification
-		return err
+		return ErrNotification
 	}
 
-	resp, err := h.httpClient.Post(h.destinationURL, writer.FormDataContentType(), buf)
+	resp, err := h.httpClient.Post(h.clientEndpointURL, writer.FormDataContentType(), buf)
 	if err != nil {
-		err := ErrNotification
+		err = ErrNotification
 		h.logger.Error().Err(err).Msgf("response was: %s", resp.Status)
 		return err
 	}
 
-	if resp.StatusCode >= 400 {
-		err := ErrNotification
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		err = ErrNotification
 		h.logger.Error().Err(err).Msgf("response was: %s", resp.Status)
 		return err
 	}
 
 	return nil
-}
-
-type NotificationJsonBody struct {
-	Hash string `json:"hash"`
-	File []byte `json:"file
-"`
-	WhResponse interface{} `json:"webhook_response"`
 }

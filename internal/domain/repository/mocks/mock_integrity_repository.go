@@ -9,7 +9,6 @@ import (
 	context "context"
 	reflect "reflect"
 
-	integrity "github.com/bloock/bloock-sdk-go/v2/entity/integrity"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -37,31 +36,16 @@ func (m *MockIntegrityRepository) EXPECT() *MockIntegrityRepositoryMockRecorder 
 }
 
 // Certify mocks base method.
-func (m *MockIntegrityRepository) Certify(ctx context.Context, bytes []byte) (domain.Certification, error) {
+func (m *MockIntegrityRepository) Certify(ctx context.Context, file []byte) (domain.Certification, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Certify", ctx, bytes)
+	ret := m.ctrl.Call(m, "Certify", ctx, file)
 	ret0, _ := ret[0].(domain.Certification)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Certify indicates an expected call of Certify.
-func (mr *MockIntegrityRepositoryMockRecorder) Certify(ctx, bytes interface{}) *gomock.Call {
+func (mr *MockIntegrityRepositoryMockRecorder) Certify(ctx, file interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Certify", reflect.TypeOf((*MockIntegrityRepository)(nil).Certify), ctx, bytes)
-}
-
-// GetAnchorByID mocks base method.
-func (m *MockIntegrityRepository) GetAnchorByID(ctx context.Context, anchorID int) (integrity.Anchor, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAnchorByID", ctx, anchorID)
-	ret0, _ := ret[0].(integrity.Anchor)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetAnchorByID indicates an expected call of GetAnchorByID.
-func (mr *MockIntegrityRepositoryMockRecorder) GetAnchorByID(ctx, anchorID interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAnchorByID", reflect.TypeOf((*MockIntegrityRepository)(nil).GetAnchorByID), ctx, anchorID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Certify", reflect.TypeOf((*MockIntegrityRepository)(nil).Certify), ctx, file)
 }

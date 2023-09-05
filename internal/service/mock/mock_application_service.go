@@ -7,10 +7,8 @@ package mock_service
 import (
 	domain "bloock-managed-api/internal/domain"
 	request "bloock-managed-api/internal/service/authenticity/request"
-	request0 "bloock-managed-api/internal/service/integrity/request"
-	response "bloock-managed-api/internal/service/integrity/response"
-	request1 "bloock-managed-api/internal/service/process/request"
-	response0 "bloock-managed-api/internal/service/process/response"
+	request0 "bloock-managed-api/internal/service/process/request"
+	response "bloock-managed-api/internal/service/process/response"
 	context "context"
 	reflect "reflect"
 
@@ -41,10 +39,10 @@ func (m *MockBaseProcessService) EXPECT() *MockBaseProcessServiceMockRecorder {
 }
 
 // Process mocks base method.
-func (m *MockBaseProcessService) Process(ctx context.Context, req request1.ProcessRequest) (*response0.ProcessResponse, error) {
+func (m *MockBaseProcessService) Process(ctx context.Context, req request0.ProcessRequest) (*response.ProcessResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Process", ctx, req)
-	ret0, _ := ret[0].(*response0.ProcessResponse)
+	ret0, _ := ret[0].(*response.ProcessResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -117,33 +115,33 @@ func (m *MockIntegrityService) EXPECT() *MockIntegrityServiceMockRecorder {
 	return m.recorder
 }
 
-// Certify mocks base method.
-func (m *MockIntegrityService) Certify(ctx context.Context, files []byte) (response.CertificationResponse, error) {
+// CertifyData mocks base method.
+func (m *MockIntegrityService) CertifyData(ctx context.Context, data []byte) (domain.Certification, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Certify", ctx, files)
-	ret0, _ := ret[0].(response.CertificationResponse)
+	ret := m.ctrl.Call(m, "CertifyData", ctx, data)
+	ret0, _ := ret[0].(domain.Certification)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// Certify indicates an expected call of Certify.
-func (mr *MockIntegrityServiceMockRecorder) Certify(ctx, files interface{}) *gomock.Call {
+// CertifyData indicates an expected call of CertifyData.
+func (mr *MockIntegrityServiceMockRecorder) CertifyData(ctx, data interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Certify", reflect.TypeOf((*MockIntegrityService)(nil).Certify), ctx, files)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CertifyData", reflect.TypeOf((*MockIntegrityService)(nil).CertifyData), ctx, data)
 }
 
-// SetDataIDToCertification mocks base method.
-func (m *MockIntegrityService) SetDataIDToCertification(ctx context.Context, hash, id string) error {
+// UpdateCertification mocks base method.
+func (m *MockIntegrityService) UpdateCertification(ctx context.Context, certification domain.Certification) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SetDataIDToCertification", ctx, hash, id)
+	ret := m.ctrl.Call(m, "UpdateCertification", ctx, certification)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// SetDataIDToCertification indicates an expected call of SetDataIDToCertification.
-func (mr *MockIntegrityServiceMockRecorder) SetDataIDToCertification(ctx, hash, id interface{}) *gomock.Call {
+// UpdateCertification indicates an expected call of UpdateCertification.
+func (mr *MockIntegrityServiceMockRecorder) UpdateCertification(ctx, certification interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetDataIDToCertification", reflect.TypeOf((*MockIntegrityService)(nil).SetDataIDToCertification), ctx, hash, id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateCertification", reflect.TypeOf((*MockIntegrityService)(nil).UpdateCertification), ctx, certification)
 }
 
 // MockAvailabilityService is a mock of AvailabilityService interface.
@@ -208,17 +206,18 @@ func (m *MockCertificateUpdateAnchorService) EXPECT() *MockCertificateUpdateAnch
 }
 
 // UpdateAnchor mocks base method.
-func (m *MockCertificateUpdateAnchorService) UpdateAnchor(ctx context.Context, updateRequest request0.UpdateCertificationAnchorRequest) error {
+func (m *MockCertificateUpdateAnchorService) UpdateAnchor(ctx context.Context, anchorID int) ([]domain.Certification, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateAnchor", ctx, updateRequest)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret := m.ctrl.Call(m, "UpdateAnchor", ctx, anchorID)
+	ret0, _ := ret[0].([]domain.Certification)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // UpdateAnchor indicates an expected call of UpdateAnchor.
-func (mr *MockCertificateUpdateAnchorServiceMockRecorder) UpdateAnchor(ctx, updateRequest interface{}) *gomock.Call {
+func (mr *MockCertificateUpdateAnchorServiceMockRecorder) UpdateAnchor(ctx, anchorID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAnchor", reflect.TypeOf((*MockCertificateUpdateAnchorService)(nil).UpdateAnchor), ctx, updateRequest)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAnchor", reflect.TypeOf((*MockCertificateUpdateAnchorService)(nil).UpdateAnchor), ctx, anchorID)
 }
 
 // MockFileService is a mock of FileService interface.
@@ -244,16 +243,68 @@ func (m *MockFileService) EXPECT() *MockFileServiceMockRecorder {
 	return m.recorder
 }
 
-// SaveFile mocks base method.
-func (m *MockFileService) SaveFile(ctx context.Context, file []byte) error {
+// GetFileHash mocks base method.
+func (m *MockFileService) GetFileHash(ctx context.Context, file []byte) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SaveFile", ctx, file)
+	ret := m.ctrl.Call(m, "GetFileHash", ctx, file)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetFileHash indicates an expected call of GetFileHash.
+func (mr *MockFileServiceMockRecorder) GetFileHash(ctx, file interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFileHash", reflect.TypeOf((*MockFileService)(nil).GetFileHash), ctx, file)
+}
+
+// SaveFile mocks base method.
+func (m *MockFileService) SaveFile(ctx context.Context, file []byte, hash string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SaveFile", ctx, file, hash)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // SaveFile indicates an expected call of SaveFile.
-func (mr *MockFileServiceMockRecorder) SaveFile(ctx, file interface{}) *gomock.Call {
+func (mr *MockFileServiceMockRecorder) SaveFile(ctx, file, hash interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveFile", reflect.TypeOf((*MockFileService)(nil).SaveFile), ctx, file)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveFile", reflect.TypeOf((*MockFileService)(nil).SaveFile), ctx, file, hash)
+}
+
+// MockNotifyService is a mock of NotifyService interface.
+type MockNotifyService struct {
+	ctrl     *gomock.Controller
+	recorder *MockNotifyServiceMockRecorder
+}
+
+// MockNotifyServiceMockRecorder is the mock recorder for MockNotifyService.
+type MockNotifyServiceMockRecorder struct {
+	mock *MockNotifyService
+}
+
+// NewMockNotifyService creates a new mock instance.
+func NewMockNotifyService(ctrl *gomock.Controller) *MockNotifyService {
+	mock := &MockNotifyService{ctrl: ctrl}
+	mock.recorder = &MockNotifyServiceMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockNotifyService) EXPECT() *MockNotifyServiceMockRecorder {
+	return m.recorder
+}
+
+// NotifyClient mocks base method.
+func (m *MockNotifyService) NotifyClient(ctx context.Context, certifications []domain.Certification) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "NotifyClient", ctx, certifications)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// NotifyClient indicates an expected call of NotifyClient.
+func (mr *MockNotifyServiceMockRecorder) NotifyClient(ctx, certifications interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NotifyClient", reflect.TypeOf((*MockNotifyService)(nil).NotifyClient), ctx, certifications)
 }

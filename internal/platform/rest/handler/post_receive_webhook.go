@@ -2,56 +2,11 @@ package handler
 
 import (
 	"bloock-managed-api/internal/service"
-	"bloock-managed-api/internal/service/integrity/request"
-	"encoding/json"
 	"github.com/bloock/bloock-sdk-go/v2/client"
 	"github.com/gin-gonic/gin"
+	"io"
 	"net/http"
 )
-
-func PostReceiveWebhook(certification service.CertificateUpdateAnchorService, secretKey string, enforceTolerance bool) gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-
-		var webhookRequest WebhookRequest
-		if err := ctx.BindJSON(&webhookRequest); err != nil {
-			NewBadRequestAPIError("invalid json body")
-			return
-		}
-		bloockSignature := ctx.GetHeader("Bloock-Signature")
-
-		webhookClient := client.NewWebhookClient()
-		bodyBytes, err := json.Marshal(webhookRequest)
-		if err != nil {
-			serverAPIError := NewInternalServerAPIError(err.Error())
-			ctx.JSON(serverAPIError.Status, serverAPIError)
-			return
-		}
-		ok, err := webhookClient.VerifyWebhookSignature(bodyBytes, bloockSignature, secretKey, enforceTolerance)
-		if err != nil {
-			serverAPIError := NewInternalServerAPIError(err.Error())
-			ctx.JSON(serverAPIError.Status, serverAPIError)
-			return
-		}
-		if !ok {
-			badRequestAPIError := NewBadRequestAPIError(err.Error())
-			ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
-			return
-		}
-
-		//call file service to find the file i need the hash or dataID
-
-		if err := certification.UpdateAnchor(ctx, request.UpdateCertificationAnchorRequest{
-			AnchorId: webhookRequest.Data.Network.AnchorId,
-			Payload:  webhookRequest,
-		}); err != nil {
-			serverAPIError := NewInternalServerAPIError(err.Error())
-			ctx.JSON(serverAPIError.Status, serverAPIError)
-			return
-		}
-
-		ctx.Status(http.StatusAccepted)
-	}
-}
 
 type WebhookRequest struct {
 	WebhookId string `json:"webhook_id"`
@@ -74,4 +29,55 @@ type WebhookRequest struct {
 		Root string `json:"root"`
 		Test bool   `json:"test"`
 	} `json:"data"`
+}
+
+type WebhookResponse struct {
+	Success bool `json:"success"`
+}
+
+func PostReceiveWebhook(certification service.CertificateUpdateAnchorService, notify service.NotifyService, secretKey string, enforceTolerance bool) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+
+		var webhookRequest WebhookRequest
+		if err := ctx.BindJSON(&webhookRequest); err != nil {
+			webhookErr := NewBadRequestAPIError("invalid json body")
+			ctx.JSON(webhookErr.Status, webhookErr)
+			return
+		}
+		bloockSignature := ctx.GetHeader("Bloock-Signature")
+
+		buf, err := io.ReadAll(ctx.Request.Body)
+		if err != nil {
+			webhookErr := NewInternalServerAPIError("error while reading webhook body")
+			ctx.JSON(webhookErr.Status, webhookErr)
+			return
+		}
+		webhookClient := client.NewWebhookClient()
+		ok, err := webhookClient.VerifyWebhookSignature(buf, bloockSignature, secretKey, enforceTolerance)
+		if err != nil {
+			serverAPIError := NewInternalServerAPIError(err.Error())
+			ctx.JSON(serverAPIError.Status, serverAPIError)
+			return
+		}
+		if !ok {
+			badRequestAPIError := NewBadRequestAPIError("invalid bloock webhook signature")
+			ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
+			return
+		}
+
+		certifications, err := certification.UpdateAnchor(ctx, webhookRequest.Data.Id)
+		if err != nil {
+			serverAPIError := NewInternalServerAPIError(err.Error())
+			ctx.JSON(serverAPIError.Status, serverAPIError)
+			return
+		}
+
+		if err = notify.NotifyClient(ctx, certifications); err != nil {
+			serverAPIError := NewInternalServerAPIError(err.Error())
+			ctx.JSON(serverAPIError.Status, serverAPIError)
+			return
+		}
+
+		ctx.JSON(http.StatusAccepted, WebhookResponse{Success: true})
+	}
 }
