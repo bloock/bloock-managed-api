@@ -14,13 +14,16 @@ type debugRequest struct {
 	File *multipart.FileHeader `form:"file" binding:"required"`
 }
 
+type debugResponse struct {
+	Success bool `json:"success"`
+}
+
 func Debug() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var formData debugRequest
 		err := ctx.Bind(&formData)
 		if err != nil {
 			badRequestAPIError := NewBadRequestAPIError("error binding form")
-			fmt.Println(err)
 			ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
 			return
 		}
@@ -28,7 +31,6 @@ func Debug() gin.HandlerFunc {
 		fileReader, err := formData.File.Open()
 		if err != nil {
 			badRequestAPIError := NewBadRequestAPIError(err.Error())
-			fmt.Println(err)
 			ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
 			return
 		}
@@ -36,35 +38,26 @@ func Debug() gin.HandlerFunc {
 		file, err := io.ReadAll(fileReader)
 		if err != nil {
 			serverAPIError := NewInternalServerAPIError(err.Error())
-			fmt.Println(err)
 			ctx.JSON(serverAPIError.Status, serverAPIError)
 			return
 		}
 		if len(file) == 0 {
 			badRequestAPIError := NewBadRequestAPIError("empty file")
-			fmt.Println(err)
 			ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
 			return
 		}
 
 		fileName := formData.File.Filename
+		fmt.Println(fileName)
 		pattern := "^[a-fA-F0-9]{64}$"
 		regex := regexp.MustCompile(pattern)
 		if regex.MatchString(fileName) {
 			badRequestAPIError := NewBadRequestAPIError("invalid sha256 hash file name")
-			fmt.Println(err)
+			fmt.Printf("3-> %+v", err)
 			ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
 			return
 		}
 
-		_, err = io.Copy(ctx.Writer, fileReader)
-		if err != nil {
-			serverAPIError := NewInternalServerAPIError(err.Error())
-			fmt.Println(err)
-			ctx.JSON(serverAPIError.Status, serverAPIError)
-			return
-		}
-
-		ctx.JSON(http.StatusOK, nil)
+		ctx.JSON(http.StatusOK, debugResponse{Success: true})
 	}
 }

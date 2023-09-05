@@ -23,6 +23,7 @@ func NewHttpNotificationRepository(httpClient http.Client, clientEndpointURL str
 func (h HttpNotificationRepository) NotifyCertification(hash string, file []byte) error {
 	buf := new(bytes.Buffer)
 	writer := multipart.NewWriter(buf)
+
 	filePart, err := writer.CreateFormFile("file", hash)
 	if err != nil {
 		h.logger.Error().Err(err).Msg("")
@@ -33,8 +34,10 @@ func (h HttpNotificationRepository) NotifyCertification(hash string, file []byte
 		h.logger.Error().Err(err).Msg("")
 		return ErrNotification
 	}
+	header := writer.FormDataContentType()
+	_ = writer.Close()
 
-	resp, err := h.httpClient.Post(h.clientEndpointURL, writer.FormDataContentType(), buf)
+	resp, err := h.httpClient.Post(h.clientEndpointURL, header, buf)
 	if err != nil {
 		err = ErrNotification
 		h.logger.Error().Err(err).Msgf("response was: %s", resp.Status)
