@@ -3,6 +3,7 @@ package repository
 import (
 	"bloock-managed-api/internal/domain"
 	"context"
+
 	"github.com/bloock/bloock-sdk-go/v2/client"
 	"github.com/bloock/bloock-sdk-go/v2/entity/integrity"
 	"github.com/bloock/bloock-sdk-go/v2/entity/record"

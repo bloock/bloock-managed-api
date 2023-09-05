@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"errors"
-	"log"
 	"strings"
 
 	"github.com/bloock/bloock-sdk-go/v2/client"
