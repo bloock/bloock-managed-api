@@ -5,9 +5,10 @@ import (
 	"bloock-managed-api/internal/platform/repository/sql/connection"
 	"bloock-managed-api/internal/platform/repository/sql/ent/certification"
 	"context"
+	"time"
+
 	"github.com/bloock/bloock-sdk-go/v2/entity/integrity"
 	"github.com/rs/zerolog"
-	"time"
 )
 
 type SQLCertificationRepository struct {
@@ -25,7 +26,7 @@ func (s SQLCertificationRepository) SaveCertification(ctx context.Context, certi
 		Certification.Create().
 		SetHash(certification.Hash()).
 		SetAnchorID(certification.AnchorID()).
-		SetDataID("").
+		SetDataID(certification.DataID()).
 		SetAnchor(certification.Anchor())
 
 	if _, err := crt.Save(ctx); err != nil {

@@ -245,15 +245,15 @@ func (m *MockFileService) EXPECT() *MockFileServiceMockRecorder {
 }
 
 // SaveFile mocks base method.
-func (m *MockFileService) SaveFile(ctx context.Context, file []byte, filename string) error {
+func (m *MockFileService) SaveFile(ctx context.Context, file []byte) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SaveFile", ctx, file, filename)
+	ret := m.ctrl.Call(m, "SaveFile", ctx, file)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // SaveFile indicates an expected call of SaveFile.
-func (mr *MockFileServiceMockRecorder) SaveFile(ctx, file, filename interface{}) *gomock.Call {
+func (mr *MockFileServiceMockRecorder) SaveFile(ctx, file interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveFile", reflect.TypeOf((*MockFileService)(nil).SaveFile), ctx, file, filename)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveFile", reflect.TypeOf((*MockFileService)(nil).SaveFile), ctx, file)
 }

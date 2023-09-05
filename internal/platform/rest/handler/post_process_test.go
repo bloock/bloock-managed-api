@@ -11,15 +11,17 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"mime/multipart"
+	"net/http"
+	"net/http/httptest"
+	"strconv"
+	"testing"
+
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"mime/multipart"
-	"net/http"
-	"net/http/httptest"
-	"testing"
 )
 
 func TestProcessServiceError(t *testing.T) {
@@ -41,16 +43,16 @@ func TestProcessServiceError(t *testing.T) {
 	engine := server.Engine()
 
 	t.Run("given service error it should return 500 status code", func(t *testing.T) {
-		kid := "768e7955-9690-4ba5-8ff9-23206d14ceb8"
-		useEnsResolution := "true"
 		data := []byte("Hello World")
-		ecp256k := "EcP256k"
-		hosted := domain.HOSTED.String()
-		managedKey := domain.MANAGED_KEY.String()
-		integrityEnabled := "true"
-		authenticityEnabled := "true"
+		integrityEnabled := true
+		authenticityEnabled := true
+		keySource := domain.MANAGED_KEY.String()
+		keyType := "EcP256k"
+		kid := "768e7955-9690-4ba5-8ff9-23206d14ceb8"
+		useEnsResolution := true
+		availabilityType := domain.HOSTED.String()
 
-		processRequest, err := request.NewProcessRequest(data, integrityEnabled, authenticityEnabled, managedKey, ecp256k, kid, hosted, useEnsResolution)
+		processRequest, err := request.NewProcessRequest(data, integrityEnabled, authenticityEnabled, keySource, keyType, kid, useEnsResolution, availabilityType)
 		require.NoError(t, err)
 		processService.EXPECT().Process(gomock.Any(), *processRequest).Return(nil, errors.New("some error"))
 		buf := new(bytes.Buffer)
@@ -59,13 +61,13 @@ func TestProcessServiceError(t *testing.T) {
 		require.NoError(t, err)
 		_, err = part.Write(data)
 		require.NoError(t, err)
-		_ = writer.WriteField("integrity.enabled", integrityEnabled)
-		_ = writer.WriteField("authenticity.enabled", authenticityEnabled)
-		_ = writer.WriteField("authenticity.keyType", managedKey)
-		_ = writer.WriteField("authenticity.kty", ecp256k)
+		_ = writer.WriteField("integrity.enabled", strconv.FormatBool(integrityEnabled))
+		_ = writer.WriteField("authenticity.enabled", strconv.FormatBool(authenticityEnabled))
+		_ = writer.WriteField("authenticity.keySource", keySource)
+		_ = writer.WriteField("authenticity.keyType", keyType)
 		_ = writer.WriteField("authenticity.key", kid)
-		_ = writer.WriteField("authenticity.useEnsResolution", useEnsResolution)
-		_ = writer.WriteField("availability.type", hosted)
+		_ = writer.WriteField("authenticity.useEnsResolution", strconv.FormatBool(useEnsResolution))
+		_ = writer.WriteField("availability.type", availabilityType)
 		_ = writer.Close()
 		rec := httptest.NewRecorder()
 		require.NoError(t, err)
@@ -104,16 +106,16 @@ func TestPostProcessMultipart(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			kid := "768e7955-9690-4ba5-8ff9-23206d14ceb8"
-			useEnsResolution := "true"
 			data := fixtures.PDFContent
-			ecp256k := "EcP256k"
-			hosted := domain.HOSTED.String()
-			managedKey := domain.MANAGED_KEY.String()
-			integrityEnabled := "true"
-			authenticityEnabled := "true"
+			integrityEnabled := true
+			authenticityEnabled := true
+			keySource := domain.MANAGED_KEY.String()
+			keyType := "EcP256k"
+			kid := "768e7955-9690-4ba5-8ff9-23206d14ceb8"
+			useEnsResolution := true
+			availabilityType := domain.HOSTED.String()
 
-			processRequest, err := request.NewProcessRequest(data, integrityEnabled, authenticityEnabled, managedKey, ecp256k, kid, hosted, useEnsResolution)
+			processRequest, err := request.NewProcessRequest(data, integrityEnabled, authenticityEnabled, keySource, keyType, kid, useEnsResolution, availabilityType)
 			require.NoError(t, err)
 			processResponse := response.NewProcessResponseBuilder().Build()
 			signApplicationService.EXPECT().Process(gomock.Any(), *processRequest).Return(processResponse, nil)
@@ -123,13 +125,13 @@ func TestPostProcessMultipart(t *testing.T) {
 			part, _ := writer.CreateFormFile("file", uuid.New().String())
 			_, err = part.Write(data)
 			require.NoError(t, err)
-			_ = writer.WriteField("integrity.enabled", integrityEnabled)
-			_ = writer.WriteField("authenticity.enabled", authenticityEnabled)
-			_ = writer.WriteField("authenticity.keyType", managedKey)
-			_ = writer.WriteField("authenticity.kty", ecp256k)
+			_ = writer.WriteField("integrity.enabled", strconv.FormatBool(integrityEnabled))
+			_ = writer.WriteField("authenticity.enabled", strconv.FormatBool(authenticityEnabled))
+			_ = writer.WriteField("authenticity.keySource", keySource)
+			_ = writer.WriteField("authenticity.keyType", keyType)
 			_ = writer.WriteField("authenticity.key", kid)
-			_ = writer.WriteField("authenticity.useEnsResolution", useEnsResolution)
-			_ = writer.WriteField("availability.type", hosted)
+			_ = writer.WriteField("authenticity.useEnsResolution", strconv.FormatBool(useEnsResolution))
+			_ = writer.WriteField("availability.type", availabilityType)
 
 			err = writer.Close()
 			require.NoError(t, err)

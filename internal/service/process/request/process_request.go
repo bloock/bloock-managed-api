@@ -1,82 +1,75 @@
 package request
 
 import (
+	"bloock-managed-api/internal/config"
 	"bloock-managed-api/internal/domain"
 	"errors"
+
 	"github.com/bloock/bloock-sdk-go/v2/entity/key"
 	"github.com/google/uuid"
-	"strconv"
 )
 
 type ProcessRequest struct {
 	file                  []byte
 	isIntegrityEnabled    bool
 	isAuthenticityEnabled bool
-	keyType               domain.KeyType
-	kty                   key.KeyType
+	keySource             domain.KeyType
 	keyID                 uuid.UUID
+	keyType               key.KeyType
 	hostingType           domain.HostingType
 	useEnsResolution      bool
 }
 
 var ErrIntegrityMiss = errors.New("integrity required for hosting feature")
 
-func NewProcessRequest(data []byte, integrityEnabled string, authenticityEnabled string, keyType string, kty string, kid string, availabilityType string, ensRes string) (*ProcessRequest, error) {
+func NewProcessRequest(data []byte, integrityEnabled bool, authenticityEnabled bool, keySource string, keyType string, kid string, useEns bool, availabilityType string) (*ProcessRequest, error) {
 	processRequestInstance := &ProcessRequest{}
 
-	isIntegrityEnabled, err := strconv.ParseBool(integrityEnabled)
-	if err != nil {
-		return nil, err
-	}
+	processRequestInstance.file = data
+	processRequestInstance.isIntegrityEnabled = integrityEnabled
+	processRequestInstance.isAuthenticityEnabled = authenticityEnabled
 
-	isAuthenticityEnabled, err := strconv.ParseBool(authenticityEnabled)
-	if err != nil {
-		return nil, err
-	}
-	processRequestInstance.isAuthenticityEnabled = isAuthenticityEnabled
-	if isAuthenticityEnabled {
-
-		keyID, err := uuid.Parse(kid)
+	if authenticityEnabled {
+		authenticityKeySource, err := domain.ParseKeySource(keySource)
 		if err != nil {
 			return nil, err
 		}
-		processRequestInstance.keyID = keyID
-		ktyp, err := domain.ValidateKeyType(kty)
-		if err != nil {
-			return nil, err
-		}
-		processRequestInstance.kty = ktyp
-		authenticityKeyType, err := domain.ParseKeyType(keyType)
-		if err != nil {
-			return nil, err
-		}
-		processRequestInstance.keyType = authenticityKeyType
+		processRequestInstance.keySource = authenticityKeySource
 
-		useEnsResolution, err := strconv.ParseBool(ensRes)
+		kty, err := domain.ValidateKeyType(keyType)
 		if err != nil {
 			return nil, err
 		}
-		processRequestInstance.useEnsResolution = useEnsResolution
+		processRequestInstance.keyType = kty
 
+		if authenticityKeySource == domain.MANAGED_KEY || authenticityKeySource == domain.MANAGED_CERTIFICATE {
+			// Managed key or certificate
+
+			keyID, err := uuid.Parse(kid)
+			if err != nil {
+				return nil, err
+			}
+			processRequestInstance.keyID = keyID
+		} else {
+			if config.Configuration.PublicKey == "" {
+				return nil, errors.New("no public key loaded")
+			}
+
+			if config.Configuration.PrivateKey == "" {
+				return nil, errors.New("no private key loaded")
+			}
+		}
+
+		processRequestInstance.useEnsResolution = useEns
 	}
 
 	hostingType, err := domain.ParseHostingType(availabilityType)
 	if err != nil {
 		return nil, err
 	}
-
-	if hostingType != domain.NONE && !isIntegrityEnabled {
-		return nil, ErrIntegrityMiss
-	}
-	processRequestInstance.file = data
 	processRequestInstance.hostingType = hostingType
-	processRequestInstance.isIntegrityEnabled = isIntegrityEnabled
-	return &ProcessRequest{
-		file:                  data,
-		isIntegrityEnabled:    isIntegrityEnabled,
-		isAuthenticityEnabled: isAuthenticityEnabled,
-		hostingType:           hostingType,
-	}, nil
+
+	return processRequestInstance, nil
 }
 
 func (s ProcessRequest) KeyID() uuid.UUID {
@@ -105,10 +98,10 @@ func (s ProcessRequest) HostingType() domain.HostingType {
 	return s.hostingType
 }
 
-func (s ProcessRequest) KeyType() domain.KeyType {
-	return s.keyType
+func (s ProcessRequest) KeySource() domain.KeyType {
+	return s.keySource
 }
 
-func (s ProcessRequest) Kty() key.KeyType {
-	return s.kty
+func (s ProcessRequest) KeyType() key.KeyType {
+	return s.keyType
 }

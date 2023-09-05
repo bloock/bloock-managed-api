@@ -13,15 +13,15 @@ import (
 	"bloock-managed-api/internal/service/file"
 	"bloock-managed-api/internal/service/integrity"
 	"bloock-managed-api/internal/service/process"
-	"github.com/bloock/bloock-sdk-go/v2/client"
-	"github.com/rs/zerolog"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/bloock/bloock-sdk-go/v2/client"
+	"github.com/rs/zerolog"
 )
 
 func main() {
-	os.Setenv("BLOOCK_API_KEY", "km1sFmrojcrRgfZ4v0H0w0d1d22GookjcJl7y-2jr51qx0RioCR3nVm1z74hDEzZ")
 	os.Setenv("BLOOCK_API_FILE_DIR", "tmp")
 
 	cfg, err := config.InitConfig()

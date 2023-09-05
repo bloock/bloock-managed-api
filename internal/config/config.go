@@ -1,19 +1,23 @@
 package config
 
 import (
+	"log"
+
 	"github.com/bloock/bloock-sdk-go/v2"
+	"github.com/go-playground/validator/v10"
 	"github.com/spf13/viper"
 )
 
 type Config struct {
 	DBConnectionString      string `mapstructure:"BLOOCK_DB_CONNECTION_STRING"`
-	APIKey                  string `mapstructure:"BLOOCK_API_KEY"`
+	APIKey                  string `mapstructure:"BLOOCK_API_KEY" validate:"required"`
 	APIHost                 string `mapstructure:"BLOOCK_API_HOST"`
 	APIPort                 string `mapstructure:"BLOOCK_API_PORT"`
 	WebhookURL              string `mapstructure:"BLOOCK_WEBHOOK_URL"`
 	WebhookSecretKey        string `mapstructure:"BLOOCK_WEBHOOK_SECRET_KEY"`
 	WebhookEnforceTolerance bool   `mapstructure:"BLOOCK_ENFORCE_TOLERANCE"`
 	DebugMode               bool   `mapstructure:"BLOOCK_API_DEBUG_MODE"`
+	KeyType                 string `mapstructure:"BLOOCK_AUTHENTICITY_KEY_TYPE"`
 	PrivateKey              string `mapstructure:"BLOOCK_AUTHENTICITY_PRIVATE_KEY"`
 	PublicKey               string `mapstructure:"BLOOCK_AUTHENTICITY_PUBLIC_KEY"`
 	MaxMemory               int64  `mapstructure:"BLOOCK_MAX_MEMORY"`
@@ -29,11 +33,16 @@ func InitConfig() (*Config, error) {
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
 	viper.AutomaticEnv()
-	err := viper.ReadInConfig()
+	_ = viper.ReadInConfig()
 
-	err = viper.Unmarshal(Configuration)
+	err := viper.Unmarshal(Configuration)
 	if err != nil {
 		return &Config{}, err
+	}
+
+	validate := validator.New()
+	if err := validate.Struct(Configuration); err != nil {
+		log.Fatalf("Missing required attributes %v\n", err)
 	}
 
 	bloock.ApiKey = Configuration.APIKey
@@ -51,6 +60,7 @@ func setDefaultConfigValues() {
 	viper.SetDefault("bloock_api_debug_mode", false)
 	viper.SetDefault("bloock_max_memory", 10<<20) //10MB
 	viper.SetDefault("bloock_file_dir", "./")
-	viper.SetDefault("bloock_authenticity_private_key", "./")
-	viper.SetDefault("bloock_authenticity_public_key", "./")
+	viper.SetDefault("bloock_authenticity_key_type", "EcP256k")
+	viper.SetDefault("bloock_authenticity_private_key", "")
+	viper.SetDefault("bloock_authenticity_public_key", "")
 }

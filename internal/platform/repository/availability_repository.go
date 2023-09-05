@@ -3,10 +3,12 @@ package repository
 import (
 	"context"
 	"errors"
+	"log"
+	"strings"
+
 	"github.com/bloock/bloock-sdk-go/v2/client"
 	"github.com/bloock/bloock-sdk-go/v2/entity/availability"
 	"github.com/rs/zerolog"
-	"strings"
 )
 
 type BloockAvailabilityRepository struct {
@@ -46,7 +48,7 @@ func (b BloockAvailabilityRepository) FindFile(ctx context.Context, dataID strin
 			record, err = b.availabilityClient.Retrieve(availability.NewIpfsLoader(dataID))
 			if err != nil {
 				if strings.Contains(err.Error(), "not found") {
-					return nil, nil
+					return nil, errFileNotFound
 				}
 				b.logger.Error().Err(err).Msg("")
 				return nil, errUnknown

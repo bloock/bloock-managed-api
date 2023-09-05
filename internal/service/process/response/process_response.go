@@ -1,14 +1,15 @@
 package response
 
 import (
-	response2 "bloock-managed-api/internal/service/authenticity/response"
-	"bloock-managed-api/internal/service/integrity/response"
+	autenticityResponse "bloock-managed-api/internal/service/authenticity/response"
+	availabilityResponse "bloock-managed-api/internal/service/availability/response"
+	integrityResponse "bloock-managed-api/internal/service/integrity/response"
 )
 
 type ProcessResponse struct {
-	certificationResponse response.CertificationResponse
-	signResponse          response2.SignResponse
-	availabilityResponse  string
+	certificationResponse *integrityResponse.CertificationResponse
+	signResponse          *autenticityResponse.SignResponse
+	availabilityResponse  *availabilityResponse.AvailabilityResponse
 }
 
 type ProcessResponseBuilder struct {
@@ -21,14 +22,19 @@ func NewProcessResponseBuilder() *ProcessResponseBuilder {
 	return b
 }
 
-func (b *ProcessResponseBuilder) CertificationResponse(certificationResponse response.CertificationResponse) *ProcessResponseBuilder {
-	b.processResponse.certificationResponse = certificationResponse
+func (b *ProcessResponseBuilder) CertificationResponse(certificationResponse integrityResponse.CertificationResponse) *ProcessResponseBuilder {
+	b.processResponse.certificationResponse = &certificationResponse
 	return b
 }
 
-func (b *ProcessResponseBuilder) SignResponse(signResponse response2.SignResponse) *ProcessResponseBuilder {
-	b.processResponse.signResponse = signResponse
+func (b *ProcessResponseBuilder) SignResponse(signResponse autenticityResponse.SignResponse) *ProcessResponseBuilder {
+	b.processResponse.signResponse = &signResponse
 	return b
+}
+
+func (b *ProcessResponseBuilder) AvailabilityResponse(availabilityResponse availabilityResponse.AvailabilityResponse) *ProcessResponse {
+	b.processResponse.availabilityResponse = &availabilityResponse
+	return b.processResponse
 }
 
 func (b *ProcessResponseBuilder) Build() *ProcessResponse {
@@ -39,19 +45,14 @@ func (b *ProcessResponseBuilder) CertificationHash() string {
 	return b.processResponse.certificationResponse.Hash()
 }
 
-func (b *ProcessResponseBuilder) AvailabilityResponse(url string) *ProcessResponse {
-	b.processResponse.availabilityResponse = url
-	return b.processResponse
-}
-
-func (p ProcessResponse) CertificationResponse() response.CertificationResponse {
+func (p ProcessResponse) CertificationResponse() *integrityResponse.CertificationResponse {
 	return p.certificationResponse
 }
 
-func (p ProcessResponse) SignResponse() response2.SignResponse {
+func (p ProcessResponse) SignResponse() *autenticityResponse.SignResponse {
 	return p.signResponse
 }
 
-func (p ProcessResponse) AvailabilityResponse() string {
+func (p ProcessResponse) AvailabilityResponse() *availabilityResponse.AvailabilityResponse {
 	return p.availabilityResponse
 }

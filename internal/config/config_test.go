@@ -1,10 +1,11 @@
 package config
 
 import (
-	"github.com/stretchr/testify/assert"
 	"os"
 	"strconv"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestInitConfig(t *testing.T) {

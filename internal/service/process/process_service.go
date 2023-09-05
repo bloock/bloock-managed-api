@@ -5,8 +5,8 @@ import (
 	"bloock-managed-api/internal/domain"
 	"bloock-managed-api/internal/service"
 	"bloock-managed-api/internal/service/authenticity/request"
-	"bloock-managed-api/internal/service/authenticity/response"
-	integrity_response "bloock-managed-api/internal/service/integrity/response"
+	authenticity_response "bloock-managed-api/internal/service/authenticity/response"
+	availability_response "bloock-managed-api/internal/service/availability/response"
 	process_request "bloock-managed-api/internal/service/process/request"
 	process_response "bloock-managed-api/internal/service/process/response"
 	"context"
@@ -31,7 +31,15 @@ func NewProcessService(integrityService service.IntegrityService, authenticitySe
 
 func (s ProcessService) Process(ctx context.Context, req process_request.ProcessRequest) (*process_response.ProcessResponse, error) {
 	responseBuilder := process_response.NewProcessResponseBuilder()
-	var certifications *integrity_response.CertificationResponse
+
+	certification := domain.NewPendingCertification(req.Data())
+
+	fileHash, err := s.fileService.GetFileHash(ctx, req.Data())
+	if err != nil {
+		return nil, err
+	}
+	certification.SetHash(fileHash)
+
 	if req.IsIntegrityEnabled() {
 		certifications, err := s.integrityService.Certify(ctx, req.Data())
 		if err != nil {
@@ -41,12 +49,13 @@ func (s ProcessService) Process(ctx context.Context, req process_request.Process
 	}
 
 	if req.IsAuthenticityEnabled() {
-		var signature, signedData, err = s.authenticityService.
+
+		signature, signedData, err := s.authenticityService.
 			Sign(ctx, *request.NewSignRequest(
 				config.Configuration.PublicKey,
 				&config.Configuration.PrivateKey,
+				req.KeySource(),
 				req.KeyID(),
-				req.Kty(),
 				req.KeyType(),
 				req.Data(),
 				req.UseEnsResolution(),
@@ -56,21 +65,19 @@ func (s ProcessService) Process(ctx context.Context, req process_request.Process
 		}
 
 		req.ReplaceDataWith(signedData)
-		responseBuilder.SignResponse(*response.NewSignResponse(signature))
+		responseBuilder.SignResponse(*authenticity_response.NewSignResponse(signature))
 	}
 
 	if req.HostingType() != domain.NONE {
-
 		dataID, err := s.availabilityService.Upload(ctx, req.Data(), req.HostingType())
 		if err != nil {
 			return nil, err
 		}
-		if err := s.integrityService.SetDataIDToCertification(ctx, certifications.Hash(), dataID); err != nil {
+		if err := s.integrityService.SetDataIDToCertification(ctx, fileHash, dataID); err != nil {
 			return nil, err
 		}
-		responseBuilder.AvailabilityResponse(dataID)
+		responseBuilder.AvailabilityResponse(*availability_response.NewAvailabilityResponse(dataID))
 	} else {
-
 		if err := s.fileService.SaveFile(ctx, req.Data()); err != nil {
 			return nil, err
 		}

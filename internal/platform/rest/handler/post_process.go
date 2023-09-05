@@ -1,54 +1,44 @@
 package handler
 
 import (
-	"bloock-managed-api/internal/config"
 	"bloock-managed-api/internal/service"
 	"bloock-managed-api/internal/service/process/request"
 	"bloock-managed-api/internal/service/process/response"
-	"github.com/gin-gonic/gin"
 	"io"
+	"mime/multipart"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
+
+type postProcessForm struct {
+	File                  *multipart.FileHeader `form:"file" binding:"required"`
+	IntegrityEnabled      bool                  `form:"integrity.enabled,default=false"`
+	AuthenticityEnabled   bool                  `form:"authenticity.enabled,default=false"`
+	AuthenticityKeySource string                `form:"authenticity.keySource"`
+	AuthenticityKeyType   string                `form:"authenticity.keyType"`
+	AuthenticityKey       string                `form:"authenticity.key"`
+	AuthenticityUseEns    bool                  `form:"authenticity.useEnsResolution,default=false"`
+	AvailabilityType      string                `form:"availability.type,default=NONE"`
+}
 
 func PostProcess(processService service.BaseProcessService) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-
-		var file []byte
-		var isIntegrityEnabled = "false"
-		var isAuthenticityEnabled = "false"
-		var authenticityKeyType string
-		var keyType string
-		var authenticityKeyID string
-		var availabilityType = "NONE"
-		var useEnsResolution = "false"
-
-		mr, err := ctx.Request.MultipartReader()
-		multipartIsEmpty := err != nil
-		if multipartIsEmpty {
-			badRequestAPIError := NewBadRequestAPIError(err.Error())
+		var formData postProcessForm
+		err := ctx.Bind(&formData)
+		if err != nil {
+			badRequestAPIError := NewBadRequestAPIError("error binding form")
 			ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
 			return
 		}
 
-		form, err := mr.ReadForm(config.Configuration.MaxMemory)
+		fileReader, err := formData.File.Open()
 		if err != nil {
 			badRequestAPIError := NewBadRequestAPIError(err.Error())
 			ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
 			return
 		}
-		headers := form.File["file"]
-		if len(headers) == 0 {
-			badRequestAPIError := NewBadRequestAPIError("file must be provided")
-			ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
-			return
-		}
-		fileReader, err := headers[0].Open()
-		if err != nil {
-			badRequestAPIError := NewBadRequestAPIError(err.Error())
-			ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
-			return
-		}
-		file, err = io.ReadAll(fileReader)
+		file, err := io.ReadAll(fileReader)
 		if err != nil {
 			serverAPIError := NewInternalServerAPIError(err.Error())
 			ctx.JSON(serverAPIError.Status, serverAPIError)
@@ -60,37 +50,7 @@ func PostProcess(processService service.BaseProcessService) gin.HandlerFunc {
 			return
 		}
 
-		isIntegrityEnabled = form.Value["integrity.enabled"][0]
-
-		isAuthenticityEnabled = form.Value["authenticity.enabled"][0]
-		if isAuthenticityEnabled == "true" {
-			authenticityKeyType = form.Value["authenticity.keyType"][0]
-			if authenticityKeyType == "" {
-				badRequestAPIError := NewBadRequestAPIError("authenticity.keyType must be provided")
-				ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
-				return
-			}
-
-			keyType = form.Value["authenticity.kty"][0]
-			if keyType == "" {
-				badRequestAPIError := NewBadRequestAPIError("authenticity.kty must be provided")
-				ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
-				return
-			}
-
-			authenticityKeyID = form.Value["authenticity.key"][0]
-			if authenticityKeyID == "" {
-				badRequestAPIError := NewBadRequestAPIError("authenticity.key must be provided")
-				ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
-				return
-			}
-			useEnsResolution = form.Value["authenticity.useEnsResolution"][0]
-		}
-
-		availabilityType = form.Value["availability.type"][0]
-
-		processRequest, err := request.NewProcessRequest(file, isIntegrityEnabled, isAuthenticityEnabled, authenticityKeyType, keyType, authenticityKeyID, availabilityType, useEnsResolution)
-
+		processRequest, err := request.NewProcessRequest(file, formData.IntegrityEnabled, formData.AuthenticityEnabled, formData.AuthenticityKeySource, formData.AuthenticityKeyType, formData.AuthenticityKey, formData.AuthenticityUseEns, formData.AvailabilityType)
 		if err != nil {
 			badRequestAPIError := NewBadRequestAPIError(err.Error())
 			ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
@@ -99,7 +59,6 @@ func PostProcess(processService service.BaseProcessService) gin.HandlerFunc {
 
 		processResponse, err := processService.Process(ctx, *processRequest)
 		if err != nil {
-
 			serverAPIError := NewInternalServerAPIError(err.Error())
 			ctx.JSON(serverAPIError.Status, serverAPIError)
 			return
@@ -110,20 +69,33 @@ func PostProcess(processService service.BaseProcessService) gin.HandlerFunc {
 }
 
 func toProcessJsonResponse(processResponse *response.ProcessResponse) ProcessResponse {
-	return ProcessResponse{
-		Integrity: IntegrityJSONResponse{
+	response := ProcessResponse{
+		Success: true,
+	}
+
+	if processResponse.CertificationResponse() != nil {
+		response.Integrity = &IntegrityJSONResponse{
 			Hash:     processResponse.CertificationResponse().Hash(),
 			AnchorId: processResponse.CertificationResponse().AnchorID(),
-		},
-		Authenticity: AuthenticityJSONResponse{processResponse.SignResponse().Signature()},
-		Availability: AvailabilityJSONResponse{processResponse.AvailabilityResponse()},
+		}
 	}
+
+	if processResponse.SignResponse() != nil {
+		response.Authenticity = &AuthenticityJSONResponse{processResponse.SignResponse().Signature()}
+	}
+
+	if processResponse.AvailabilityResponse() != nil {
+		response.Availability = &AvailabilityJSONResponse{processResponse.AvailabilityResponse().Cid()}
+	}
+
+	return response
 }
 
 type ProcessResponse struct {
-	Integrity    IntegrityJSONResponse    `json:"integrity"`
-	Authenticity AuthenticityJSONResponse `json:"authenticity"`
-	Availability AvailabilityJSONResponse `json:"availability"`
+	Success      bool                      `json:"success"`
+	Integrity    *IntegrityJSONResponse    `json:"integrity,omitempty"`
+	Authenticity *AuthenticityJSONResponse `json:"authenticity,omitempty"`
+	Availability *AvailabilityJSONResponse `json:"availability,omitempty"`
 }
 
 type IntegrityJSONResponse struct {

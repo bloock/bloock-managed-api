@@ -28,7 +28,7 @@ func (t KeyType) String() string {
 	return ""
 }
 
-func ParseKeyType(value string) (KeyType, error) {
+func ParseKeySource(value string) (KeyType, error) {
 	switch strings.ToLower(value) {
 	case "local_key":
 		return LOCAL_KEY, nil

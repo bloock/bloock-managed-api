@@ -32,5 +32,6 @@ type CertificateUpdateAnchorService interface {
 }
 
 type FileService interface {
+	GetFileHash(ctx context.Context, file []byte) (string, error)
 	SaveFile(ctx context.Context, file []byte) error
 }
