@@ -26,7 +26,7 @@ type AvailabilityService interface {
 }
 
 type CertificateUpdateAnchorService interface {
-	UpdateAnchor(ctx context.Context, anchorID int) ([]domain.Certification, error)
+	GetCertificationsByAnchorID(ctx context.Context, anchorID int) ([]domain.Certification, error)
 }
 
 type FileService interface {

@@ -53,7 +53,7 @@ func PostReceiveWebhook(certification service.CertificateUpdateAnchorService, no
 			return
 		}
 		webhookClient := client.NewWebhookClient()
-		ok, err := webhookClient.VerifyWebhookSignature(buf, bloockSignature, secretKey, enforceTolerance)
+		ok, err := webhookClient.VerifyWebhookSignature(buf, bloockSignature, secretKey, false)
 		if err != nil {
 			serverAPIError := NewInternalServerAPIError(err.Error())
 			ctx.JSON(serverAPIError.Status, serverAPIError)
@@ -65,7 +65,7 @@ func PostReceiveWebhook(certification service.CertificateUpdateAnchorService, no
 			return
 		}
 
-		certifications, err := certification.UpdateAnchor(ctx, webhookRequest.Data.Id)
+		certifications, err := certification.GetCertificationsByAnchorID(ctx, webhookRequest.Data.Id)
 		if err != nil {
 			serverAPIError := NewInternalServerAPIError(err.Error())
 			ctx.JSON(serverAPIError.Status, serverAPIError)
@@ -78,6 +78,6 @@ func PostReceiveWebhook(certification service.CertificateUpdateAnchorService, no
 			return
 		}
 
-		ctx.JSON(http.StatusAccepted, WebhookResponse{Success: true})
+		ctx.JSON(http.StatusOK, WebhookResponse{Success: true})
 	}
 }

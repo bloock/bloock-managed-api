@@ -206,9 +206,9 @@ func (m *MockCertificateUpdateAnchorService) EXPECT() *MockCertificateUpdateAnch
 }
 
 // UpdateAnchor mocks base method.
-func (m *MockCertificateUpdateAnchorService) UpdateAnchor(ctx context.Context, anchorID int) ([]domain.Certification, error) {
+func (m *MockCertificateUpdateAnchorService) GetCertificationsByAnchorID(ctx context.Context, anchorID int) ([]domain.Certification, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateAnchor", ctx, anchorID)
+	ret := m.ctrl.Call(m, "GetCertificationsByAnchorID", ctx, anchorID)
 	ret0, _ := ret[0].([]domain.Certification)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
@@ -217,7 +217,7 @@ func (m *MockCertificateUpdateAnchorService) UpdateAnchor(ctx context.Context, a
 // UpdateAnchor indicates an expected call of UpdateAnchor.
 func (mr *MockCertificateUpdateAnchorServiceMockRecorder) UpdateAnchor(ctx, anchorID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAnchor", reflect.TypeOf((*MockCertificateUpdateAnchorService)(nil).UpdateAnchor), ctx, anchorID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCertificationsByAnchorID", reflect.TypeOf((*MockCertificateUpdateAnchorService)(nil).GetCertificationsByAnchorID), ctx, anchorID)
 }
 
 // MockFileService is a mock of FileService interface.

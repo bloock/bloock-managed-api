@@ -69,26 +69,26 @@ func PostProcess(processService service.BaseProcessService) gin.HandlerFunc {
 }
 
 func toProcessJsonResponse(processResponse *response.ProcessResponse) ProcessResponse {
-	response := ProcessResponse{
+	resp := ProcessResponse{
 		Success: true,
 	}
 
 	if processResponse.CertificationResponse() != nil {
-		response.Integrity = &IntegrityJSONResponse{
+		resp.Integrity = &IntegrityJSONResponse{
 			Hash:     processResponse.CertificationResponse().Hash(),
 			AnchorId: processResponse.CertificationResponse().AnchorID(),
 		}
 	}
 
 	if processResponse.SignResponse() != nil {
-		response.Authenticity = &AuthenticityJSONResponse{processResponse.SignResponse().Signature()}
+		resp.Authenticity = &AuthenticityJSONResponse{processResponse.SignResponse().Signature()}
 	}
 
 	if processResponse.AvailabilityResponse() != nil {
-		response.Availability = &AvailabilityJSONResponse{processResponse.AvailabilityResponse().Cid()}
+		resp.Availability = &AvailabilityJSONResponse{processResponse.AvailabilityResponse().Cid()}
 	}
 
-	return response
+	return resp
 }
 
 type ProcessResponse struct {

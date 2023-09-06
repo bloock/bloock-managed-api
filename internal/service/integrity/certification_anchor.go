@@ -16,7 +16,7 @@ func NewUpdateAnchorService(certificationRepository repository.CertificationRepo
 	}
 }
 
-func (c CertificationAnchor) UpdateAnchor(ctx context.Context, anchorID int) ([]domain.Certification, error) {
+func (c CertificationAnchor) GetCertificationsByAnchorID(ctx context.Context, anchorID int) ([]domain.Certification, error) {
 	certifications, err := c.certificationRepository.GetCertificationsByAnchorID(ctx, anchorID)
 	if err != nil {
 		return []domain.Certification{}, err

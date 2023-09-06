@@ -48,6 +48,7 @@ func (s ProcessService) Process(ctx context.Context, req process_request.Process
 	}
 
 	if req.IsAuthenticityEnabled() {
+		//TODO update hash certification
 		signature, signedData, err := s.authenticityService.Sign(ctx, *request.NewSignRequest(
 			config.Configuration.PublicKey,
 			&config.Configuration.PrivateKey,
@@ -92,6 +93,7 @@ func (s ProcessService) Process(ctx context.Context, req process_request.Process
 		}
 	}
 
+	//TODO anchor id compare
 	if !asyncClientResponse {
 		if err = s.notifyService.NotifyClient(ctx, []domain.Certification{certification}); err != nil {
 			return nil, err
