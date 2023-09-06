@@ -77,13 +77,14 @@ func (m *MockAuthenticityService) EXPECT() *MockAuthenticityServiceMockRecorder 
 }
 
 // Sign mocks base method.
-func (m *MockAuthenticityService) Sign(ctx context.Context, SignRequest request.SignRequest) (string, []byte, error) {
+func (m *MockAuthenticityService) Sign(ctx context.Context, SignRequest request.SignRequest) (string, []byte, string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Sign", ctx, SignRequest)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].([]byte)
-	ret2, _ := ret[2].(error)
-	return ret0, ret1, ret2
+	ret2, _ := ret[2].(string)
+	ret3, _ := ret[3].(error)
+	return ret0, ret1, ret2, ret3
 }
 
 // Sign indicates an expected call of Sign.
@@ -205,7 +206,7 @@ func (m *MockCertificateUpdateAnchorService) EXPECT() *MockCertificateUpdateAnch
 	return m.recorder
 }
 
-// UpdateAnchor mocks base method.
+// GetCertificationsByAnchorID mocks base method.
 func (m *MockCertificateUpdateAnchorService) GetCertificationsByAnchorID(ctx context.Context, anchorID int) ([]domain.Certification, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetCertificationsByAnchorID", ctx, anchorID)
@@ -214,8 +215,8 @@ func (m *MockCertificateUpdateAnchorService) GetCertificationsByAnchorID(ctx con
 	return ret0, ret1
 }
 
-// UpdateAnchor indicates an expected call of UpdateAnchor.
-func (mr *MockCertificateUpdateAnchorServiceMockRecorder) UpdateAnchor(ctx, anchorID interface{}) *gomock.Call {
+// GetCertificationsByAnchorID indicates an expected call of GetCertificationsByAnchorID.
+func (mr *MockCertificateUpdateAnchorServiceMockRecorder) GetCertificationsByAnchorID(ctx, anchorID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCertificationsByAnchorID", reflect.TypeOf((*MockCertificateUpdateAnchorService)(nil).GetCertificationsByAnchorID), ctx, anchorID)
 }
