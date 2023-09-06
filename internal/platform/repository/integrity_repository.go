@@ -3,61 +3,46 @@ package repository
 import (
 	"bloock-managed-api/internal/domain"
 	"context"
-	"github.com/bloock/bloock-sdk-go/v2"
+
 	"github.com/bloock/bloock-sdk-go/v2/client"
-	"github.com/bloock/bloock-sdk-go/v2/entity/integrity"
 	"github.com/bloock/bloock-sdk-go/v2/entity/record"
 	"github.com/rs/zerolog"
 )
 
 type BloockIntegrityRepository struct {
-	apikey          string
 	integrityClient client.IntegrityClient
-	log             zerolog.Logger
+	logger          zerolog.Logger
 }
 
-func NewBloockIntegrityRepository(apikey string, log zerolog.Logger) *BloockIntegrityRepository {
-	bloock.ApiKey = apikey
+func NewBloockIntegrityRepository(logger zerolog.Logger) *BloockIntegrityRepository {
+	logger.With().Caller().Str("component", "integrity-repository").Logger()
 	return &BloockIntegrityRepository{
-		apikey:          apikey,
 		integrityClient: client.NewIntegrityClient(),
-		log:             log,
+		logger:          logger,
 	}
 }
 
-func (b BloockIntegrityRepository) Certify(ctx context.Context, files [][]byte) (certification []domain.Certification, err error) {
-	var records []record.Record
-	for i := range files {
-		rec, err := client.NewRecordClient().FromBytes(files[i]).Build()
-		if err != nil {
-			b.log.Error().Err(err).Msg("error certifying data")
-			return []domain.Certification{}, err
-		}
-
-		records = append(records, rec)
-	}
-
-	receipt, err := b.integrityClient.SendRecords(records)
+func (b BloockIntegrityRepository) Certify(ctx context.Context, file []byte) (domain.Certification, error) {
+	rec, err := client.NewRecordClient().FromFile(file).Build()
 	if err != nil {
-		b.log.Error().Err(err).Msg("error certifying data")
-		return []domain.Certification{}, err
+		b.logger.Error().Err(err).Msg("error certifying data")
+		return domain.Certification{}, err
 	}
 
-	var certifications []domain.Certification
-	for _, recordReceipt := range receipt {
-		crts := *domain.NewPendingCertification(int(recordReceipt.Anchor), recordReceipt.Record)
-		certifications = append(certifications, crts)
-	}
-
-	return certifications, nil
-}
-
-func (b BloockIntegrityRepository) GetAnchorByID(ctx context.Context, anchorID int) (integrity.Anchor, error) {
-	anchor, err := b.integrityClient.GetAnchor(int64(anchorID))
+	receipt, err := b.integrityClient.SendRecords([]record.Record{rec})
 	if err != nil {
-		b.log.Error().Err(err).Msg("error getting anchor")
-		return integrity.Anchor{}, err
+		b.logger.Error().Err(err).Msg(err.Error())
+		return domain.Certification{}, err
+	}
+	dataHash, err := rec.GetHash()
+	if err != nil {
+		b.logger.Error().Err(err).Msg(err.Error())
+		return domain.Certification{}, err
 	}
 
-	return anchor, nil
+	return domain.Certification{
+		AnchorID: int(receipt[0].Anchor),
+		Data:     file,
+		Hash:     dataHash,
+	}, nil
 }

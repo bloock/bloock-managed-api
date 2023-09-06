@@ -4,13 +4,11 @@ package ent
 
 import (
 	"bloock-managed-api/internal/platform/repository/sql/ent/certification"
-	"encoding/json"
 	"fmt"
 	"strings"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/bloock/bloock-sdk-go/v2/entity/integrity"
 	"github.com/google/uuid"
 )
 
@@ -21,10 +19,10 @@ type Certification struct {
 	ID uuid.UUID `json:"id,omitempty"`
 	// AnchorID holds the value of the "anchor_id" field.
 	AnchorID int `json:"anchor_id,omitempty"`
-	// Anchor holds the value of the "anchor" field.
-	Anchor *integrity.Anchor `json:"anchor,omitempty"`
 	// Hash holds the value of the "hash" field.
-	Hash         string `json:"hash,omitempty"`
+	Hash string `json:"hash,omitempty"`
+	// DataID holds the value of the "data_id" field.
+	DataID       string `json:"data_id,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -33,11 +31,9 @@ func (*Certification) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case certification.FieldAnchor:
-			values[i] = new([]byte)
 		case certification.FieldAnchorID:
 			values[i] = new(sql.NullInt64)
-		case certification.FieldHash:
+		case certification.FieldHash, certification.FieldDataID:
 			values[i] = new(sql.NullString)
 		case certification.FieldID:
 			values[i] = new(uuid.UUID)
@@ -68,19 +64,17 @@ func (c *Certification) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				c.AnchorID = int(value.Int64)
 			}
-		case certification.FieldAnchor:
-			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field anchor", values[i])
-			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &c.Anchor); err != nil {
-					return fmt.Errorf("unmarshal field anchor: %w", err)
-				}
-			}
 		case certification.FieldHash:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field hash", values[i])
 			} else if value.Valid {
 				c.Hash = value.String
+			}
+		case certification.FieldDataID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field data_id", values[i])
+			} else if value.Valid {
+				c.DataID = value.String
 			}
 		default:
 			c.selectValues.Set(columns[i], values[i])
@@ -121,11 +115,11 @@ func (c *Certification) String() string {
 	builder.WriteString("anchor_id=")
 	builder.WriteString(fmt.Sprintf("%v", c.AnchorID))
 	builder.WriteString(", ")
-	builder.WriteString("anchor=")
-	builder.WriteString(fmt.Sprintf("%v", c.Anchor))
-	builder.WriteString(", ")
 	builder.WriteString("hash=")
 	builder.WriteString(c.Hash)
+	builder.WriteString(", ")
+	builder.WriteString("data_id=")
+	builder.WriteString(c.DataID)
 	builder.WriteByte(')')
 	return builder.String()
 }

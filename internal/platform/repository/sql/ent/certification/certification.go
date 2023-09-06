@@ -14,10 +14,10 @@ const (
 	FieldID = "id"
 	// FieldAnchorID holds the string denoting the anchor_id field in the database.
 	FieldAnchorID = "anchor_id"
-	// FieldAnchor holds the string denoting the anchor field in the database.
-	FieldAnchor = "anchor"
 	// FieldHash holds the string denoting the hash field in the database.
 	FieldHash = "hash"
+	// FieldDataID holds the string denoting the data_id field in the database.
+	FieldDataID = "data_id"
 	// Table holds the table name of the certification in the database.
 	Table = "certifications"
 )
@@ -26,8 +26,8 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldAnchorID,
-	FieldAnchor,
 	FieldHash,
+	FieldDataID,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -65,4 +65,9 @@ func ByAnchorID(opts ...sql.OrderTermOption) OrderOption {
 // ByHash orders the results by the hash field.
 func ByHash(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldHash, opts...).ToFunc()
+}
+
+// ByDataID orders the results by the data_id field.
+func ByDataID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDataID, opts...).ToFunc()
 }

@@ -1,52 +1,13 @@
 package handler
 
 import (
-	"bloock-managed-api/internal/service/update"
-	"bloock-managed-api/internal/service/update/request"
+	"bloock-managed-api/internal/service"
 	"encoding/json"
 	"github.com/bloock/bloock-sdk-go/v2/client"
 	"github.com/gin-gonic/gin"
+	"io"
 	"net/http"
 )
-
-func PostReceiveWebhook(certification update.CertificationAnchor, secretKey string, enforceTolerance bool) gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-
-		var webhookRequest WebhookRequest
-		if err := ctx.BindJSON(&webhookRequest); err != nil {
-			NewBadRequestAPIError("invalid json body")
-			return
-		}
-		bloockSignature := ctx.GetHeader("Bloock-Signature")
-
-		webhookClient := client.NewWebhookClient()
-		bodyBytes, err := json.Marshal(webhookRequest)
-		if err != nil {
-
-			ctx.JSON(http.StatusInternalServerError, NewInternalServerAPIError(err.Error()))
-			return
-		}
-		ok, err := webhookClient.VerifyWebhookSignature(bodyBytes, bloockSignature, secretKey, enforceTolerance)
-		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, NewInternalServerAPIError(err.Error()))
-			return
-		}
-		if !ok {
-			ctx.JSON(http.StatusBadRequest, NewBadRequestAPIError("invalid signature"))
-			return
-		}
-
-		if err := certification.UpdateAnchor(ctx, request.UpdateCertificationAnchorRequest{
-			AnchorId: webhookRequest.Data.Network.AnchorId,
-			Payload:  webhookRequest,
-		}); err != nil {
-			ctx.JSON(http.StatusInternalServerError, NewInternalServerAPIError(err.Error()))
-			return
-		}
-
-		ctx.Status(http.StatusAccepted)
-	}
-}
 
 type WebhookRequest struct {
 	WebhookId string `json:"webhook_id"`
@@ -69,4 +30,55 @@ type WebhookRequest struct {
 		Root string `json:"root"`
 		Test bool   `json:"test"`
 	} `json:"data"`
+}
+
+type WebhookResponse struct {
+	Success bool `json:"success"`
+}
+
+func PostReceiveWebhook(certification service.CertificateUpdateAnchorService, notify service.NotifyService, secretKey string) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		buf, err := io.ReadAll(ctx.Request.Body)
+		if err != nil {
+			webhookErr := NewInternalServerAPIError("error while reading webhook body")
+			ctx.JSON(webhookErr.Status, webhookErr)
+			return
+		}
+
+		var webhookRequest WebhookRequest
+		if err = json.Unmarshal(buf, &webhookRequest); err != nil {
+			webhookErr := NewBadRequestAPIError("invalid json body")
+			ctx.JSON(webhookErr.Status, webhookErr)
+			return
+		}
+		bloockSignature := ctx.GetHeader("Bloock-Signature")
+
+		webhookClient := client.NewWebhookClient()
+		ok, err := webhookClient.VerifyWebhookSignature(buf, bloockSignature, secretKey, false)
+		if err != nil {
+			serverAPIError := NewInternalServerAPIError(err.Error())
+			ctx.JSON(serverAPIError.Status, serverAPIError)
+			return
+		}
+		if !ok {
+			badRequestAPIError := NewBadRequestAPIError("invalid bloock webhook signature")
+			ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
+			return
+		}
+
+		certifications, err := certification.GetCertificationsByAnchorID(ctx, webhookRequest.Data.Id)
+		if err != nil {
+			serverAPIError := NewInternalServerAPIError(err.Error())
+			ctx.JSON(serverAPIError.Status, serverAPIError)
+			return
+		}
+
+		if err = notify.NotifyClient(ctx, certifications); err != nil {
+			serverAPIError := NewInternalServerAPIError(err.Error())
+			ctx.JSON(serverAPIError.Status, serverAPIError)
+			return
+		}
+
+		ctx.JSON(http.StatusOK, WebhookResponse{Success: true})
+	}
 }

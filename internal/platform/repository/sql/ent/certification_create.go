@@ -10,7 +10,6 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/bloock/bloock-sdk-go/v2/entity/integrity"
 	"github.com/google/uuid"
 )
 
@@ -27,15 +26,15 @@ func (cc *CertificationCreate) SetAnchorID(i int) *CertificationCreate {
 	return cc
 }
 
-// SetAnchor sets the "anchor" field.
-func (cc *CertificationCreate) SetAnchor(i *integrity.Anchor) *CertificationCreate {
-	cc.mutation.SetAnchor(i)
-	return cc
-}
-
 // SetHash sets the "hash" field.
 func (cc *CertificationCreate) SetHash(s string) *CertificationCreate {
 	cc.mutation.SetHash(s)
+	return cc
+}
+
+// SetDataID sets the "data_id" field.
+func (cc *CertificationCreate) SetDataID(s string) *CertificationCreate {
+	cc.mutation.SetDataID(s)
 	return cc
 }
 
@@ -104,9 +103,6 @@ func (cc *CertificationCreate) check() error {
 			return &ValidationError{Name: "anchor_id", err: fmt.Errorf(`ent: validator failed for field "Certification.anchor_id": %w`, err)}
 		}
 	}
-	if _, ok := cc.mutation.Anchor(); !ok {
-		return &ValidationError{Name: "anchor", err: errors.New(`ent: missing required field "Certification.anchor"`)}
-	}
 	if _, ok := cc.mutation.Hash(); !ok {
 		return &ValidationError{Name: "hash", err: errors.New(`ent: missing required field "Certification.hash"`)}
 	}
@@ -114,6 +110,9 @@ func (cc *CertificationCreate) check() error {
 		if err := certification.HashValidator(v); err != nil {
 			return &ValidationError{Name: "hash", err: fmt.Errorf(`ent: validator failed for field "Certification.hash": %w`, err)}
 		}
+	}
+	if _, ok := cc.mutation.DataID(); !ok {
+		return &ValidationError{Name: "data_id", err: errors.New(`ent: missing required field "Certification.data_id"`)}
 	}
 	return nil
 }
@@ -154,13 +153,13 @@ func (cc *CertificationCreate) createSpec() (*Certification, *sqlgraph.CreateSpe
 		_spec.SetField(certification.FieldAnchorID, field.TypeInt, value)
 		_node.AnchorID = value
 	}
-	if value, ok := cc.mutation.Anchor(); ok {
-		_spec.SetField(certification.FieldAnchor, field.TypeJSON, value)
-		_node.Anchor = value
-	}
 	if value, ok := cc.mutation.Hash(); ok {
 		_spec.SetField(certification.FieldHash, field.TypeString, value)
 		_node.Hash = value
+	}
+	if value, ok := cc.mutation.DataID(); ok {
+		_spec.SetField(certification.FieldDataID, field.TypeString, value)
+		_node.DataID = value
 	}
 	return _node, _spec
 }

@@ -9,7 +9,6 @@ import (
 	context "context"
 	reflect "reflect"
 
-	integrity "github.com/bloock/bloock-sdk-go/v2/entity/integrity"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -36,6 +35,21 @@ func (m *MockCertificationRepository) EXPECT() *MockCertificationRepositoryMockR
 	return m.recorder
 }
 
+// ExistCertificationByHash mocks base method.
+func (m *MockCertificationRepository) ExistCertificationByHash(ctx context.Context, hash string) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ExistCertificationByHash", ctx, hash)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExistCertificationByHash indicates an expected call of ExistCertificationByHash.
+func (mr *MockCertificationRepositoryMockRecorder) ExistCertificationByHash(ctx, hash interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExistCertificationByHash", reflect.TypeOf((*MockCertificationRepository)(nil).ExistCertificationByHash), ctx, hash)
+}
+
 // GetCertificationsByAnchorID mocks base method.
 func (m *MockCertificationRepository) GetCertificationsByAnchorID(ctx context.Context, anchor int) ([]domain.Certification, error) {
 	m.ctrl.T.Helper()
@@ -52,7 +66,7 @@ func (mr *MockCertificationRepositoryMockRecorder) GetCertificationsByAnchorID(c
 }
 
 // SaveCertification mocks base method.
-func (m *MockCertificationRepository) SaveCertification(ctx context.Context, certification []domain.Certification) error {
+func (m *MockCertificationRepository) SaveCertification(ctx context.Context, certification domain.Certification) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SaveCertification", ctx, certification)
 	ret0, _ := ret[0].(error)
@@ -65,16 +79,16 @@ func (mr *MockCertificationRepositoryMockRecorder) SaveCertification(ctx, certif
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveCertification", reflect.TypeOf((*MockCertificationRepository)(nil).SaveCertification), ctx, certification)
 }
 
-// UpdateCertificationAnchor mocks base method.
-func (m *MockCertificationRepository) UpdateCertificationAnchor(ctx context.Context, anchor integrity.Anchor) error {
+// UpdateCertificationDataID mocks base method.
+func (m *MockCertificationRepository) UpdateCertificationDataID(ctx context.Context, certification domain.Certification) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateCertificationAnchor", ctx, anchor)
+	ret := m.ctrl.Call(m, "UpdateCertificationDataID", ctx, certification)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// UpdateCertificationAnchor indicates an expected call of UpdateCertificationAnchor.
-func (mr *MockCertificationRepositoryMockRecorder) UpdateCertificationAnchor(ctx, anchor interface{}) *gomock.Call {
+// UpdateCertificationDataID indicates an expected call of UpdateCertificationDataID.
+func (mr *MockCertificationRepositoryMockRecorder) UpdateCertificationDataID(ctx, certification interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateCertificationAnchor", reflect.TypeOf((*MockCertificationRepository)(nil).UpdateCertificationAnchor), ctx, anchor)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateCertificationDataID", reflect.TypeOf((*MockCertificationRepository)(nil).UpdateCertificationDataID), ctx, certification)
 }
