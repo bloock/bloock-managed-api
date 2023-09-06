@@ -76,7 +76,6 @@ func toProcessJsonResponse(processResponse *response.ProcessResponse) ProcessRes
 
 	if processResponse.CertificationResponse() != nil {
 		resp.Integrity = &IntegrityJSONResponse{
-			Hash:     processResponse.CertificationResponse().Hash(),
 			AnchorId: processResponse.CertificationResponse().AnchorID(),
 		}
 	}
@@ -104,8 +103,7 @@ type ProcessResponse struct {
 }
 
 type IntegrityJSONResponse struct {
-	Hash     string `json:"hash"`
-	AnchorId int    `json:"anchor_id"`
+	AnchorId int `json:"anchor_id"`
 }
 
 type AuthenticityJSONResponse struct {
