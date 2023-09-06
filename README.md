@@ -2,7 +2,7 @@
 
 Managed api is a tool to integrate automatically in your system and include some bloock products:
 
-- Integrity ✅
+- Integrity
 - Keys
 - Authenticity
 - Encryption
@@ -29,8 +29,10 @@ we are going to use default values for `BLOOCK_API_HOST`, `BLOOCK_API_PORT`, `BL
 - BLOOCK_API_PORT: The main API port; default is 8080.
 - BLOOCK_API_HOST: The main API host IP; default is 10.0.5.23.
 - BLOOCK_API_KEY: Your Bloock API key.
-- BLOOCK_CLIENT_ENDPOINT_URL: Your api endpoint URL where you want to receive the response.
+- BLOOCK_CLIENT_ENDPOINT_URL: Your api endpoint URL where you want to receive the response file.
 - BLOOCK_WEBHOOK_SECRET_KEY: Your webhook secret key.
+- BLOOCK_AUTHENTICITY_PRIVATE_KEY: If you want to sign with you own local keys. Here you can set the private key you want to use.
+- BLOOCK_AUTHENTICITY_PUBLIC_KEY: If you want to sign with you own local keys. Here you can set the public key you want to use.
 - BLOOCK_ENFORCE_TOLERANCE: Decide if you want to set tolerance when verifying the webhook; true or false.
 - BLOOCK_DB_CONNECTION_STRING: Your database URL; e.g., mysql://username:password@localhost:3306/mydatabase.
 - BLOOCK_API_DEBUG_MODE: debug mode prints more log information; true or false.
@@ -44,8 +46,10 @@ Sample content of `config.yaml`:
 ```yaml
 BLOOCK_DB_CONNECTION_STRING: "file:bloock?mode=memory&cache=shared&_fk=1"
 BLOOCK_API_KEY: ""
-BLOOCK_WEBHOOK_URL:
+BLOOCK_CLIENT_ENDPOINT_URL: ""
 BLOOCK_WEBHOOK_SECRET_KEY:  ""
+BLOOCK_AUTHENTICITY_PRIVATE_KEY: ""
+BLOOCK_AUTHENTICITY_PUBLIC_KEY: ""
 BLOOCK_API_HOST: "0.0.0.0"
 BLOOCK_API_PORT: "8080"
 BLOOCK_ENFORCE_TOLERANCE: true
@@ -103,8 +107,10 @@ services:
     environment:
       BLOOCK_DB_CONNECTION_STRING: "file:managed?mode=memory&cache=shared&_fk=1"
       BLOOCK_API_KEY: ""
-      BLOOCK_WEBHOOK_URL: ""
+      BLOOCK_CLIENT_ENDPOINT_URL: ""
       BLOOCK_WEBHOOK_SECRET_KEY: ""
+      BLOOCK_AUTHENTICITY_PRIVATE_KEY: ""
+      BLOOCK_AUTHENTICITY_PUBLIC_KEY: ""
       BLOOCK_API_HOST: "0.0.0.0"
       BLOOCK_API_PORT: "8080"
       BLOOCK_ENFORCE_TOLERANCE: false
