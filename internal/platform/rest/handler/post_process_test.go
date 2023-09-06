@@ -9,7 +9,6 @@ import (
 	"bloock-managed-api/internal/service/process/response"
 	"bytes"
 	"errors"
-	"fmt"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -141,7 +140,7 @@ func TestPostProcessMultipart(t *testing.T) {
 			rec := httptest.NewRecorder()
 			require.NoError(t, err)
 			url := "/v1/process"
-			req := httptest.NewRequest(http.MethodPost, fmt.Sprintf(url), buf)
+			req := httptest.NewRequest(http.MethodPost, url, buf)
 			req.Header.Add("Content-Type", writer.FormDataContentType())
 			engine.ServeHTTP(rec, req)
 
@@ -218,7 +217,7 @@ func TestPostProcessBadRequests(t *testing.T) {
 			rec := httptest.NewRecorder()
 			require.NoError(t, err)
 			url := "/v1/process"
-			req := httptest.NewRequest(http.MethodPost, fmt.Sprintf(url), buf)
+			req := httptest.NewRequest(http.MethodPost, url, buf)
 			req.Header.Add("Content-Type", writer.FormDataContentType())
 			engine.ServeHTTP(rec, req)
 
@@ -274,7 +273,7 @@ func TestWithoutFile(t *testing.T) {
 		rec := httptest.NewRecorder()
 		require.NoError(t, err)
 		url := "/v1/process"
-		req := httptest.NewRequest(http.MethodPost, fmt.Sprintf(url), buf)
+		req := httptest.NewRequest(http.MethodPost, url, buf)
 		req.Header.Add("Content-Type", writer.FormDataContentType())
 		engine.ServeHTTP(rec, req)
 
@@ -311,7 +310,7 @@ func TestWithoutFile(t *testing.T) {
 		rec := httptest.NewRecorder()
 		require.NoError(t, err)
 		url := "/v1/process"
-		req := httptest.NewRequest(http.MethodPost, fmt.Sprintf(url), buf)
+		req := httptest.NewRequest(http.MethodPost, url, buf)
 		req.Header.Add("Content-Type", writer.FormDataContentType())
 		engine.ServeHTTP(rec, req)
 

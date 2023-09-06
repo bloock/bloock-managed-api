@@ -12,11 +12,6 @@ import (
 type LocalKey struct {
 	ent.Schema
 }
-type name struct {
-	id       uuid.UUID
-	localKey key.LocalKey
-	keyType  key.KeyType
-}
 
 func (LocalKey) Fields() []ent.Field {
 

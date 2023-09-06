@@ -81,7 +81,7 @@ func (s ProcessRequest) UseEnsResolution() bool {
 func (s ProcessRequest) Data() []byte {
 	return s.file
 }
-func (s ProcessRequest) ReplaceDataWith(newData []byte) {
+func (s *ProcessRequest) ReplaceDataWith(newData []byte) {
 	s.file = newData
 }
 func (s ProcessRequest) IsAuthenticityEnabled() bool {

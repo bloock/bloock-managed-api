@@ -4,11 +4,12 @@ import (
 	"bloock-managed-api/internal/platform/test_utils/fixtures"
 	"context"
 	"fmt"
+	"os"
+	"testing"
+
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"os"
-	"testing"
 )
 
 func TestHardDriveLocalStorageRepository_Save(t *testing.T) {
@@ -18,6 +19,7 @@ func TestHardDriveLocalStorageRepository_Save(t *testing.T) {
 
 		err := NewHardDriveLocalStorageRepository(directory, zerolog.Logger{}).
 			Save(context.TODO(), fixtures.PDFContent, hash)
+		require.NoError(t, err)
 
 		fullPath := fmt.Sprintf("%s/%s", directory, hash)
 		file, err := os.ReadFile(fullPath)

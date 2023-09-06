@@ -4,13 +4,14 @@ import (
 	"bloock-managed-api/internal/domain"
 	"bloock-managed-api/internal/platform/repository/sql"
 	"context"
+	"testing"
+	"time"
+
 	"github.com/bloock/bloock-sdk-go/v2/entity/key"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"testing"
-	"time"
 )
 
 var ctx = context.TODO()
@@ -79,10 +80,11 @@ func TestSQLLocalKeyRepository_GetKeys(t *testing.T) {
 		SetID(keyID).
 		SetLocalKey(&localKey).SetKeyType(keyType).
 		Save(ctx)
+	require.NoError(t, err)
 
 	localKeyRepository := sql.NewSQLLocalKeyRepository(*conn, 5*time.Second, zerolog.Logger{})
 	localKeys, err := localKeyRepository.FindKeys(ctx)
-
+	require.NoError(t, err)
 	assert.NotEmpty(t, localKeys)
 
 }

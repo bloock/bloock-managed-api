@@ -1,8 +1,8 @@
 package domain
 
 import (
-	"errors"
 	"fmt"
+
 	"github.com/bloock/bloock-sdk-go/v2/entity/key"
 	"github.com/google/uuid"
 )
@@ -49,5 +49,5 @@ func (l LocalKey) KeyTypeStr() string {
 }
 
 var ErrInvalidKeyType = func(kty string) error {
-	return errors.New(fmt.Sprintf("invalid key type: %s", kty))
+	return fmt.Errorf("invalid key type: %s", kty)
 }
