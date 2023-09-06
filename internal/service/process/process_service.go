@@ -86,8 +86,10 @@ func (s ProcessService) Process(ctx context.Context, req process_request.Process
 		}
 		responseBuilder.AvailabilityResponse(*availability_response.NewAvailabilityResponse(certification.DataID, req.HostingType()))
 	} else {
-		if err = s.fileService.SaveFile(ctx, certification.Data, certification.Hash); err != nil {
-			return nil, err
+		if req.IsIntegrityEnabled() {
+			if err = s.fileService.SaveFile(ctx, certification.Data, certification.Hash); err != nil {
+				return nil, err
+			}
 		}
 	}
 	responseBuilder.HashResponse(certification.Hash)

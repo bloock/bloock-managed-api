@@ -26,15 +26,19 @@ func (n NotifyService) NotifyClient(ctx context.Context, certifications []domain
 		var fileBytes []byte
 		var err error
 
-		if crt.DataID != "" {
-			fileBytes, err = n.availabilityRepository.FindFile(ctx, crt.DataID)
-			if err != nil {
-				return err
-			}
+		if len(crt.Data) != 0 {
+			fileBytes = crt.Data
 		} else {
-			fileBytes, err = n.localStorageRepository.Retrieve(ctx, config.Configuration.FileDir, crt.Hash)
-			if err != nil {
-				return err
+			if crt.DataID != "" {
+				fileBytes, err = n.availabilityRepository.FindFile(ctx, crt.DataID)
+				if err != nil {
+					return err
+				}
+			} else {
+				fileBytes, err = n.localStorageRepository.Retrieve(ctx, config.Configuration.FileDir, crt.Hash)
+				if err != nil {
+					return err
+				}
 			}
 		}
 
