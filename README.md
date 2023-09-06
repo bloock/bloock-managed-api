@@ -23,7 +23,7 @@ See postman doc: https://www.postman.com/bloock/workspace/bloock-api/documentati
 ### Configuration
 
 The service uses viper as a configuration manager, currently supporting environment variables and a YAML configuration file. If no config are provided
-we are going to use default values for `BLOOCK_API_HOST`, `BLOOCK_API_PORT`, `BLOOCK_DB_CONNECTION_STRING`, `BLOOCK_ENFORCE_TOLERANCE` and `BLOOCK_API_DEBUG_MODE`.
+we are going to use default values for `BLOOCK_API_HOST`, `BLOOCK_API_PORT`, `BLOOCK_DB_CONNECTION_STRING` and `BLOOCK_API_DEBUG_MODE`.
 ##### Variables
 
 - BLOOCK_API_PORT: The main API port; default is 8080.
@@ -33,7 +33,6 @@ we are going to use default values for `BLOOCK_API_HOST`, `BLOOCK_API_PORT`, `BL
 - BLOOCK_WEBHOOK_SECRET_KEY: Your webhook secret key.
 - BLOOCK_AUTHENTICITY_PRIVATE_KEY: If you want to sign with you own local keys. Here you can set the private key you want to use.
 - BLOOCK_AUTHENTICITY_PUBLIC_KEY: If you want to sign with you own local keys. Here you can set the public key you want to use.
-- BLOOCK_ENFORCE_TOLERANCE: Decide if you want to set tolerance when verifying the webhook; true or false.
 - BLOOCK_DB_CONNECTION_STRING: Your database URL; e.g., mysql://username:password@localhost:3306/mydatabase.
 - BLOOCK_API_DEBUG_MODE: debug mode prints more log information; true or false.
 
@@ -52,8 +51,8 @@ BLOOCK_AUTHENTICITY_PRIVATE_KEY: ""
 BLOOCK_AUTHENTICITY_PUBLIC_KEY: ""
 BLOOCK_API_HOST: "0.0.0.0"
 BLOOCK_API_PORT: "8080"
-BLOOCK_ENFORCE_TOLERANCE: true
 BLOOCK_API_DEBUG_MODE: false
+BLOOCK_FILE_DIR: ""
 ```
 
 ### Database
@@ -113,7 +112,7 @@ services:
       BLOOCK_AUTHENTICITY_PUBLIC_KEY: ""
       BLOOCK_API_HOST: "0.0.0.0"
       BLOOCK_API_PORT: "8080"
-      BLOOCK_ENFORCE_TOLERANCE: false
       BLOOCK_API_DEBUG_MODE: false
-
+      BLOOCK_MAX_MEMORY:
+      BLOOCK_FILE_DIR:
 ```

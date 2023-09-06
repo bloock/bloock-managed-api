@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -45,6 +46,7 @@ func Debug() gin.HandlerFunc {
 			ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
 			return
 		}
+		fmt.Printf("%+v", string(file))
 
 		fileName := formData.File.Filename
 		pattern := "^[a-fA-F0-9]{64}$"

@@ -34,9 +34,6 @@ func NewProcessService(integrityService service.IntegrityService, authenticitySe
 }
 
 func (s ProcessService) Process(ctx context.Context, req process_request.ProcessRequest) (*process_response.ProcessResponse, error) {
-	responseBuilder := process_response.NewProcessResponseBuilder()
-	asyncClientResponse := false
-
 	fileHash, err := s.fileService.GetFileHash(ctx, req.Data())
 	if err != nil {
 		return nil, err
@@ -47,9 +44,10 @@ func (s ProcessService) Process(ctx context.Context, req process_request.Process
 		Hash: fileHash,
 	}
 
+	responseBuilder := process_response.NewProcessResponseBuilder()
+
 	if req.IsAuthenticityEnabled() {
-		//TODO update hash certification
-		signature, signedData, err := s.authenticityService.Sign(ctx, *request.NewSignRequest(
+		signature, signedData, newHash, err := s.authenticityService.Sign(ctx, *request.NewSignRequest(
 			config.Configuration.PublicKey,
 			&config.Configuration.PrivateKey,
 			req.KeySource(),
@@ -63,11 +61,11 @@ func (s ProcessService) Process(ctx context.Context, req process_request.Process
 		}
 
 		certification.Data = signedData
+		certification.Hash = newHash
 		responseBuilder.SignResponse(*authenticity_response.NewSignResponse(signature))
 	}
 
 	if req.IsIntegrityEnabled() {
-		asyncClientResponse = true
 		newCertification, err := s.integrityService.CertifyData(ctx, certification.Data)
 		if err != nil {
 			return nil, err
@@ -86,15 +84,15 @@ func (s ProcessService) Process(ctx context.Context, req process_request.Process
 		if err = s.integrityService.UpdateCertification(ctx, certification); err != nil {
 			return nil, err
 		}
-		responseBuilder.AvailabilityResponse(*availability_response.NewAvailabilityResponse(certification.DataID))
+		responseBuilder.AvailabilityResponse(*availability_response.NewAvailabilityResponse(certification.DataID, req.HostingType()))
 	} else {
 		if err = s.fileService.SaveFile(ctx, certification.Data, certification.Hash); err != nil {
 			return nil, err
 		}
 	}
+	responseBuilder.HashResponse(certification.Hash)
 
-	//TODO anchor id compare
-	if !asyncClientResponse {
+	if certification.AnchorID == 0 {
 		if err = s.notifyService.NotifyClient(ctx, []domain.Certification{certification}); err != nil {
 			return nil, err
 		}

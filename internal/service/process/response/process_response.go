@@ -7,6 +7,7 @@ import (
 )
 
 type ProcessResponse struct {
+	hash                  string
 	certificationResponse *integrityResponse.CertificationResponse
 	signResponse          *autenticityResponse.SignResponse
 	availabilityResponse  *availabilityResponse.AvailabilityResponse
@@ -19,6 +20,11 @@ type ProcessResponseBuilder struct {
 func NewProcessResponseBuilder() *ProcessResponseBuilder {
 	processResponse := &ProcessResponse{}
 	b := &ProcessResponseBuilder{processResponse: processResponse}
+	return b
+}
+
+func (b *ProcessResponseBuilder) HashResponse(hash string) *ProcessResponseBuilder {
+	b.processResponse.hash = hash
 	return b
 }
 
@@ -43,6 +49,10 @@ func (b *ProcessResponseBuilder) Build() *ProcessResponse {
 
 func (b *ProcessResponseBuilder) CertificationHash() string {
 	return b.processResponse.certificationResponse.Hash()
+}
+
+func (p ProcessResponse) Hash() string {
+	return p.hash
 }
 
 func (p ProcessResponse) CertificationResponse() *integrityResponse.CertificationResponse {

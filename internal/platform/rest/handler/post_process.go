@@ -71,6 +71,7 @@ func PostProcess(processService service.BaseProcessService) gin.HandlerFunc {
 func toProcessJsonResponse(processResponse *response.ProcessResponse) ProcessResponse {
 	resp := ProcessResponse{
 		Success: true,
+		Hash:    processResponse.Hash(),
 	}
 
 	if processResponse.CertificationResponse() != nil {
@@ -85,7 +86,10 @@ func toProcessJsonResponse(processResponse *response.ProcessResponse) ProcessRes
 	}
 
 	if processResponse.AvailabilityResponse() != nil {
-		resp.Availability = &AvailabilityJSONResponse{processResponse.AvailabilityResponse().Cid()}
+		resp.Availability = &AvailabilityJSONResponse{
+			processResponse.AvailabilityResponse().Id(),
+			processResponse.AvailabilityResponse().Url(),
+		}
 	}
 
 	return resp
@@ -93,6 +97,7 @@ func toProcessJsonResponse(processResponse *response.ProcessResponse) ProcessRes
 
 type ProcessResponse struct {
 	Success      bool                      `json:"success"`
+	Hash         string                    `json:"hash"`
 	Integrity    *IntegrityJSONResponse    `json:"integrity,omitempty"`
 	Authenticity *AuthenticityJSONResponse `json:"authenticity,omitempty"`
 	Availability *AvailabilityJSONResponse `json:"availability,omitempty"`
@@ -106,9 +111,8 @@ type IntegrityJSONResponse struct {
 type AuthenticityJSONResponse struct {
 	Signature string `json:"signature"`
 }
+
 type AvailabilityJSONResponse struct {
-	ID string `json:"id"`
-}
-type CertificationJSONRequest struct {
-	Data interface{}
+	ID  string `json:"id"`
+	Url string `json:"url,omitempty"`
 }

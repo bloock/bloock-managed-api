@@ -2,6 +2,7 @@ package handler
 
 import (
 	"bloock-managed-api/internal/service"
+	"encoding/json"
 	"github.com/bloock/bloock-sdk-go/v2/client"
 	"github.com/gin-gonic/gin"
 	"io"
@@ -35,23 +36,23 @@ type WebhookResponse struct {
 	Success bool `json:"success"`
 }
 
-func PostReceiveWebhook(certification service.CertificateUpdateAnchorService, notify service.NotifyService, secretKey string, enforceTolerance bool) gin.HandlerFunc {
+func PostReceiveWebhook(certification service.CertificateUpdateAnchorService, notify service.NotifyService, secretKey string) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-
-		var webhookRequest WebhookRequest
-		if err := ctx.BindJSON(&webhookRequest); err != nil {
-			webhookErr := NewBadRequestAPIError("invalid json body")
-			ctx.JSON(webhookErr.Status, webhookErr)
-			return
-		}
-		bloockSignature := ctx.GetHeader("Bloock-Signature")
-
 		buf, err := io.ReadAll(ctx.Request.Body)
 		if err != nil {
 			webhookErr := NewInternalServerAPIError("error while reading webhook body")
 			ctx.JSON(webhookErr.Status, webhookErr)
 			return
 		}
+
+		var webhookRequest WebhookRequest
+		if err = json.Unmarshal(buf, &webhookRequest); err != nil {
+			webhookErr := NewBadRequestAPIError("invalid json body")
+			ctx.JSON(webhookErr.Status, webhookErr)
+			return
+		}
+		bloockSignature := ctx.GetHeader("Bloock-Signature")
+
 		webhookClient := client.NewWebhookClient()
 		ok, err := webhookClient.VerifyWebhookSignature(buf, bloockSignature, secretKey, false)
 		if err != nil {

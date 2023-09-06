@@ -48,6 +48,7 @@ func (s SQLCertificationRepository) GetCertificationsByAnchorID(ctx context.Cont
 		newCrt := domain.Certification{
 			AnchorID: crt.AnchorID,
 			Hash:     crt.Hash,
+			DataID:   crt.DataID,
 		}
 		certifications = append(certifications, newCrt)
 	}

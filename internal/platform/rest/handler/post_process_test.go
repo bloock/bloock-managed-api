@@ -35,7 +35,6 @@ func TestProcessServiceError(t *testing.T) {
 		updateAnchor,
 		notifyService,
 		"",
-		true,
 		zerolog.Logger{},
 		true,
 	)
@@ -95,7 +94,6 @@ func TestPostProcessMultipart(t *testing.T) {
 		updateAnchor,
 		notifyService,
 		"",
-		true,
 		zerolog.Logger{},
 		true,
 	)
@@ -165,7 +163,6 @@ func TestPostProcessBadRequests(t *testing.T) {
 		updateAnchor,
 		notifyService,
 		"",
-		true,
 		zerolog.Logger{},
 		true,
 	)
@@ -243,7 +240,6 @@ func TestWithoutFile(t *testing.T) {
 		updateAnchor,
 		notifyService,
 		"",
-		true,
 		zerolog.Logger{},
 		true,
 	)

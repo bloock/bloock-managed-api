@@ -13,7 +13,7 @@ type BaseProcessService interface {
 }
 
 type AuthenticityService interface {
-	Sign(ctx context.Context, SignRequest request.SignRequest) (string, []byte, error)
+	Sign(ctx context.Context, SignRequest request.SignRequest) (string, []byte, string, error)
 }
 
 type IntegrityService interface {

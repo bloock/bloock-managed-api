@@ -41,12 +41,13 @@ func (b BloockAuthenticityRepository) SignECWithLocalKey(ctx context.Context, da
 		b.logger.Error().Err(err).Msg("")
 		return "", record.Record{}, err
 	}
-	signature, err := b.authenticityClient.Sign(rec, signer)
+	signatures, err := b.authenticityClient.GetSignatures(rec)
 	if err != nil {
 		b.logger.Error().Err(err).Msg("")
 		return "", record.Record{}, err
 	}
-	return signature.Signature, rec, nil
+
+	return signatures[0].Signature, rec, nil
 }
 
 func (b BloockAuthenticityRepository) SignECWithLocalKeyEns(ctx context.Context, data []byte, kty key.KeyType, publicKey string, privateKey *string) (string, record.Record, error) {
@@ -64,12 +65,13 @@ func (b BloockAuthenticityRepository) SignECWithLocalKeyEns(ctx context.Context,
 		b.logger.Error().Err(err).Msg("")
 		return "", record.Record{}, err
 	}
-	signature, err := b.authenticityClient.Sign(rec, signer)
+	signatures, err := b.authenticityClient.GetSignatures(rec)
 	if err != nil {
 		b.logger.Error().Err(err).Msg("")
 		return "", record.Record{}, err
 	}
-	return signature.Signature, rec, nil
+
+	return signatures[0].Signature, rec, nil
 }
 
 func (b BloockAuthenticityRepository) SignECWithManagedKey(ctx context.Context, data []byte, kid string) (string, record.Record, error) {
@@ -88,12 +90,13 @@ func (b BloockAuthenticityRepository) SignECWithManagedKey(ctx context.Context, 
 		b.logger.Error().Err(err).Msg("")
 		return "", record.Record{}, err
 	}
-	signature, err := b.authenticityClient.Sign(rec, signer)
+	signatures, err := b.authenticityClient.GetSignatures(rec)
 	if err != nil {
 		b.logger.Error().Err(err).Msg("")
 		return "", record.Record{}, err
 	}
-	return signature.Signature, rec, nil
+
+	return signatures[0].Signature, rec, nil
 }
 
 func (b BloockAuthenticityRepository) SignECWithManagedKeyEns(ctx context.Context, data []byte, kid string) (string, record.Record, error) {
@@ -112,10 +115,11 @@ func (b BloockAuthenticityRepository) SignECWithManagedKeyEns(ctx context.Contex
 		b.logger.Error().Err(err).Msg("")
 		return "", record.Record{}, err
 	}
-	signature, err := b.authenticityClient.Sign(rec, signer)
+	signatures, err := b.authenticityClient.GetSignatures(rec)
 	if err != nil {
 		b.logger.Error().Err(err).Msg("")
 		return "", record.Record{}, err
 	}
-	return signature.Signature, rec, nil
+
+	return signatures[0].Signature, rec, nil
 }

@@ -14,7 +14,9 @@ import (
 	"bloock-managed-api/internal/service/integrity"
 	"bloock-managed-api/internal/service/notify"
 	"bloock-managed-api/internal/service/process"
+
 	"github.com/bloock/bloock-sdk-go/v2"
+
 	"net/http"
 	"os"
 	"sync"
@@ -24,8 +26,6 @@ import (
 )
 
 func main() {
-	os.Setenv("BLOOCK_API_FILE_DIR", "tmp")
-
 	cfg, err := config.InitConfig()
 	if err != nil {
 		panic(err)
@@ -42,7 +42,6 @@ func main() {
 	}
 
 	bloock.ApiKey = cfg.APIKey
-	bloock.ApiHost = "https://api.bloock.dev"
 
 	certificationRepository := sql.NewSQLCertificationRepository(*conn, 5*time.Second, logger)
 	integrityRepository := repository.NewBloockIntegrityRepository(logger)
@@ -64,7 +63,7 @@ func main() {
 
 	go func() {
 		defer wg.Done()
-		server, err := rest.NewServer(cfg.APIHost, cfg.APIPort, processService, updateAnchorService, notifyService, cfg.WebhookSecretKey, cfg.WebhookEnforceTolerance, logger, cfg.DebugMode)
+		server, err := rest.NewServer(cfg.APIHost, cfg.APIPort, processService, updateAnchorService, notifyService, cfg.WebhookSecretKey, logger, cfg.DebugMode)
 		if err != nil {
 			panic(err)
 		}
