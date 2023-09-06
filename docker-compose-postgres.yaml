@@ -6,6 +6,10 @@ services:
     restart: always
     environment:
       POSTGRES_PASSWORD: admin
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      timeout: 5s
+      retries: 5
 
   bloock-managed-api:
     platform: linux/x86_64
@@ -18,17 +22,7 @@ services:
     ports:
       - 8080:8080
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     environment:
-      BLOOCK_DB_CONNECTION_STRING: "postgres://admin:admin@tcp(postgres:3306)/managed"
-      BLOOCK_API_KEY: ""
-      BLOOCK_CLIENT_ENDPOINT_URL: ""
-      BLOOCK_WEBHOOK_SECRET_KEY: ""
-      BLOOCK_API_HOST: "0.0.0.0"
-      BLOOCK_API_PORT: "8080"
-      BLOOCK_API_DEBUG_MODE:
-      BLOOCK_AUTHENTICITY_PRIVATE_KEY: ""
-      BLOOCK_AUTHENTICITY_PUBLIC_KEY: ""
-      BLOOCK_MAX_MEMORY:
-      BLOOCK_FILE_DIR:
-
+      BLOOCK_DB_CONNECTION_STRING: "postgres://postgres:admin@tcp(postgres:5432)/managed"
