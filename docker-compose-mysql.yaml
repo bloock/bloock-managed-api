@@ -15,9 +15,7 @@ services:
 
   bloock-managed-api:
     platform: linux/x86_64
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: bloock/managed-api:latest
     container_name: bloock-managed-api
     volumes:
       - ./config.yml:/go/bin/config.yml:ro
