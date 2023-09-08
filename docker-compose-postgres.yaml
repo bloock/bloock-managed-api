@@ -1,6 +1,5 @@
 services:
   postgres:
-    platform: linux/x86_64
     container_name: postgres
     image: postgres
     restart: always
@@ -12,7 +11,6 @@ services:
       retries: 5
 
   bloock-managed-api:
-    platform: linux/x86_64
     image: bloock/managed-api:latest
     container_name: bloock-managed-api
     volumes:
@@ -24,3 +22,12 @@ services:
         condition: service_healthy
     environment:
       BLOOCK_DB_CONNECTION_STRING: "postgres://postgres:admin@tcp(postgres:5432)/managed"
+      BLOOCK_API_KEY: ""
+      BLOOCK_CLIENT_ENDPOINT_URL: ""
+      BLOOCK_WEBHOOK_SECRET_KEY: ""
+      BLOOCK_AUTHENTICITY_PRIVATE_KEY: ""
+      BLOOCK_AUTHENTICITY_PUBLIC_KEY: ""
+      BLOOCK_API_HOST: "0.0.0.0"
+      BLOOCK_API_PORT: "8080"
+      BLOOCK_API_DEBUG_MODE: false
+      BLOOCK_FILE_DIR: ""
