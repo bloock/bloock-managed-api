@@ -17,7 +17,6 @@ type Config struct {
 	DebugMode          bool   `mapstructure:"BLOOCK_API_DEBUG_MODE"`
 	PrivateKey         string `mapstructure:"BLOOCK_AUTHENTICITY_PRIVATE_KEY"`
 	PublicKey          string `mapstructure:"BLOOCK_AUTHENTICITY_PUBLIC_KEY"`
-	MaxMemory          int64  `mapstructure:"BLOOCK_MAX_MEMORY"`
 	FileDir            string `mapstructure:"BLOOCK_FILE_DIR"`
 }
 
@@ -53,7 +52,6 @@ func setDefaultConfigValues() {
 	viper.SetDefault("bloock_api_host", "0.0.0.0")
 	viper.SetDefault("bloock_api_port", "8080")
 	viper.SetDefault("bloock_api_debug_mode", false)
-	viper.SetDefault("bloock_max_memory", 10<<20) //10MB
 	viper.SetDefault("bloock_file_dir", "./tmp")
 	viper.SetDefault("bloock_authenticity_private_key", "")
 	viper.SetDefault("bloock_authenticity_public_key", "")

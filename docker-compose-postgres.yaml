@@ -4,7 +4,10 @@ services:
     image: postgres
     restart: always
     environment:
+      POSTGRES_DB: managed
       POSTGRES_PASSWORD: admin
+    ports:
+      - "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       timeout: 5s
@@ -21,13 +24,5 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      BLOOCK_DB_CONNECTION_STRING: "postgres://postgres:admin@tcp(postgres:5432)/managed"
-      BLOOCK_API_KEY: ""
-      BLOOCK_CLIENT_ENDPOINT_URL: ""
-      BLOOCK_WEBHOOK_SECRET_KEY: ""
-      BLOOCK_AUTHENTICITY_PRIVATE_KEY: ""
-      BLOOCK_AUTHENTICITY_PUBLIC_KEY: ""
-      BLOOCK_API_HOST: "0.0.0.0"
-      BLOOCK_API_PORT: "8080"
-      BLOOCK_API_DEBUG_MODE: false
-      BLOOCK_FILE_DIR: ""
+      BLOOCK_DB_CONNECTION_STRING: "postgresql://postgres:admin@postgres/managed?sslmode=disable"
+      BLOOCK_API_KEY: "test_u4NFCv4ht7ho3fWPWem-UYC3qLHU2HXT5MEQkAV66BSOrKMprZRdIS1bshVZ8QvP"
