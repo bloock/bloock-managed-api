@@ -23,7 +23,7 @@ The BLOOCK Managed API is a tool to integrate [BLOOCK](https://bloock.com)'s ser
 
 ## Installation
 
-You have two primary methods to set up and run the Bloock Identity Managed API:
+You have two primary methods to set up and run the Bloock Managed API:
 
 1. [Docker Setup Guide](#docker-setup-guide)
 2. [Standalone Setup](#standalone-setup)
@@ -48,21 +48,21 @@ This option is straightforward and ideal if you want to get started quickly. Fol
       docker pull bloock/managed-api
       ```
 
-      This command fetches the latest version of the Bloock Identity Managed API image from [DockerHub](https://hub.docker.com/repository/docker/bloock/managed-api/general). We maintain a Docker repository with the latest releases of this repository.
+      This command fetches the latest version of the Bloock Managed API image from [DockerHub](https://hub.docker.com/repository/docker/bloock/managed-api/general). We maintain a Docker repository with the latest releases of this repository.
 
 
-2. **Create a `config.txt` File:**
+2. **Create a `.env` File:**
 
-    - In your project directory, create a `config.txt` file. You can use a text editor of your choice to create this file.
+    - In your project directory, create a `.env` file. You can use a text editor of your choice to create this file.
 
     - This file will contain the configuration for the API, including environment variables. Refer to the [Variables](#variables) section for a list of environment variables and their descriptions.
 
-    - In the `config.txt` file, define the environment variables you want to configure for the API. Each environment variable should be set in the following format:
+    - In the `.env` file, define the environment variables you want to configure for the API. Each environment variable should be set in the following format:
       ```txt
       VARIABLE_NAME=VALUE
       ```
 
-    - Here's an example of what your `config.txt` file might look like:
+    - Here's an example of what your `.env` file might look like:
 
       ```txt
       BLOOCK_DB_CONNECTION_STRING=file:bloock?mode=memory&cache=shared&_fk=1
@@ -75,22 +75,22 @@ This option is straightforward and ideal if you want to get started quickly. Fol
 
 3. **Run the Docker Image with Environment Variables:**
 
-    - Run the following command to start the Bloock Identity Managed API container while passing the `config.txt` file as an environment variable source:
+    - Run the following command to start the Bloock Managed API container while passing the `.env` file as an environment variable source:
 
      ```bash
-     docker run --env-file config.txt -p 8080:8080 bloock/managed-api
+     docker run --env-file .env -p 8080:8080 bloock/managed-api
      ```
 
-    - This command maps the `config.txt` file into the container, ensuring that the API reads its configuration from the file. Viper automatically read these environment variables and make them accessible to the code.
+    - This command maps the `.env` file into the container, ensuring that the API reads its configuration from the file. Viper automatically read these environment variables and make them accessible to the code.
 
 
 4. **Access the API:**
 
-    - After running the Docker image, the Bloock Identity Managed API will be accessible at `http://localhost:8080`.
+    - After running the Docker image, the Bloock Managed API will be accessible at `http://localhost:8080`.
 
     - You can now make API requests to interact with the service.
 
-By following these steps, you can quickly deploy the Bloock Identity Managed API as a Docker container with your customized configuration.
+By following these steps, you can quickly deploy the Bloock Managed API as a Docker container with your customized configuration.
 
 ### Option 2: Use Docker Compose with Database Containers
 
@@ -98,7 +98,7 @@ If you need a more complex setup, such as using a specific database like **MySQL
 
 1. **Choose the Docker Compose File:**
 
-    - In our [repository](https://github.com/bloock/bloock-identity-managed-api), you will find Docker Compose files for different database types:
+    - In our [repository](https://github.com/bloock/bloock-managed-api), you will find Docker Compose files for different database types:
 
         - `docker-compose-mysql.yaml` for MySQL
         - `docker-compose-postgres.yaml` for PostgreSQL
@@ -146,9 +146,9 @@ If you need a more complex setup, such as using a specific database like **MySQL
 
 6. **Access the API:**
 
-    - After running the Docker Compose command, the Bloock Identity Managed API will be accessible at http://localhost:8080. You can make API requests to interact with the service.
+    - After running the Docker Compose command, the Bloock Managed API will be accessible at http://localhost:8080. You can make API requests to interact with the service.
 
-By following these steps, you can quickly set up the Bloock Identity Managed API with your chosen database type using the provided Docker Compose files.
+By following these steps, you can quickly set up the Bloock Managed API with your chosen database type using the provided Docker Compose files.
 
 ### Standalone Setup
 
@@ -168,9 +168,9 @@ To deploy the API as a standalone application, follow these steps:
 
 1. **Clone the Repository:**
 
-    - Open your terminal and navigate to the directory where you want to clone the [repository]((https://github.com/bloock/bloock-identity-managed-api)).
+    - Open your terminal and navigate to the directory where you want to clone the [repository]((https://github.com/bloock/bloock-managed-api)).
 
-    - Run the following command to clone the [repository]((https://github.com/bloock/bloock-identity-managed-api)):
+    - Run the following command to clone the [repository]((https://github.com/bloock/bloock-managed-api)):
 
     ```bash
      git clone https://github.com/bloock/managed-api.git
@@ -205,26 +205,26 @@ To deploy the API as a standalone application, follow these steps:
      go run cmd/main.go
      ```
 
-   This command will start the Bloock Identity Managed API as a standalone application, and it will use the configuration provided in the config.yaml file.
+   This command will start the Bloock Managed API as a standalone application, and it will use the configuration provided in the config.yaml file.
 
 
 5. **Access the API:**
 
-    - After running the application, the Bloock Identity Managed API will be accessible at http://localhost:8080. You can make API requests to interact with the service.
+    - After running the application, the Bloock Managed API will be accessible at http://localhost:8080. You can make API requests to interact with the service.
 
 ---
 
 ## Configuration
 
-The Bloock Identity Managed API leverages Viper, a powerful configuration management library, currently supporting environment variables and a YAML configuration file.
+The Bloock Managed API leverages Viper, a powerful configuration management library, currently supporting environment variables and a YAML configuration file.
 
 ### Variables
 
-Here are the configuration variables used by the Bloock Identity Managed API:
+Here are the configuration variables used by the Bloock Managed API:
 
 - **BLOOCK_API_KEY** (**REQUIRED**)
     - **Description**: Your unique BLOOCK API key.
-    - **Purpose**: This API key is required for authentication and authorization when interacting with the Bloock Identity Managed API. It allows you to securely access and use the API's features.
+    - **Purpose**: This API key is required for authentication and authorization when interacting with the Bloock Managed API. It allows you to securely access and use the API's features.
 - **BLOOCK_DB_CONNECTION_STRING** (***OPTIONAL***)
     - **Description**: Your custom database connection URL.
     - **Default**: "file:bloock?mode=memory&cache=shared&_fk=1"
@@ -246,7 +246,7 @@ Here are the configuration variables used by the Bloock Identity Managed API:
 - **BLOOCK_API_HOST** (***OPTIONAL***)
     - **Description**: The API host IP address.
     - **Default**: 0.0.0.0
-    - **Purpose**: This variable allows you to specify the IP address on which the Bloock Identity Managed API should listen for incoming requests. You can customize it based on your network configuration.
+    - **Purpose**: This variable allows you to specify the IP address on which the Bloock Managed API should listen for incoming requests. You can customize it based on your network configuration.
 - **BLOOCK_API_PORT** (***OPTIONAL***)
     - **Description**: The API port number.
     - **Default**: 8080
@@ -260,7 +260,7 @@ Here are the configuration variables used by the Bloock Identity Managed API:
     - **Default**: ./tmp
     - **Purpose**: Processed files can be temporarily stored in this directory while waiting for integrity confirmation. You can configure it to a specific directory path that suits your storage needs.
 
-These configuration variables provide fine-grained control over the behavior of the Bloock Identity Managed API. You can adjust them to match your specific requirements and deployment environment.
+These configuration variables provide fine-grained control over the behavior of the Bloock Managed API. You can adjust them to match your specific requirements and deployment environment.
 
 ### Configuration file
 
@@ -286,7 +286,7 @@ BLOOCK_AUTHENTICITY_PUBLIC_KEY: ""
 
 ### Database Support
 
-The Bloock Identity Managed API is designed to be flexible when it comes to database integration. It supports three types of relational databases: **MemDB (SQLite)**, **MySQL**, and **Postgres**. The choice of database type depends on your specific requirements and infrastructure.
+The Bloock Managed API is designed to be flexible when it comes to database integration. It supports three types of relational databases: **MemDB (SQLite)**, **MySQL**, and **Postgres**. The choice of database type depends on your specific requirements and infrastructure.
 
 Here are the supported database types and how to configure them:
 
@@ -313,7 +313,7 @@ Similar to MySQL, replace `user`, `password`, `host`, and `database` with your P
 
 In this format, `dbname` represents the name of your SQLite database. The API will create an in-memory SQLite database with this name.
 
-If you already have an existing database infrastructure and want to use it with the Bloock Identity Managed API, you have the flexibility to provide your custom database connection string.
+If you already have an existing database infrastructure and want to use it with the Bloock Managed API, you have the flexibility to provide your custom database connection string.
 
 `Variable: BLOOCK_DB_CONNECTION_STRING`
 
