@@ -45,8 +45,8 @@ func NewEntConnection(connectionURL string, connector SQLConnector, logger zerol
 			db: client,
 		}, nil
 	}
-	if strings.Contains(connectionURL, "postgres") {
-		client, err := open(connector, Postgres, strings.Replace(connectionURL, "postgres://", "", 1))
+	if strings.Contains(connectionURL, "postgresql") {
+		client, err := open(connector, Postgres, strings.Replace(connectionURL, "postgresql://", "", 1))
 		if err != nil {
 			return nil, err
 		}
