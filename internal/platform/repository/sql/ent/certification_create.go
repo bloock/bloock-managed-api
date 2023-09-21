@@ -167,11 +167,15 @@ func (cc *CertificationCreate) createSpec() (*Certification, *sqlgraph.CreateSpe
 // CertificationCreateBulk is the builder for creating many Certification entities in bulk.
 type CertificationCreateBulk struct {
 	config
+	err      error
 	builders []*CertificationCreate
 }
 
 // Save creates the Certification entities in the database.
 func (ccb *CertificationCreateBulk) Save(ctx context.Context) ([]*Certification, error) {
+	if ccb.err != nil {
+		return nil, ccb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(ccb.builders))
 	nodes := make([]*Certification, len(ccb.builders))
 	mutators := make([]Mutator, len(ccb.builders))

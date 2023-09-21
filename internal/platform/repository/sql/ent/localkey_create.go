@@ -145,11 +145,15 @@ func (lkc *LocalKeyCreate) createSpec() (*LocalKey, *sqlgraph.CreateSpec) {
 // LocalKeyCreateBulk is the builder for creating many LocalKey entities in bulk.
 type LocalKeyCreateBulk struct {
 	config
+	err      error
 	builders []*LocalKeyCreate
 }
 
 // Save creates the LocalKey entities in the database.
 func (lkcb *LocalKeyCreateBulk) Save(ctx context.Context) ([]*LocalKey, error) {
+	if lkcb.err != nil {
+		return nil, lkcb.err
+	}
 	specs := make([]*sqlgraph.CreateSpec, len(lkcb.builders))
 	nodes := make([]*LocalKey, len(lkcb.builders))
 	mutators := make([]Mutator, len(lkcb.builders))
