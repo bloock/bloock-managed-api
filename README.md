@@ -295,7 +295,7 @@ Here are the supported database types and how to configure them:
    mysql://user:password@tcp(host:port)/database
    ````
 
-Replace `user`, +password`, `host`, `port`, and `database` with your MySQL database credentials and configuration. This format allows you to specify the MySQL database you want to connect to.
+Replace `user`, `password`, `host`, `port`, and `database` with your MySQL database credentials and configuration. This format allows you to specify the MySQL database you want to connect to.
 
 - **Postgres**: For PostgreSQL database integration, use the following connection string format:
 
