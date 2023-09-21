@@ -25,4 +25,4 @@ services:
         condition: service_healthy
     environment:
       BLOOCK_DB_CONNECTION_STRING: "postgresql://postgres:admin@postgres/managed?sslmode=disable"
-      BLOOCK_API_KEY: "test_u4NFCv4ht7ho3fWPWem-UYC3qLHU2HXT5MEQkAV66BSOrKMprZRdIS1bshVZ8QvP"
+      BLOOCK_API_KEY: ""
