@@ -20,7 +20,7 @@ func TestConnection_NewConnection(t *testing.T) {
 		expected string
 	}{
 		{name: "given mysql url it should be detected", url: "mysql://username:password@localhost:3306/mydatabase", driver: Mysql, expected: "username:password@localhost:3306/mydatabase"},
-		{name: "given postgres url it should be detected", url: "postgres://username:password@localhost:5432/mydatabase", driver: Postgres, expected: "username:password@localhost:5432/mydatabase"},
+		{name: "given postgres url it should be detected", url: "postgresql://username:password@localhost/mydatabase?sslmode=disable", driver: Postgres, expected: "username:password@localhost/mydatabase?sslmode=disable"},
 		{name: "given sqlite memory url it should be detected", url: "file:ent?mode=memory&cache=shared&_fk=1", driver: Sqlite, expected: "file:ent?mode=memory&cache=shared&_fk=1"},
 	}
 	for _, test := range tests {
