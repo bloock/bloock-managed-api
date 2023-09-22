@@ -83,6 +83,18 @@ This option is straightforward and ideal if you want to get started quickly. Fol
 
     - This command maps the `.env` file into the container, ensuring that the API reads its configuration from the file. Viper automatically read these environment variables and make them accessible to the code.
 
+    - By default, the above command runs the Docker container in the foreground, displaying API logs and output in your terminal. You can interact with the API while it's running.
+    
+    3.1. **Running Docker in the Background (Daemon Mode)**
+
+    - Append the `-d` flag to the docker run command as follows:
+
+    ```bash
+    docker run -d --env-file config.txt -p 8080:8080 bloock/managed-api
+    ```
+
+    The `-d` flag tells Docker to run the container as a background process. You can continue using your terminal for other tasks while the Bloock Managed API container runs silently in the background.
+
 
 4. **Access the API:**
 
@@ -143,6 +155,16 @@ If you need a more complex setup, such as using a specific database like **MySQL
 
    Replace `docker-compose-mysql.yaml` with the name of the Docker Compose file you selected.
 
+    5.1. **Running Docker in the Background (Daemon Mode)**
+
+    - Append the `-d` flag to the docker run command as follows:
+
+    ```bash
+    docker-compose -f docker-compose-mysql.yaml up -d
+    ```
+
+    The `-d` flag tells Docker to run the container as a background process. You can continue using your terminal for other tasks while the Bloock Managed API container runs silently in the background.
+
 
 6. **Access the API:**
 
@@ -166,19 +188,33 @@ You can also run this service as a common Golang binary if you need it.
 
 To deploy the API as a standalone application, follow these steps:
 
-1. **Clone the Repository:**
+1. **Clone the Repository or Download the Latest Release:**
 
-    - Open your terminal and navigate to the directory where you want to clone the [repository]((https://github.com/bloock/bloock-managed-api)).
+   1.1. **Clone the Repository:**
 
-    - Run the following command to clone the [repository]((https://github.com/bloock/bloock-managed-api)):
+    - Open your terminal and navigate to the directory where you want to clone the [repository]((https://github.com/bloock/bloock-identity-managed-api)).
+
+    - Run the following command to clone the [repository]((https://github.com/bloock/bloock-identity-managed-api)):
 
     ```bash
      git clone https://github.com/bloock/managed-api.git
      ```
 
+   Instead of cloning the repository, it's recommended to download the latest release to ensure you have the most stable and up-to-date version of the Bloock Managed API.
+
+   1.2 **Download the Latest Release:**
+
+    - Visit the [repository's releases page](https://github.com/bloock/bloock-managed-api/releases) on GitHub.
+
+    - Look for the latest release version and select it.
+
+    - Under the Assets section, you will find downloadable files. Choose the appropriate file for your operating system (e.g., Windows, macOS, Linux).
+
+    - Download the selected release file to your local machine.
+
 2. **Navigate to the Repository:**
 
-    - Change your current directory to the cloned repository:
+    - Change your current directory to the cloned repository or downloaded the release file:
 
     ```bash
      cd managed-api
@@ -223,17 +259,19 @@ The Bloock Managed API leverages Viper, a powerful configuration management libr
 Here are the configuration variables used by the Bloock Managed API:
 
 - **BLOOCK_API_KEY** (**REQUIRED**)
-    - **Description**: Your unique BLOOCK API key.
-    - **Purpose**: This API key is required for authentication and authorization when interacting with the Bloock Managed API. It allows you to securely access and use the API's features.
+    - **Description**: Your unique [BLOOCK API key](https://docs.bloock.com/libraries/authentication/create-an-api-key).
+    - **Purpose**: This [API key](https://docs.bloock.com/libraries/authentication/create-an-api-key) is required for authentication and authorization when interacting with the Bloock Identity Managed API. It allows you to securely access and use the API's features.
+    - **[Create API Key](https://docs.bloock.com/libraries/authentication/create-an-api-key)**
 - **BLOOCK_DB_CONNECTION_STRING** (***OPTIONAL***)
     - **Description**: Your custom database connection URL.
     - **Default**: "file:bloock?mode=memory&cache=shared&_fk=1"
     - **Purpose**: This variable allows you to specify your own [database](#database-support) connection string. You can use it to connect the API to your existing database infrastructure. The format depends on the [database](#database-support) type you choose.
     - **Required**: When docker database container or your existing database infrastructure provided.
 - **BLOOCK_WEBHOOK_SECRET_KEY** (***OPTIONAL***)
-    - **Description**: Your BLOOCK webhook secret key.
-    - **Purpose**: The webhook secret key is used to secure and verify incoming webhook requests. It ensures that webhook data is received from a trusted source and has not been tampered with during transmission.
+    - **Description**: Your [BLOOCK webhook secret key](https://docs.bloock.com/webhooks/overview).
+    - **Purpose**: The [webhook secret key](https://docs.bloock.com/webhooks/overview) is used to secure and verify incoming webhook requests. It ensures that webhook data is received from a trusted source and has not been tampered with during transmission.
     - **Required**: When you want to certificate data using integrity Bloock product.
+    - **[Create webhook](https://docs.bloock.com/webhooks/overview)**
 - **BLOOCK_CLIENT_ENDPOINT_URL** (***OPTIONAL***)
     - **Description**: An endpoint URL where you want to send processed files.
     - **Purpose**: This URL specifies the destination where processed files will be sent after successful verification. It can be configured to integrate with other systems or services that require the processed data.
