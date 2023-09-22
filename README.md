@@ -369,5 +369,5 @@ You can access the following Postman collection where is the specification for t
 
 ## License
 
-See [LICENSE](LICENSE.md).
+See [LICENSE](LICENSE).
 
