@@ -5,6 +5,9 @@ import (
 	"bloock-managed-api/internal/domain/repository"
 	"context"
 	"errors"
+	"fmt"
+	"io"
+	"net/http"
 )
 
 var ErrUnsupportedHosting = errors.New("unsupported hosting type")
@@ -36,4 +39,24 @@ func (a AvailabilityService) Upload(ctx context.Context, data []byte, hostingTyp
 	default:
 		return "", ErrUnsupportedHosting
 	}
+}
+
+func (a AvailabilityService) Download(ctx context.Context, url string) ([]byte, error) {
+	resp, err := http.Get(url)
+	if err != nil {
+		return []byte{}, fmt.Errorf("error downloading file from %s: %s", url, err.Error())
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return []byte{}, fmt.Errorf("error downloading file from %s: received status code %d", url, resp.StatusCode)
+	}
+
+	file, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return []byte{}, fmt.Errorf("error downloading file from %s: %s", url, err.Error())
+	}
+
+	return file, nil
+
 }

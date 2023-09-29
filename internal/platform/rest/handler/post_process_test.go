@@ -25,12 +25,14 @@ import (
 func TestProcessServiceError(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	processService := mock_service.NewMockBaseProcessService(ctrl)
+	availabilityService := mock_service.NewMockAvailabilityService(ctrl)
 	notifyService := mock_service.NewMockNotifyService(ctrl)
 	updateAnchor := mock_service.NewMockCertificateUpdateAnchorService(ctrl)
 	server, err := rest.NewServer(
 		"localhost",
 		"8085",
 		processService,
+		availabilityService,
 		updateAnchor,
 		notifyService,
 		"",
@@ -83,13 +85,15 @@ func TestProcessServiceError(t *testing.T) {
 
 func TestPostProcessMultipart(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	signApplicationService := mock_service.NewMockBaseProcessService(ctrl)
+	processService := mock_service.NewMockBaseProcessService(ctrl)
+	availabilityService := mock_service.NewMockAvailabilityService(ctrl)
 	notifyService := mock_service.NewMockNotifyService(ctrl)
 	updateAnchor := mock_service.NewMockCertificateUpdateAnchorService(ctrl)
 	server, err := rest.NewServer(
 		"localhost",
 		"8085",
-		signApplicationService,
+		processService,
+		availabilityService,
 		updateAnchor,
 		notifyService,
 		"",
@@ -103,12 +107,14 @@ func TestPostProcessMultipart(t *testing.T) {
 
 	tests := []struct {
 		name string
+		url  string
+		file []byte
 	}{
-		{name: "given a valid request it should return 202 when no error occurs"},
+		{name: "given a valid request with file it should return 202 when no error occurs", file: fixtures.PDFContent},
+		{name: "given a valid request with url it should return 202 when no error occurs", url: "https://valid.url"},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			data := fixtures.PDFContent
 			integrityEnabled := true
 			authenticityEnabled := true
 			keySource := domain.MANAGED_KEY.String()
@@ -117,15 +123,23 @@ func TestPostProcessMultipart(t *testing.T) {
 			useEnsResolution := true
 			availabilityType := domain.HOSTED.String()
 
-			processRequest, err := request.NewProcessRequest(data, integrityEnabled, authenticityEnabled, keySource, keyType, kid, useEnsResolution, availabilityType)
+			processRequest, err := request.NewProcessRequest(test.file, integrityEnabled, authenticityEnabled, keySource, keyType, kid, useEnsResolution, availabilityType)
 			require.NoError(t, err)
 			processResponse := response.NewProcessResponseBuilder().Build()
-			signApplicationService.EXPECT().Process(gomock.Any(), *processRequest).Return(processResponse, nil)
+			processService.EXPECT().Process(gomock.Any(), *processRequest).Return(processResponse, nil)
 			buf := new(bytes.Buffer)
 			writer := multipart.NewWriter(buf)
 
-			part, _ := writer.CreateFormFile("file", uuid.New().String())
-			_, err = part.Write(data)
+			if len(test.file) > 0 {
+				part, _ := writer.CreateFormFile("file", uuid.New().String())
+				_, err = part.Write(test.file)
+			}
+
+			if len(test.url) > 0 {
+				availabilityService.EXPECT().Download(gomock.Any(), test.url).Return(test.file, nil)
+				_ = writer.WriteField("url", test.url)
+			}
+
 			require.NoError(t, err)
 			_ = writer.WriteField("integrity.enabled", strconv.FormatBool(integrityEnabled))
 			_ = writer.WriteField("authenticity.enabled", strconv.FormatBool(authenticityEnabled))
@@ -153,12 +167,14 @@ func TestPostProcessMultipart(t *testing.T) {
 func TestPostProcessBadRequests(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	processService := mock_service.NewMockBaseProcessService(ctrl)
+	availabilityService := mock_service.NewMockAvailabilityService(ctrl)
 	notifyService := mock_service.NewMockNotifyService(ctrl)
 	updateAnchor := mock_service.NewMockCertificateUpdateAnchorService(ctrl)
 	server, err := rest.NewServer(
 		"localhost",
 		"8085",
 		processService,
+		availabilityService,
 		updateAnchor,
 		notifyService,
 		"",
@@ -180,6 +196,7 @@ func TestPostProcessBadRequests(t *testing.T) {
 	authenticityEnabled := "true"
 	tests := []struct {
 		file             []byte
+		url              string
 		name             string
 		integrity        string
 		authenticity     string
@@ -189,6 +206,7 @@ func TestPostProcessBadRequests(t *testing.T) {
 		availability     string
 		useEnsResolution string
 	}{
+		{name: "given bad url it should return 400 status code", url: "invalid url", integrity: "a", authenticity: authenticityEnabled, keyType: managedKey, kty: ecp256k, key: kid, availability: hosted, useEnsResolution: ensResolutionEnabled},
 		{name: "given bad integrity value it should return 400 status code", file: data, integrity: "a", authenticity: authenticityEnabled, keyType: managedKey, kty: ecp256k, key: kid, availability: hosted, useEnsResolution: ensResolutionEnabled},
 		{name: "given bad authenticity value it should return 400 status code", file: data, integrity: integrityEnabled, authenticity: "a", keyType: managedKey, kty: ecp256k, key: kid, availability: hosted, useEnsResolution: ensResolutionEnabled},
 		{name: "given bad  keyType value it should return 400 status code", file: data, integrity: integrityEnabled, authenticity: authenticityEnabled, keyType: "a", kty: ecp256k, key: kid, availability: hosted, useEnsResolution: ensResolutionEnabled},
@@ -206,6 +224,7 @@ func TestPostProcessBadRequests(t *testing.T) {
 			part, _ := writer.CreateFormFile("file", uuid.New().String())
 			_, err = part.Write(data)
 			require.NoError(t, err)
+			_ = writer.WriteField("url", test.url)
 			_ = writer.WriteField("integrity.enabled", test.integrity)
 			_ = writer.WriteField("authenticity.enabled", test.authenticity)
 			_ = writer.WriteField("authenticity.keyType", test.keyType)
@@ -229,13 +248,15 @@ func TestPostProcessBadRequests(t *testing.T) {
 
 func TestWithoutFile(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	signApplicationService := mock_service.NewMockBaseProcessService(ctrl)
+	processService := mock_service.NewMockBaseProcessService(ctrl)
+	availabilityService := mock_service.NewMockAvailabilityService(ctrl)
 	notifyService := mock_service.NewMockNotifyService(ctrl)
 	updateAnchor := mock_service.NewMockCertificateUpdateAnchorService(ctrl)
 	server, err := rest.NewServer(
 		"localhost",
 		"8085",
-		signApplicationService,
+		processService,
+		availabilityService,
 		updateAnchor,
 		notifyService,
 		"",
@@ -247,7 +268,7 @@ func TestWithoutFile(t *testing.T) {
 	require.NoError(t, err)
 	engine := server.Engine()
 
-	t.Run("given no file it should return bad request", func(t *testing.T) {
+	t.Run("given no file or url it should return bad request", func(t *testing.T) {
 		kid := "768e7955-9690-4ba5-8ff9-23206d14ceb8"
 		useEnsResolution := "true"
 		ecp256k := "EcP256k"

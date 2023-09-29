@@ -7,12 +7,14 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
+	"net/url"
 
 	"github.com/gin-gonic/gin"
 )
 
 type postProcessForm struct {
-	File                  *multipart.FileHeader `form:"file" binding:"required"`
+	File                  *multipart.FileHeader `form:"file"`
+	Url                   string                `form:"url"`
 	IntegrityEnabled      bool                  `form:"integrity.enabled,default=false"`
 	AuthenticityEnabled   bool                  `form:"authenticity.enabled,default=false"`
 	AuthenticityKeySource string                `form:"authenticity.keySource"`
@@ -22,7 +24,7 @@ type postProcessForm struct {
 	AvailabilityType      string                `form:"availability.type,default=NONE"`
 }
 
-func PostProcess(processService service.BaseProcessService) gin.HandlerFunc {
+func PostProcess(processService service.BaseProcessService, availabilityService service.AvailabilityService) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var formData postProcessForm
 		err := ctx.Bind(&formData)
@@ -32,20 +34,42 @@ func PostProcess(processService service.BaseProcessService) gin.HandlerFunc {
 			return
 		}
 
-		fileReader, err := formData.File.Open()
-		if err != nil {
-			badRequestAPIError := NewBadRequestAPIError(err.Error())
-			ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
-			return
-		}
-		file, err := io.ReadAll(fileReader)
-		if err != nil {
-			serverAPIError := NewInternalServerAPIError(err.Error())
-			ctx.JSON(serverAPIError.Status, serverAPIError)
-			return
-		}
-		if len(file) == 0 {
-			badRequestAPIError := NewBadRequestAPIError("file must be a valid file")
+		var file []byte
+		if formData.File != nil {
+			fileReader, err := formData.File.Open()
+			if err != nil {
+				badRequestAPIError := NewBadRequestAPIError(err.Error())
+				ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
+				return
+			}
+			file, err = io.ReadAll(fileReader)
+			if err != nil {
+				serverAPIError := NewInternalServerAPIError(err.Error())
+				ctx.JSON(serverAPIError.Status, serverAPIError)
+				return
+			}
+			if len(file) == 0 {
+				badRequestAPIError := NewBadRequestAPIError("file must be a valid file")
+				ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
+				return
+			}
+		} else if formData.Url != "" {
+			u, err := url.ParseRequestURI(formData.Url)
+			if err != nil {
+				badRequestAPIError := NewBadRequestAPIError("Invalid URL provided")
+				ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
+				return
+			}
+
+			file, err = availabilityService.Download(ctx, u.String())
+			if err != nil {
+				badRequestAPIError := NewBadRequestAPIError(err.Error())
+				ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
+				return
+			}
+
+		} else {
+			badRequestAPIError := NewBadRequestAPIError("You must provide a file or URL")
 			ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
 			return
 		}

@@ -4,6 +4,7 @@ import (
 	"bloock-managed-api/internal/platform/rest/handler"
 	"bloock-managed-api/internal/service"
 	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 )
@@ -16,7 +17,7 @@ type Server struct {
 	logger zerolog.Logger
 }
 
-func NewServer(host string, port string, processService service.BaseProcessService, updateAnchor service.CertificateUpdateAnchorService, notify service.NotifyService, webhookSecretKey string, logger zerolog.Logger, debug bool) (*Server, error) {
+func NewServer(host string, port string, processService service.BaseProcessService, availabilityService service.AvailabilityService, updateAnchor service.CertificateUpdateAnchorService, notify service.NotifyService, webhookSecretKey string, logger zerolog.Logger, debug bool) (*Server, error) {
 	router := gin.Default()
 	if debug {
 		gin.SetMode(gin.DebugMode)
@@ -28,7 +29,7 @@ func NewServer(host string, port string, processService service.BaseProcessServi
 	}
 
 	v1 := router.Group("/v1/")
-	v1.POST("process", handler.PostProcess(processService))
+	v1.POST("process", handler.PostProcess(processService, availabilityService))
 	v1.POST("webhook", handler.PostReceiveWebhook(updateAnchor, notify, webhookSecretKey))
 	if debug {
 		v1.POST("certification", handler.Debug())

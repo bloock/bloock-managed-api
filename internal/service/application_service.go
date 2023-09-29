@@ -23,6 +23,7 @@ type IntegrityService interface {
 
 type AvailabilityService interface {
 	Upload(ctx context.Context, data []byte, hostingType domain.HostingType) (string, error)
+	Download(ctx context.Context, url string) ([]byte, error)
 }
 
 type CertificateUpdateAnchorService interface {

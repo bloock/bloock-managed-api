@@ -168,6 +168,21 @@ func (m *MockAvailabilityService) EXPECT() *MockAvailabilityServiceMockRecorder 
 	return m.recorder
 }
 
+// Download mocks base method.
+func (m *MockAvailabilityService) Download(ctx context.Context, url string) ([]byte, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Download", ctx, url)
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Download indicates an expected call of Download.
+func (mr *MockAvailabilityServiceMockRecorder) Download(ctx, url interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Download", reflect.TypeOf((*MockAvailabilityService)(nil).Download), ctx, url)
+}
+
 // Upload mocks base method.
 func (m *MockAvailabilityService) Upload(ctx context.Context, data []byte, hostingType domain.HostingType) (string, error) {
 	m.ctrl.T.Helper()

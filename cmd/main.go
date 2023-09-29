@@ -63,7 +63,7 @@ func main() {
 
 	go func() {
 		defer wg.Done()
-		server, err := rest.NewServer(cfg.APIHost, cfg.APIPort, processService, updateAnchorService, notifyService, cfg.WebhookSecretKey, logger, cfg.DebugMode)
+		server, err := rest.NewServer(cfg.APIHost, cfg.APIPort, processService, availabilityService, updateAnchorService, notifyService, cfg.WebhookSecretKey, logger, cfg.DebugMode)
 		if err != nil {
 			panic(err)
 		}
