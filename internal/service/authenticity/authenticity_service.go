@@ -8,6 +8,7 @@ import (
 	"errors"
 
 	"github.com/bloock/bloock-sdk-go/v2/entity/key"
+	"github.com/bloock/bloock-sdk-go/v2/entity/record"
 )
 
 type AuthenticityService struct {
@@ -22,33 +23,25 @@ func NewAuthenticityService(authenticityRepository repository.AuthenticityReposi
 
 var ErrKeyTypeNotSupported = errors.New("key type not supported for signing")
 
-func (s AuthenticityService) Sign(ctx context.Context, request request.SignRequest) (string, []byte, string, error) {
+func (s AuthenticityService) Sign(ctx context.Context, request request.SignRequest) (string, *record.Record, error) {
 	switch request.KeySource() {
 	case domain.LOCAL_KEY:
 		if request.KeyType() == key.EcP256k && !request.UseEnsResolution() {
 			signature, record, err := s.authenticityRepository.
 				SignECWithLocalKey(ctx, request.Data(), request.KeyType(), request.PublicKey(), request.PrivateKey())
 			if err != nil {
-				return "", nil, "", err
+				return "", nil, err
 			}
-			recHash, err := record.GetHash()
-			if err != nil {
-				return "", nil, "", err
-			}
-			return signature, record.Retrieve(), recHash, nil
+			return signature, record, nil
 		}
 
 		if request.KeyType() == key.EcP256k && request.UseEnsResolution() {
 			signature, record, err := s.authenticityRepository.
 				SignECWithLocalKeyEns(ctx, request.Data(), request.KeyType(), request.PublicKey(), request.PrivateKey())
 			if err != nil {
-				return "", nil, "", err
+				return "", nil, err
 			}
-			recHash, err := record.GetHash()
-			if err != nil {
-				return "", nil, "", err
-			}
-			return signature, record.Retrieve(), recHash, nil
+			return signature, record, nil
 		}
 
 	case domain.MANAGED_KEY:
@@ -56,57 +49,41 @@ func (s AuthenticityService) Sign(ctx context.Context, request request.SignReque
 			signature, record, err := s.authenticityRepository.
 				SignECWithManagedKey(ctx, request.Data(), request.KeyID().String())
 			if err != nil {
-				return "", nil, "", err
+				return "", nil, err
 			}
-			recHash, err := record.GetHash()
-			if err != nil {
-				return "", nil, "", err
-			}
-			return signature, record.Retrieve(), recHash, nil
+			return signature, record, nil
 		}
 
 		if request.KeyType() == key.EcP256k && request.UseEnsResolution() {
 			signature, record, err := s.authenticityRepository.
 				SignECWithManagedKeyEns(ctx, request.Data(), request.KeyID().String())
 			if err != nil {
-				return "", nil, "", err
+				return "", nil, err
 			}
-			recHash, err := record.GetHash()
-			if err != nil {
-				return "", nil, "", err
-			}
-			return signature, record.Retrieve(), recHash, nil
+			return signature, record, nil
 		}
 
 	case domain.LOCAL_CERTIFICATE:
-		return "", nil, "", nil
+		return "", nil, nil
 	case domain.MANAGED_CERTIFICATE:
 		if request.KeyType() == key.EcP256k && !request.UseEnsResolution() {
 			signature, record, err := s.authenticityRepository.
 				SignECWithManagedKey(ctx, request.Data(), request.KeyID().String())
 			if err != nil {
-				return "", nil, "", err
+				return "", nil, err
 			}
-			recHash, err := record.GetHash()
-			if err != nil {
-				return "", nil, "", err
-			}
-			return signature, record.Retrieve(), recHash, nil
+			return signature, record, nil
 		}
 
 		if request.KeyType() == key.EcP256k && request.UseEnsResolution() {
 			signature, record, err := s.authenticityRepository.
 				SignECWithManagedKeyEns(ctx, request.Data(), request.KeyID().String())
 			if err != nil {
-				return "", nil, "", err
+				return "", nil, err
 			}
-			recHash, err := record.GetHash()
-			if err != nil {
-				return "", nil, "", err
-			}
-			return signature, record.Retrieve(), recHash, nil
+			return signature, record, nil
 		}
 	}
 
-	return "", nil, "", ErrKeyTypeNotSupported
+	return "", nil, ErrKeyTypeNotSupported
 }

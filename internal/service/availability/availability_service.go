@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+
+	"github.com/bloock/bloock-sdk-go/v2/entity/record"
 )
 
 var ErrUnsupportedHosting = errors.New("unsupported hosting type")
@@ -20,16 +22,16 @@ func NewAvailabilityService(availabilityRepository repository.AvailabilityReposi
 	return &AvailabilityService{availabilityRepository: availabilityRepository}
 }
 
-func (a AvailabilityService) Upload(ctx context.Context, data []byte, hostingType domain.HostingType) (string, error) {
+func (a AvailabilityService) Upload(ctx context.Context, record *record.Record, hostingType domain.HostingType) (string, error) {
 	switch hostingType {
 	case domain.HOSTED:
-		hostedID, err := a.availabilityRepository.UploadHosted(ctx, data)
+		hostedID, err := a.availabilityRepository.UploadHosted(ctx, record)
 		if err != nil {
 			return "", err
 		}
 		return hostedID, err
 	case domain.IPFS:
-		ipfsID, err := a.availabilityRepository.UploadIpfs(ctx, data)
+		ipfsID, err := a.availabilityRepository.UploadIpfs(ctx, record)
 		if err != nil {
 			return "", err
 		}

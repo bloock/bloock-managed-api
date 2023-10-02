@@ -2,11 +2,12 @@ package repository
 
 import (
 	"context"
-	"errors"
+	"strings"
+
 	"github.com/bloock/bloock-sdk-go/v2/client"
 	"github.com/bloock/bloock-sdk-go/v2/entity/availability"
+	"github.com/bloock/bloock-sdk-go/v2/entity/record"
 	"github.com/rs/zerolog"
-	"strings"
 )
 
 type BloockAvailabilityRepository struct {
@@ -24,22 +25,12 @@ func NewBloockAvailabilityRepository(logger zerolog.Logger) *BloockAvailabilityR
 	}
 }
 
-func (b BloockAvailabilityRepository) UploadHosted(ctx context.Context, data []byte) (string, error) {
-	rec, err := b.recordClient.FromBytes(data).Build()
-	if err != nil {
-		b.logger.Error().Err(err).Msg("")
-		return "", errUnknown
-	}
-	return b.availabilityClient.Publish(rec, availability.NewHostedPublisher())
+func (b BloockAvailabilityRepository) UploadHosted(ctx context.Context, record *record.Record) (string, error) {
+	return b.availabilityClient.Publish(*record, availability.NewHostedPublisher())
 }
 
-func (b BloockAvailabilityRepository) UploadIpfs(ctx context.Context, data []byte) (string, error) {
-	rec, err := b.recordClient.FromBytes(data).Build()
-	if err != nil {
-		b.logger.Error().Err(err).Msg("")
-		return "", errUnknown
-	}
-	return b.availabilityClient.Publish(rec, availability.NewIpfsPublisher())
+func (b BloockAvailabilityRepository) UploadIpfs(ctx context.Context, record *record.Record) (string, error) {
+	return b.availabilityClient.Publish(*record, availability.NewIpfsPublisher())
 
 }
 
@@ -58,5 +49,3 @@ func (b BloockAvailabilityRepository) FindFile(ctx context.Context, dataID strin
 
 	return record.Retrieve(), nil
 }
-
-var errUnknown = errors.New("availability unknown error")

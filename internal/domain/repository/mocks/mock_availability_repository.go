@@ -8,6 +8,7 @@ import (
 	context "context"
 	reflect "reflect"
 
+	record "github.com/bloock/bloock-sdk-go/v2/entity/record"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -50,31 +51,31 @@ func (mr *MockAvailabilityRepositoryMockRecorder) FindFile(ctx, dataID interface
 }
 
 // UploadHosted mocks base method.
-func (m *MockAvailabilityRepository) UploadHosted(ctx context.Context, data []byte) (string, error) {
+func (m *MockAvailabilityRepository) UploadHosted(ctx context.Context, record *record.Record) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UploadHosted", ctx, data)
+	ret := m.ctrl.Call(m, "UploadHosted", ctx, record)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // UploadHosted indicates an expected call of UploadHosted.
-func (mr *MockAvailabilityRepositoryMockRecorder) UploadHosted(ctx, data interface{}) *gomock.Call {
+func (mr *MockAvailabilityRepositoryMockRecorder) UploadHosted(ctx, record interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UploadHosted", reflect.TypeOf((*MockAvailabilityRepository)(nil).UploadHosted), ctx, data)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UploadHosted", reflect.TypeOf((*MockAvailabilityRepository)(nil).UploadHosted), ctx, record)
 }
 
 // UploadIpfs mocks base method.
-func (m *MockAvailabilityRepository) UploadIpfs(ctx context.Context, data []byte) (string, error) {
+func (m *MockAvailabilityRepository) UploadIpfs(ctx context.Context, record *record.Record) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UploadIpfs", ctx, data)
+	ret := m.ctrl.Call(m, "UploadIpfs", ctx, record)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // UploadIpfs indicates an expected call of UploadIpfs.
-func (mr *MockAvailabilityRepositoryMockRecorder) UploadIpfs(ctx, data interface{}) *gomock.Call {
+func (mr *MockAvailabilityRepositoryMockRecorder) UploadIpfs(ctx, record interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UploadIpfs", reflect.TypeOf((*MockAvailabilityRepository)(nil).UploadIpfs), ctx, data)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UploadIpfs", reflect.TypeOf((*MockAvailabilityRepository)(nil).UploadIpfs), ctx, record)
 }

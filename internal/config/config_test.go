@@ -20,6 +20,8 @@ func TestInitConfig(t *testing.T) {
 		_ = os.Setenv("BLOOCK_API_DEBUG_MODE", "true")
 		_ = os.Setenv("BLOOCK_AUTHENTICITY_PRIVATE_KEY", value)
 		_ = os.Setenv("BLOOCK_AUTHENTICITY_PUBLIC_KEY", value)
+		_ = os.Setenv("BLOOCK_ENCRYPTION_PRIVATE_KEY", value)
+		_ = os.Setenv("BLOOCK_ENCRYPTION_PUBLIC_KEY", value)
 		_ = os.Setenv("BLOOCK_FILE_DIR", value)
 		config, err := InitConfig()
 
@@ -31,8 +33,10 @@ func TestInitConfig(t *testing.T) {
 		assert.Equal(t, value, config.DBConnectionString)
 		assert.Equal(t, value, config.ClientEndpointUrl)
 		assert.Equal(t, value, config.WebhookSecretKey)
-		assert.Equal(t, value, config.PublicKey)
-		assert.Equal(t, value, config.PrivateKey)
+		assert.Equal(t, value, config.AuthenticityPublicKey)
+		assert.Equal(t, value, config.AuthenticityPrivateKey)
+		assert.Equal(t, value, config.EncryptionPublicKey)
+		assert.Equal(t, value, config.EncryptionPrivateKey)
 		assert.Equal(t, value, config.FileDir)
 		assert.Equal(t, true, config.DebugMode)
 

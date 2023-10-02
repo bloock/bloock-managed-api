@@ -2,18 +2,25 @@ package service
 
 import (
 	"bloock-managed-api/internal/domain"
-	"bloock-managed-api/internal/service/authenticity/request"
-	request2 "bloock-managed-api/internal/service/process/request"
+	authenticityRequest "bloock-managed-api/internal/service/authenticity/request"
+	encryptionRequest "bloock-managed-api/internal/service/encryption/request"
+	processRequest "bloock-managed-api/internal/service/process/request"
 	"bloock-managed-api/internal/service/process/response"
 	"context"
+
+	"github.com/bloock/bloock-sdk-go/v2/entity/record"
 )
 
 type BaseProcessService interface {
-	Process(ctx context.Context, req request2.ProcessRequest) (*response.ProcessResponse, error)
+	Process(ctx context.Context, req processRequest.ProcessRequest) (*response.ProcessResponse, error)
 }
 
 type AuthenticityService interface {
-	Sign(ctx context.Context, SignRequest request.SignRequest) (string, []byte, string, error)
+	Sign(ctx context.Context, signRequest authenticityRequest.SignRequest) (string, *record.Record, error)
+}
+
+type EncryptionService interface {
+	Encrypt(ctx context.Context, request encryptionRequest.EncryptRequest) (*record.Record, error)
 }
 
 type IntegrityService interface {
@@ -22,7 +29,7 @@ type IntegrityService interface {
 }
 
 type AvailabilityService interface {
-	Upload(ctx context.Context, data []byte, hostingType domain.HostingType) (string, error)
+	Upload(ctx context.Context, record *record.Record, hostingType domain.HostingType) (string, error)
 	Download(ctx context.Context, url string) ([]byte, error)
 }
 
@@ -31,6 +38,7 @@ type CertificateUpdateAnchorService interface {
 }
 
 type FileService interface {
+	GetRecord(ctx context.Context, file []byte) (*record.Record, error)
 	GetFileHash(ctx context.Context, file []byte) (string, error)
 	SaveFile(ctx context.Context, file []byte, hash string) error
 }

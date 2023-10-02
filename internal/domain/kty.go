@@ -12,6 +12,10 @@ func ValidateKeyType(kty string) (key.KeyType, error) {
 		return key.Rsa3072, nil
 	case "Rsa4096":
 		return key.Rsa4096, nil
+	case "Aes128":
+		return key.Aes128, nil
+	case "Aes256":
+		return key.Aes256, nil
 	default:
 		return -1, ErrInvalidKeyType(kty)
 	}

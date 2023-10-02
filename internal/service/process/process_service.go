@@ -4,10 +4,11 @@ import (
 	"bloock-managed-api/internal/config"
 	"bloock-managed-api/internal/domain"
 	"bloock-managed-api/internal/service"
-	"bloock-managed-api/internal/service/authenticity/request"
+	authenticity_request "bloock-managed-api/internal/service/authenticity/request"
 	authenticity_response "bloock-managed-api/internal/service/authenticity/response"
 	availability_response "bloock-managed-api/internal/service/availability/response"
-	"bloock-managed-api/internal/service/integrity/response"
+	encryption_request "bloock-managed-api/internal/service/encryption/request"
+	integrity_response "bloock-managed-api/internal/service/integrity/response"
 	process_request "bloock-managed-api/internal/service/process/request"
 	process_response "bloock-managed-api/internal/service/process/response"
 	"context"
@@ -16,17 +17,19 @@ import (
 type ProcessService struct {
 	integrityService    service.IntegrityService
 	authenticityService service.AuthenticityService
+	encryptionService   service.EncryptionService
 	availabilityService service.AvailabilityService
 	fileService         service.FileService
 	notifyService       service.NotifyService
 }
 
-func NewProcessService(integrityService service.IntegrityService, authenticityService service.AuthenticityService,
+func NewProcessService(integrityService service.IntegrityService, authenticityService service.AuthenticityService, encryptionService service.EncryptionService,
 	availabilityService service.AvailabilityService, fileService service.FileService, notifyService service.NotifyService) *ProcessService {
 
 	return &ProcessService{
 		integrityService:    integrityService,
 		authenticityService: authenticityService,
+		encryptionService:   encryptionService,
 		availabilityService: availabilityService,
 		fileService:         fileService,
 		notifyService:       notifyService,
@@ -34,33 +37,45 @@ func NewProcessService(integrityService service.IntegrityService, authenticitySe
 }
 
 func (s ProcessService) Process(ctx context.Context, req process_request.ProcessRequest) (*process_response.ProcessResponse, error) {
-	fileHash, err := s.fileService.GetFileHash(ctx, req.Data())
+	record, err := s.fileService.GetRecord(ctx, req.Data())
+	if err != nil {
+		return nil, err
+	}
+
+	fileHash, err := record.GetHash()
 	if err != nil {
 		return nil, err
 	}
 
 	certification := domain.Certification{
-		Data: req.Data(),
-		Hash: fileHash,
+		Data:   req.Data(),
+		Hash:   fileHash,
+		Record: record,
 	}
 
 	responseBuilder := process_response.NewProcessResponseBuilder()
 
 	if req.IsAuthenticityEnabled() {
-		signature, signedData, newHash, err := s.authenticityService.Sign(ctx, *request.NewSignRequest(
-			config.Configuration.PublicKey,
-			&config.Configuration.PrivateKey,
-			req.KeySource(),
-			req.KeyID(),
-			req.KeyType(),
+		signature, record, err := s.authenticityService.Sign(ctx, authenticity_request.NewSignRequest(
+			config.Configuration.AuthenticityPublicKey,
+			&config.Configuration.AuthenticityPrivateKey,
+			req.AuthenticityKeySource(),
+			req.AuthenticityKeyID(),
+			req.AuthenticityKeyType(),
+			req.AuthenticityUseEnsResolution(),
 			req.Data(),
-			req.UseEnsResolution(),
 		))
 		if err != nil {
 			return nil, err
 		}
 
-		certification.Data = signedData
+		newHash, err := record.GetHash()
+		if err != nil {
+			return nil, err
+		}
+
+		certification.Data = record.Retrieve()
+		certification.Record = record
 		certification.Hash = newHash
 		responseBuilder.SignResponse(*authenticity_response.NewSignResponse(signature))
 	}
@@ -70,13 +85,36 @@ func (s ProcessService) Process(ctx context.Context, req process_request.Process
 		if err != nil {
 			return nil, err
 		}
-		certification.AnchorID = newCertification.AnchorID
-		certification.Hash = newCertification.Hash
-		responseBuilder.CertificationResponse(*response.NewCertificationResponse(certification.Hash, certification.AnchorID))
+		certification = newCertification
+		responseBuilder.CertificationResponse(*integrity_response.NewCertificationResponse(certification.Hash, certification.AnchorID))
+	}
+
+	if req.IsEncryptionEnabled() {
+		req := encryption_request.NewEncryptRequest(
+			config.Configuration.EncryptionPublicKey,
+			&config.Configuration.EncryptionPrivateKey,
+			req.EncryptionKeySource(),
+			req.EncryptionKeyID(),
+			req.EncryptionKeyType(),
+			req.Data(),
+		)
+		encryptedRecord, err := s.encryptionService.Encrypt(ctx, req)
+		if err != nil {
+			return nil, err
+		}
+
+		newHash, err := record.GetHash()
+		if err != nil {
+			return nil, err
+		}
+
+		certification.Data = encryptedRecord.Retrieve()
+		certification.Record = encryptedRecord
+		certification.Hash = newHash
 	}
 
 	if req.HostingType() != domain.NONE {
-		dataID, err := s.availabilityService.Upload(ctx, certification.Data, req.HostingType())
+		dataID, err := s.availabilityService.Upload(ctx, certification.Record, req.HostingType())
 		if err != nil {
 			return nil, err
 		}

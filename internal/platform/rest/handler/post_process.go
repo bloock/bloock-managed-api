@@ -22,6 +22,10 @@ type postProcessForm struct {
 	AuthenticityKey       string                `form:"authenticity.key"`
 	AuthenticityUseEns    bool                  `form:"authenticity.useEnsResolution,default=false"`
 	AvailabilityType      string                `form:"availability.type,default=NONE"`
+	EncryptionEnabled     bool                  `form:"encryption.enabled,default=false"`
+	EncryptionKeySource   string                `form:"encryption.keySource"`
+	EncryptionKeyType     string                `form:"encryption.keyType"`
+	EncryptionKey         string                `form:"encryption.key"`
 }
 
 func PostProcess(processService service.BaseProcessService, availabilityService service.AvailabilityService) gin.HandlerFunc {
@@ -74,7 +78,7 @@ func PostProcess(processService service.BaseProcessService, availabilityService 
 			return
 		}
 
-		processRequest, err := request.NewProcessRequest(file, formData.IntegrityEnabled, formData.AuthenticityEnabled, formData.AuthenticityKeySource, formData.AuthenticityKeyType, formData.AuthenticityKey, formData.AuthenticityUseEns, formData.AvailabilityType)
+		processRequest, err := request.NewProcessRequest(file, formData.IntegrityEnabled, formData.AuthenticityEnabled, formData.AuthenticityKeySource, formData.AuthenticityKeyType, formData.AuthenticityKey, formData.AuthenticityUseEns, formData.EncryptionEnabled, formData.EncryptionKeySource, formData.EncryptionKeyType, formData.EncryptionKey, formData.AvailabilityType)
 		if err != nil {
 			badRequestAPIError := NewBadRequestAPIError(err.Error())
 			ctx.JSON(badRequestAPIError.Status, badRequestAPIError)

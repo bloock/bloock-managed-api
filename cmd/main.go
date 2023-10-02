@@ -10,6 +10,7 @@ import (
 	"bloock-managed-api/internal/platform/rest"
 	"bloock-managed-api/internal/service/authenticity"
 	"bloock-managed-api/internal/service/availability"
+	"bloock-managed-api/internal/service/encryption"
 	"bloock-managed-api/internal/service/file"
 	"bloock-managed-api/internal/service/integrity"
 	"bloock-managed-api/internal/service/notify"
@@ -47,16 +48,18 @@ func main() {
 	integrityRepository := repository.NewBloockIntegrityRepository(logger)
 	notificationRepository := http_repository.NewHttpNotificationRepository(http.Client{}, cfg.ClientEndpointUrl, logger)
 	authenticityRepository := repository.NewBloockAuthenticityRepository(logger)
+	encryptionRepository := repository.NewBloockEncryptionRepository(logger)
 	availabilityRepository := repository.NewBloockAvailabilityRepository(logger)
 	storageRepository := hard_drive.NewHardDriveLocalStorageRepository(cfg.FileDir, logger)
 
 	integrityService := integrity.NewIntegrityService(certificationRepository, integrityRepository)
 	authenticityService := authenticity.NewAuthenticityService(authenticityRepository)
+	encryptionService := encryption.NewEncryptionService(encryptionRepository)
 	updateAnchorService := integrity.NewUpdateAnchorService(certificationRepository)
 	availabilityService := availability.NewAvailabilityService(availabilityRepository)
 	fileService := file.NewFileService(storageRepository)
 	notifyService := notify.NewNotifyService(notificationRepository, storageRepository, availabilityRepository)
-	processService := process.NewProcessService(integrityService, authenticityService, availabilityService, fileService, notifyService)
+	processService := process.NewProcessService(integrityService, authenticityService, encryptionService, availabilityService, fileService, notifyService)
 
 	wg := sync.WaitGroup{}
 	wg.Add(1)

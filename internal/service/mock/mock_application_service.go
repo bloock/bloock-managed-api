@@ -7,11 +7,13 @@ package mock_service
 import (
 	domain "bloock-managed-api/internal/domain"
 	request "bloock-managed-api/internal/service/authenticity/request"
-	request0 "bloock-managed-api/internal/service/process/request"
+	request0 "bloock-managed-api/internal/service/encryption/request"
+	request1 "bloock-managed-api/internal/service/process/request"
 	response "bloock-managed-api/internal/service/process/response"
 	context "context"
 	reflect "reflect"
 
+	record "github.com/bloock/bloock-sdk-go/v2/entity/record"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -39,7 +41,7 @@ func (m *MockBaseProcessService) EXPECT() *MockBaseProcessServiceMockRecorder {
 }
 
 // Process mocks base method.
-func (m *MockBaseProcessService) Process(ctx context.Context, req request0.ProcessRequest) (*response.ProcessResponse, error) {
+func (m *MockBaseProcessService) Process(ctx context.Context, req request1.ProcessRequest) (*response.ProcessResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Process", ctx, req)
 	ret0, _ := ret[0].(*response.ProcessResponse)
@@ -77,20 +79,57 @@ func (m *MockAuthenticityService) EXPECT() *MockAuthenticityServiceMockRecorder 
 }
 
 // Sign mocks base method.
-func (m *MockAuthenticityService) Sign(ctx context.Context, SignRequest request.SignRequest) (string, []byte, string, error) {
+func (m *MockAuthenticityService) Sign(ctx context.Context, signRequest request.SignRequest) (string, record.Record, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Sign", ctx, SignRequest)
+	ret := m.ctrl.Call(m, "Sign", ctx, signRequest)
 	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].([]byte)
-	ret2, _ := ret[2].(string)
-	ret3, _ := ret[3].(error)
-	return ret0, ret1, ret2, ret3
+	ret1, _ := ret[1].(record.Record)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // Sign indicates an expected call of Sign.
-func (mr *MockAuthenticityServiceMockRecorder) Sign(ctx, SignRequest interface{}) *gomock.Call {
+func (mr *MockAuthenticityServiceMockRecorder) Sign(ctx, signRequest interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Sign", reflect.TypeOf((*MockAuthenticityService)(nil).Sign), ctx, SignRequest)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Sign", reflect.TypeOf((*MockAuthenticityService)(nil).Sign), ctx, signRequest)
+}
+
+// MockEncryptionService is a mock of EncryptionService interface.
+type MockEncryptionService struct {
+	ctrl     *gomock.Controller
+	recorder *MockEncryptionServiceMockRecorder
+}
+
+// MockEncryptionServiceMockRecorder is the mock recorder for MockEncryptionService.
+type MockEncryptionServiceMockRecorder struct {
+	mock *MockEncryptionService
+}
+
+// NewMockEncryptionService creates a new mock instance.
+func NewMockEncryptionService(ctrl *gomock.Controller) *MockEncryptionService {
+	mock := &MockEncryptionService{ctrl: ctrl}
+	mock.recorder = &MockEncryptionServiceMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockEncryptionService) EXPECT() *MockEncryptionServiceMockRecorder {
+	return m.recorder
+}
+
+// Encrypt mocks base method.
+func (m *MockEncryptionService) Encrypt(ctx context.Context, request request0.EncryptRequest) (record.Record, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Encrypt", ctx, request)
+	ret0, _ := ret[0].(record.Record)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Encrypt indicates an expected call of Encrypt.
+func (mr *MockEncryptionServiceMockRecorder) Encrypt(ctx, request interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Encrypt", reflect.TypeOf((*MockEncryptionService)(nil).Encrypt), ctx, request)
 }
 
 // MockIntegrityService is a mock of IntegrityService interface.
@@ -184,18 +223,18 @@ func (mr *MockAvailabilityServiceMockRecorder) Download(ctx, url interface{}) *g
 }
 
 // Upload mocks base method.
-func (m *MockAvailabilityService) Upload(ctx context.Context, data []byte, hostingType domain.HostingType) (string, error) {
+func (m *MockAvailabilityService) Upload(ctx context.Context, record *record.Record, hostingType domain.HostingType) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Upload", ctx, data, hostingType)
+	ret := m.ctrl.Call(m, "Upload", ctx, record, hostingType)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Upload indicates an expected call of Upload.
-func (mr *MockAvailabilityServiceMockRecorder) Upload(ctx, data, hostingType interface{}) *gomock.Call {
+func (mr *MockAvailabilityServiceMockRecorder) Upload(ctx, record, hostingType interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Upload", reflect.TypeOf((*MockAvailabilityService)(nil).Upload), ctx, data, hostingType)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Upload", reflect.TypeOf((*MockAvailabilityService)(nil).Upload), ctx, record, hostingType)
 }
 
 // MockCertificateUpdateAnchorService is a mock of CertificateUpdateAnchorService interface.
@@ -272,6 +311,21 @@ func (m *MockFileService) GetFileHash(ctx context.Context, file []byte) (string,
 func (mr *MockFileServiceMockRecorder) GetFileHash(ctx, file interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFileHash", reflect.TypeOf((*MockFileService)(nil).GetFileHash), ctx, file)
+}
+
+// GetRecord mocks base method.
+func (m *MockFileService) GetRecord(ctx context.Context, file []byte) (*record.Record, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetRecord", ctx, file)
+	ret0, _ := ret[0].(*record.Record)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetRecord indicates an expected call of GetRecord.
+func (mr *MockFileServiceMockRecorder) GetRecord(ctx, file interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRecord", reflect.TypeOf((*MockFileService)(nil).GetRecord), ctx, file)
 }
 
 // SaveFile mocks base method.

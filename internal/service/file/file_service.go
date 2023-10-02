@@ -5,6 +5,7 @@ import (
 	"context"
 
 	"github.com/bloock/bloock-sdk-go/v2/client"
+	"github.com/bloock/bloock-sdk-go/v2/entity/record"
 )
 
 type FileService struct {
@@ -17,6 +18,15 @@ func NewFileService(localStorageRepository repository.LocalStorageRepository) *F
 		localStorageRepository: localStorageRepository,
 		recordClient:           client.NewRecordClient(),
 	}
+}
+
+func (f FileService) GetRecord(ctx context.Context, file []byte) (*record.Record, error) {
+	record, err := f.recordClient.FromFile(file).Build()
+	if err != nil {
+		return nil, err
+	}
+
+	return &record, nil
 }
 
 func (f FileService) GetFileHash(ctx context.Context, file []byte) (string, error) {

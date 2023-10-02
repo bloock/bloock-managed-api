@@ -48,13 +48,17 @@ func TestProcessServiceError(t *testing.T) {
 		data := []byte("Hello World")
 		integrityEnabled := true
 		authenticityEnabled := true
-		keySource := domain.MANAGED_KEY.String()
-		keyType := "EcP256k"
-		kid := "768e7955-9690-4ba5-8ff9-23206d14ceb8"
-		useEnsResolution := true
+		authenticityKeySource := domain.MANAGED_KEY.String()
+		authenticityKeyType := "EcP256k"
+		authenticityKid := "768e7955-9690-4ba5-8ff9-23206d14ceb8"
+		encryptionEnabled := true
+		encryptionKeySource := domain.MANAGED_KEY.String()
+		encryptionKeyType := "EcP256k"
+		encryptionKid := "768e7955-9690-4ba5-8ff9-23206d14ceb8"
+		authenticityUseEnsResolution := true
 		availabilityType := domain.HOSTED.String()
 
-		processRequest, err := request.NewProcessRequest(data, integrityEnabled, authenticityEnabled, keySource, keyType, kid, useEnsResolution, availabilityType)
+		processRequest, err := request.NewProcessRequest(data, integrityEnabled, authenticityEnabled, authenticityKeySource, authenticityKeyType, authenticityKid, authenticityUseEnsResolution, encryptionEnabled, encryptionKeySource, encryptionKeyType, encryptionKid, availabilityType)
 		require.NoError(t, err)
 		processService.EXPECT().Process(gomock.Any(), *processRequest).Return(nil, errors.New("some error"))
 		buf := new(bytes.Buffer)
@@ -65,10 +69,14 @@ func TestProcessServiceError(t *testing.T) {
 		require.NoError(t, err)
 		_ = writer.WriteField("integrity.enabled", strconv.FormatBool(integrityEnabled))
 		_ = writer.WriteField("authenticity.enabled", strconv.FormatBool(authenticityEnabled))
-		_ = writer.WriteField("authenticity.keySource", keySource)
-		_ = writer.WriteField("authenticity.keyType", keyType)
-		_ = writer.WriteField("authenticity.key", kid)
-		_ = writer.WriteField("authenticity.useEnsResolution", strconv.FormatBool(useEnsResolution))
+		_ = writer.WriteField("authenticity.keySource", authenticityKeySource)
+		_ = writer.WriteField("authenticity.keyType", authenticityKeyType)
+		_ = writer.WriteField("authenticity.key", authenticityKid)
+		_ = writer.WriteField("authenticity.useEnsResolution", strconv.FormatBool(authenticityUseEnsResolution))
+		_ = writer.WriteField("encryption.enabled", strconv.FormatBool(encryptionEnabled))
+		_ = writer.WriteField("encryption.keySource", encryptionKeySource)
+		_ = writer.WriteField("encryption.keyType", encryptionKeyType)
+		_ = writer.WriteField("encryption.key", encryptionKid)
 		_ = writer.WriteField("availability.type", availabilityType)
 		_ = writer.Close()
 		rec := httptest.NewRecorder()
@@ -117,13 +125,17 @@ func TestPostProcessMultipart(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			integrityEnabled := true
 			authenticityEnabled := true
-			keySource := domain.MANAGED_KEY.String()
-			keyType := "EcP256k"
-			kid := "768e7955-9690-4ba5-8ff9-23206d14ceb8"
-			useEnsResolution := true
+			authenticityKeySource := domain.MANAGED_KEY.String()
+			authenticityKeyType := "EcP256k"
+			authenticityKid := "768e7955-9690-4ba5-8ff9-23206d14ceb8"
+			authenticityUseEnsResolution := true
+			encryptionEnabled := true
+			encryptionKeySource := domain.MANAGED_KEY.String()
+			encryptionKeyType := "EcP256k"
+			encryptionKid := "768e7955-9690-4ba5-8ff9-23206d14ceb8"
 			availabilityType := domain.HOSTED.String()
 
-			processRequest, err := request.NewProcessRequest(test.file, integrityEnabled, authenticityEnabled, keySource, keyType, kid, useEnsResolution, availabilityType)
+			processRequest, err := request.NewProcessRequest(test.file, integrityEnabled, authenticityEnabled, authenticityKeySource, authenticityKeyType, authenticityKid, authenticityUseEnsResolution, encryptionEnabled, encryptionKeySource, encryptionKeyType, encryptionKid, availabilityType)
 			require.NoError(t, err)
 			processResponse := response.NewProcessResponseBuilder().Build()
 			processService.EXPECT().Process(gomock.Any(), *processRequest).Return(processResponse, nil)
@@ -143,10 +155,14 @@ func TestPostProcessMultipart(t *testing.T) {
 			require.NoError(t, err)
 			_ = writer.WriteField("integrity.enabled", strconv.FormatBool(integrityEnabled))
 			_ = writer.WriteField("authenticity.enabled", strconv.FormatBool(authenticityEnabled))
-			_ = writer.WriteField("authenticity.keySource", keySource)
-			_ = writer.WriteField("authenticity.keyType", keyType)
-			_ = writer.WriteField("authenticity.key", kid)
-			_ = writer.WriteField("authenticity.useEnsResolution", strconv.FormatBool(useEnsResolution))
+			_ = writer.WriteField("authenticity.keySource", authenticityKeySource)
+			_ = writer.WriteField("authenticity.keyType", authenticityKeyType)
+			_ = writer.WriteField("authenticity.key", authenticityKid)
+			_ = writer.WriteField("authenticity.useEnsResolution", strconv.FormatBool(authenticityUseEnsResolution))
+			_ = writer.WriteField("encryption.enabled", strconv.FormatBool(encryptionEnabled))
+			_ = writer.WriteField("encryption.keySource", encryptionKeySource)
+			_ = writer.WriteField("encryption.keyType", encryptionKeyType)
+			_ = writer.WriteField("encryption.key", encryptionKid)
 			_ = writer.WriteField("availability.type", availabilityType)
 
 			err = writer.Close()
