@@ -2,7 +2,10 @@ package repository
 
 import (
 	"context"
-	"strings"
+	"fmt"
+	"io"
+	"net/http"
+	"net/url"
 
 	"github.com/bloock/bloock-sdk-go/v2/client"
 	"github.com/bloock/bloock-sdk-go/v2/entity/availability"
@@ -34,18 +37,41 @@ func (b BloockAvailabilityRepository) UploadIpfs(ctx context.Context, record *re
 
 }
 
-func (b BloockAvailabilityRepository) FindFile(ctx context.Context, dataID string) ([]byte, error) {
-	record, err := b.availabilityClient.Retrieve(availability.NewHostedLoader(dataID))
-	if err != nil {
-		record, err = b.availabilityClient.Retrieve(availability.NewIpfsLoader(dataID))
+func (b BloockAvailabilityRepository) FindFile(ctx context.Context, id string) ([]byte, error) {
+	if _, err := url.ParseRequestURI(id); err != nil {
+		// is not a url
+
+		file, err := b.downloadUrl(ctx, fmt.Sprintf("https://cdn.bloock.com/hosting/v1/hosted/%s", id))
 		if err != nil {
-			if strings.Contains(err.Error(), "not found") {
-				return nil, nil
+			file, err := b.downloadUrl(ctx, fmt.Sprintf("https://cdn.bloock.com/hosting/v1/ipfs/%s", id))
+			if err != nil {
+				return nil, err
 			}
-			return nil, err
+			return file, nil
 		}
-		return record.Retrieve(), nil
+
+		return file, nil
+	} else {
+		// is a url
+		return b.downloadUrl(ctx, id)
+	}
+}
+
+func (b BloockAvailabilityRepository) downloadUrl(ctx context.Context, url string) ([]byte, error) {
+	resp, err := http.Get(url)
+	if err != nil {
+		return []byte{}, fmt.Errorf("error downloading file from %s: %s", url, err.Error())
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return []byte{}, fmt.Errorf("error downloading file from %s: received status code %d", url, resp.StatusCode)
 	}
 
-	return record.Retrieve(), nil
+	file, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return []byte{}, fmt.Errorf("error downloading file from %s: %s", url, err.Error())
+	}
+
+	return file, nil
 }

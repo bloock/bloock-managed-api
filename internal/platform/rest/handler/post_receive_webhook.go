@@ -3,10 +3,11 @@ package handler
 import (
 	"bloock-managed-api/internal/service"
 	"encoding/json"
-	"github.com/bloock/bloock-sdk-go/v2/client"
-	"github.com/gin-gonic/gin"
 	"io"
 	"net/http"
+
+	"github.com/bloock/bloock-sdk-go/v2/client"
+	"github.com/gin-gonic/gin"
 )
 
 type WebhookRequest struct {
