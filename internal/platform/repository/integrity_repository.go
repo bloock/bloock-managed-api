@@ -44,5 +44,6 @@ func (b BloockIntegrityRepository) Certify(ctx context.Context, file []byte) (do
 		AnchorID: int(receipt[0].Anchor),
 		Data:     file,
 		Hash:     dataHash,
+		Record:   &rec,
 	}, nil
 }

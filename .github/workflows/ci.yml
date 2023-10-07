@@ -9,20 +9,27 @@ on:
     - 'master'
 
 jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Build and push
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        push: false
   test:
     runs-on: ubuntu-latest
     name: Test
-    env:
-      GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
+    needs: [build]
     steps:
-
     - name: Checkout
       uses: actions/checkout@v3
     - name: Set up go
       uses: actions/setup-go@v3
       with:
         go-version: 1.18
-
     - name: Setup
       run: |
         go install github.com/golang/mock/mockgen@v1.6.0

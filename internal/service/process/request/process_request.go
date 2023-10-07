@@ -10,55 +10,92 @@ import (
 )
 
 type ProcessRequest struct {
-	file                  []byte
-	isIntegrityEnabled    bool
-	isAuthenticityEnabled bool
-	keySource             domain.KeyType
-	keyID                 uuid.UUID
-	keyType               key.KeyType
-	hostingType           domain.HostingType
-	useEnsResolution      bool
+	file                         []byte
+	url                          string
+	integrityEnabled             bool
+	authenticityEnabled          bool
+	authenticityKeySource        domain.KeyType
+	authenticityKeyID            uuid.UUID
+	authenticityKeyType          key.KeyType
+	authenticityUseEnsResolution bool
+	encryptionEnabled            bool
+	encryptionKeySource          domain.KeyType
+	encryptionKeyID              uuid.UUID
+	encryptionKeyType            key.KeyType
+	hostingType                  domain.HostingType
 }
 
-func NewProcessRequest(data []byte, integrityEnabled bool, authenticityEnabled bool, keySource string, keyType string, kid string, useEns bool, availabilityType string) (*ProcessRequest, error) {
+func NewProcessRequest(file []byte, url string, integrityEnabled bool, authenticityEnabled bool, authenticityKeySource string, authenticityKeyType string, authenticityKid string, authenticityUseEns bool, encryptionEnabled bool, encryptionKeySource string, encryptionKeyType string, encryptionKid string, availabilityType string) (*ProcessRequest, error) {
 	processRequestInstance := &ProcessRequest{}
 
-	processRequestInstance.file = data
-	processRequestInstance.isIntegrityEnabled = integrityEnabled
-	processRequestInstance.isAuthenticityEnabled = authenticityEnabled
+	processRequestInstance.file = file
+	processRequestInstance.url = url
+	processRequestInstance.integrityEnabled = integrityEnabled
 
+	processRequestInstance.authenticityEnabled = authenticityEnabled
 	if authenticityEnabled {
-		authenticityKeySource, err := domain.ParseKeySource(keySource)
+		authenticityKeySource, err := domain.ParseKeySource(authenticityKeySource)
 		if err != nil {
 			return nil, err
 		}
-		processRequestInstance.keySource = authenticityKeySource
+		processRequestInstance.authenticityKeySource = authenticityKeySource
 
-		kty, err := domain.ValidateKeyType(keyType)
+		kty, err := domain.ValidateKeyType(authenticityKeyType)
 		if err != nil {
 			return nil, err
 		}
-		processRequestInstance.keyType = kty
+		processRequestInstance.authenticityKeyType = kty
 
 		if authenticityKeySource == domain.MANAGED_KEY || authenticityKeySource == domain.MANAGED_CERTIFICATE {
 			// Managed key or certificate
 
-			keyID, err := uuid.Parse(kid)
+			keyID, err := uuid.Parse(authenticityKid)
 			if err != nil {
 				return nil, err
 			}
-			processRequestInstance.keyID = keyID
+			processRequestInstance.authenticityKeyID = keyID
 		} else {
-			if config.Configuration.PublicKey == "" {
+			if config.Configuration.AuthenticityPublicKey == "" {
 				return nil, errors.New("no public key loaded")
 			}
 
-			if config.Configuration.PrivateKey == "" {
+			if config.Configuration.AuthenticityPrivateKey == "" {
 				return nil, errors.New("no private key loaded")
 			}
 		}
 
-		processRequestInstance.useEnsResolution = useEns
+		processRequestInstance.authenticityUseEnsResolution = authenticityUseEns
+	}
+
+	processRequestInstance.encryptionEnabled = encryptionEnabled
+	if encryptionEnabled {
+		encryptionKeySource, err := domain.ParseKeySource(encryptionKeySource)
+		if err != nil {
+			return nil, err
+		}
+		processRequestInstance.encryptionKeySource = encryptionKeySource
+
+		kty, err := domain.ValidateKeyType(encryptionKeyType)
+		if err != nil {
+			return nil, err
+		}
+		processRequestInstance.encryptionKeyType = kty
+
+		if encryptionKeySource == domain.MANAGED_KEY || encryptionKeySource == domain.MANAGED_CERTIFICATE {
+			// Managed key or certificate
+
+			encryptionKeyID, err := uuid.Parse(encryptionKid)
+			if err != nil {
+				return nil, err
+			}
+			processRequestInstance.encryptionKeyID = encryptionKeyID
+		} else {
+			if config.Configuration.EncryptionPublicKey == "" {
+				return nil, errors.New("no public key loaded")
+			}
+		}
+
+		processRequestInstance.authenticityUseEnsResolution = authenticityUseEns
 	}
 
 	hostingType, err := domain.ParseHostingType(availabilityType)
@@ -70,36 +107,58 @@ func NewProcessRequest(data []byte, integrityEnabled bool, authenticityEnabled b
 	return processRequestInstance, nil
 }
 
-func (s ProcessRequest) KeyID() uuid.UUID {
-	return s.keyID
-}
-
-func (s ProcessRequest) UseEnsResolution() bool {
-	return s.useEnsResolution
-}
-
-func (s ProcessRequest) Data() []byte {
+func (s ProcessRequest) File() []byte {
 	return s.file
 }
+
+func (s ProcessRequest) URL() string {
+	return s.url
+}
+
 func (s *ProcessRequest) ReplaceDataWith(newData []byte) {
 	s.file = newData
 }
-func (s ProcessRequest) IsAuthenticityEnabled() bool {
-	return s.isAuthenticityEnabled
-}
 
 func (s ProcessRequest) IsIntegrityEnabled() bool {
-	return s.isIntegrityEnabled
+	return s.integrityEnabled
+}
+
+func (s ProcessRequest) IsAuthenticityEnabled() bool {
+	return s.authenticityEnabled
+}
+
+func (s ProcessRequest) AuthenticityKeySource() domain.KeyType {
+	return s.authenticityKeySource
+}
+
+func (s ProcessRequest) AuthenticityKeyType() key.KeyType {
+	return s.authenticityKeyType
+}
+
+func (s ProcessRequest) AuthenticityKeyID() uuid.UUID {
+	return s.authenticityKeyID
+}
+
+func (s ProcessRequest) AuthenticityUseEnsResolution() bool {
+	return s.authenticityUseEnsResolution
+}
+
+func (s ProcessRequest) IsEncryptionEnabled() bool {
+	return s.encryptionEnabled
+}
+
+func (s ProcessRequest) EncryptionKeySource() domain.KeyType {
+	return s.encryptionKeySource
+}
+
+func (s ProcessRequest) EncryptionKeyType() key.KeyType {
+	return s.encryptionKeyType
+}
+
+func (s ProcessRequest) EncryptionKeyID() uuid.UUID {
+	return s.encryptionKeyID
 }
 
 func (s ProcessRequest) HostingType() domain.HostingType {
 	return s.hostingType
-}
-
-func (s ProcessRequest) KeySource() domain.KeyType {
-	return s.keySource
-}
-
-func (s ProcessRequest) KeyType() key.KeyType {
-	return s.keyType
 }

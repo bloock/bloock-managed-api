@@ -3,9 +3,10 @@ package http
 import (
 	"bytes"
 	"errors"
-	"github.com/rs/zerolog"
 	"mime/multipart"
 	"net/http"
+
+	"github.com/rs/zerolog"
 )
 
 var ErrNotification = errors.New("notification couldn't send")
@@ -21,6 +22,10 @@ func NewHttpNotificationRepository(httpClient http.Client, clientEndpointURL str
 }
 
 func (h HttpNotificationRepository) NotifyCertification(hash string, file []byte) error {
+	if h.clientEndpointURL == "" {
+		return nil
+	}
+
 	buf := new(bytes.Buffer)
 	writer := multipart.NewWriter(buf)
 

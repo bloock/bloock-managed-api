@@ -5,9 +5,7 @@
 package mock_service
 
 import (
-	domain "bloock-managed-api/internal/domain"
-	request "bloock-managed-api/internal/service/authenticity/request"
-	request0 "bloock-managed-api/internal/service/process/request"
+	request "bloock-managed-api/internal/service/process/request"
 	response "bloock-managed-api/internal/service/process/response"
 	context "context"
 	reflect "reflect"
@@ -15,31 +13,31 @@ import (
 	gomock "github.com/golang/mock/gomock"
 )
 
-// MockBaseProcessService is a mock of BaseProcessService interface.
-type MockBaseProcessService struct {
+// MockProcessService is a mock of ProcessService interface.
+type MockProcessService struct {
 	ctrl     *gomock.Controller
-	recorder *MockBaseProcessServiceMockRecorder
+	recorder *MockProcessServiceMockRecorder
 }
 
-// MockBaseProcessServiceMockRecorder is the mock recorder for MockBaseProcessService.
-type MockBaseProcessServiceMockRecorder struct {
-	mock *MockBaseProcessService
+// MockProcessServiceMockRecorder is the mock recorder for MockProcessService.
+type MockProcessServiceMockRecorder struct {
+	mock *MockProcessService
 }
 
-// NewMockBaseProcessService creates a new mock instance.
-func NewMockBaseProcessService(ctrl *gomock.Controller) *MockBaseProcessService {
-	mock := &MockBaseProcessService{ctrl: ctrl}
-	mock.recorder = &MockBaseProcessServiceMockRecorder{mock}
+// NewMockProcessService creates a new mock instance.
+func NewMockProcessService(ctrl *gomock.Controller) *MockProcessService {
+	mock := &MockProcessService{ctrl: ctrl}
+	mock.recorder = &MockProcessServiceMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockBaseProcessService) EXPECT() *MockBaseProcessServiceMockRecorder {
+func (m *MockProcessService) EXPECT() *MockProcessServiceMockRecorder {
 	return m.recorder
 }
 
 // Process mocks base method.
-func (m *MockBaseProcessService) Process(ctx context.Context, req request0.ProcessRequest) (*response.ProcessResponse, error) {
+func (m *MockProcessService) Process(ctx context.Context, req request.ProcessRequest) (*response.ProcessResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Process", ctx, req)
 	ret0, _ := ret[0].(*response.ProcessResponse)
@@ -48,229 +46,9 @@ func (m *MockBaseProcessService) Process(ctx context.Context, req request0.Proce
 }
 
 // Process indicates an expected call of Process.
-func (mr *MockBaseProcessServiceMockRecorder) Process(ctx, req interface{}) *gomock.Call {
+func (mr *MockProcessServiceMockRecorder) Process(ctx, req interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Process", reflect.TypeOf((*MockBaseProcessService)(nil).Process), ctx, req)
-}
-
-// MockAuthenticityService is a mock of AuthenticityService interface.
-type MockAuthenticityService struct {
-	ctrl     *gomock.Controller
-	recorder *MockAuthenticityServiceMockRecorder
-}
-
-// MockAuthenticityServiceMockRecorder is the mock recorder for MockAuthenticityService.
-type MockAuthenticityServiceMockRecorder struct {
-	mock *MockAuthenticityService
-}
-
-// NewMockAuthenticityService creates a new mock instance.
-func NewMockAuthenticityService(ctrl *gomock.Controller) *MockAuthenticityService {
-	mock := &MockAuthenticityService{ctrl: ctrl}
-	mock.recorder = &MockAuthenticityServiceMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockAuthenticityService) EXPECT() *MockAuthenticityServiceMockRecorder {
-	return m.recorder
-}
-
-// Sign mocks base method.
-func (m *MockAuthenticityService) Sign(ctx context.Context, SignRequest request.SignRequest) (string, []byte, string, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Sign", ctx, SignRequest)
-	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].([]byte)
-	ret2, _ := ret[2].(string)
-	ret3, _ := ret[3].(error)
-	return ret0, ret1, ret2, ret3
-}
-
-// Sign indicates an expected call of Sign.
-func (mr *MockAuthenticityServiceMockRecorder) Sign(ctx, SignRequest interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Sign", reflect.TypeOf((*MockAuthenticityService)(nil).Sign), ctx, SignRequest)
-}
-
-// MockIntegrityService is a mock of IntegrityService interface.
-type MockIntegrityService struct {
-	ctrl     *gomock.Controller
-	recorder *MockIntegrityServiceMockRecorder
-}
-
-// MockIntegrityServiceMockRecorder is the mock recorder for MockIntegrityService.
-type MockIntegrityServiceMockRecorder struct {
-	mock *MockIntegrityService
-}
-
-// NewMockIntegrityService creates a new mock instance.
-func NewMockIntegrityService(ctrl *gomock.Controller) *MockIntegrityService {
-	mock := &MockIntegrityService{ctrl: ctrl}
-	mock.recorder = &MockIntegrityServiceMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockIntegrityService) EXPECT() *MockIntegrityServiceMockRecorder {
-	return m.recorder
-}
-
-// CertifyData mocks base method.
-func (m *MockIntegrityService) CertifyData(ctx context.Context, data []byte) (domain.Certification, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CertifyData", ctx, data)
-	ret0, _ := ret[0].(domain.Certification)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// CertifyData indicates an expected call of CertifyData.
-func (mr *MockIntegrityServiceMockRecorder) CertifyData(ctx, data interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CertifyData", reflect.TypeOf((*MockIntegrityService)(nil).CertifyData), ctx, data)
-}
-
-// UpdateCertification mocks base method.
-func (m *MockIntegrityService) UpdateCertification(ctx context.Context, certification domain.Certification) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateCertification", ctx, certification)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// UpdateCertification indicates an expected call of UpdateCertification.
-func (mr *MockIntegrityServiceMockRecorder) UpdateCertification(ctx, certification interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateCertification", reflect.TypeOf((*MockIntegrityService)(nil).UpdateCertification), ctx, certification)
-}
-
-// MockAvailabilityService is a mock of AvailabilityService interface.
-type MockAvailabilityService struct {
-	ctrl     *gomock.Controller
-	recorder *MockAvailabilityServiceMockRecorder
-}
-
-// MockAvailabilityServiceMockRecorder is the mock recorder for MockAvailabilityService.
-type MockAvailabilityServiceMockRecorder struct {
-	mock *MockAvailabilityService
-}
-
-// NewMockAvailabilityService creates a new mock instance.
-func NewMockAvailabilityService(ctrl *gomock.Controller) *MockAvailabilityService {
-	mock := &MockAvailabilityService{ctrl: ctrl}
-	mock.recorder = &MockAvailabilityServiceMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockAvailabilityService) EXPECT() *MockAvailabilityServiceMockRecorder {
-	return m.recorder
-}
-
-// Upload mocks base method.
-func (m *MockAvailabilityService) Upload(ctx context.Context, data []byte, hostingType domain.HostingType) (string, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Upload", ctx, data, hostingType)
-	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Upload indicates an expected call of Upload.
-func (mr *MockAvailabilityServiceMockRecorder) Upload(ctx, data, hostingType interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Upload", reflect.TypeOf((*MockAvailabilityService)(nil).Upload), ctx, data, hostingType)
-}
-
-// MockCertificateUpdateAnchorService is a mock of CertificateUpdateAnchorService interface.
-type MockCertificateUpdateAnchorService struct {
-	ctrl     *gomock.Controller
-	recorder *MockCertificateUpdateAnchorServiceMockRecorder
-}
-
-// MockCertificateUpdateAnchorServiceMockRecorder is the mock recorder for MockCertificateUpdateAnchorService.
-type MockCertificateUpdateAnchorServiceMockRecorder struct {
-	mock *MockCertificateUpdateAnchorService
-}
-
-// NewMockCertificateUpdateAnchorService creates a new mock instance.
-func NewMockCertificateUpdateAnchorService(ctrl *gomock.Controller) *MockCertificateUpdateAnchorService {
-	mock := &MockCertificateUpdateAnchorService{ctrl: ctrl}
-	mock.recorder = &MockCertificateUpdateAnchorServiceMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockCertificateUpdateAnchorService) EXPECT() *MockCertificateUpdateAnchorServiceMockRecorder {
-	return m.recorder
-}
-
-// GetCertificationsByAnchorID mocks base method.
-func (m *MockCertificateUpdateAnchorService) GetCertificationsByAnchorID(ctx context.Context, anchorID int) ([]domain.Certification, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetCertificationsByAnchorID", ctx, anchorID)
-	ret0, _ := ret[0].([]domain.Certification)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetCertificationsByAnchorID indicates an expected call of GetCertificationsByAnchorID.
-func (mr *MockCertificateUpdateAnchorServiceMockRecorder) GetCertificationsByAnchorID(ctx, anchorID interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCertificationsByAnchorID", reflect.TypeOf((*MockCertificateUpdateAnchorService)(nil).GetCertificationsByAnchorID), ctx, anchorID)
-}
-
-// MockFileService is a mock of FileService interface.
-type MockFileService struct {
-	ctrl     *gomock.Controller
-	recorder *MockFileServiceMockRecorder
-}
-
-// MockFileServiceMockRecorder is the mock recorder for MockFileService.
-type MockFileServiceMockRecorder struct {
-	mock *MockFileService
-}
-
-// NewMockFileService creates a new mock instance.
-func NewMockFileService(ctrl *gomock.Controller) *MockFileService {
-	mock := &MockFileService{ctrl: ctrl}
-	mock.recorder = &MockFileServiceMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockFileService) EXPECT() *MockFileServiceMockRecorder {
-	return m.recorder
-}
-
-// GetFileHash mocks base method.
-func (m *MockFileService) GetFileHash(ctx context.Context, file []byte) (string, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetFileHash", ctx, file)
-	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetFileHash indicates an expected call of GetFileHash.
-func (mr *MockFileServiceMockRecorder) GetFileHash(ctx, file interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetFileHash", reflect.TypeOf((*MockFileService)(nil).GetFileHash), ctx, file)
-}
-
-// SaveFile mocks base method.
-func (m *MockFileService) SaveFile(ctx context.Context, file []byte, hash string) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SaveFile", ctx, file, hash)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// SaveFile indicates an expected call of SaveFile.
-func (mr *MockFileServiceMockRecorder) SaveFile(ctx, file, hash interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveFile", reflect.TypeOf((*MockFileService)(nil).SaveFile), ctx, file, hash)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Process", reflect.TypeOf((*MockProcessService)(nil).Process), ctx, req)
 }
 
 // MockNotifyService is a mock of NotifyService interface.
@@ -296,16 +74,16 @@ func (m *MockNotifyService) EXPECT() *MockNotifyServiceMockRecorder {
 	return m.recorder
 }
 
-// NotifyClient mocks base method.
-func (m *MockNotifyService) NotifyClient(ctx context.Context, certifications []domain.Certification) error {
+// Notify mocks base method.
+func (m *MockNotifyService) Notify(ctx context.Context, anchorID int) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "NotifyClient", ctx, certifications)
+	ret := m.ctrl.Call(m, "Notify", ctx, anchorID)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// NotifyClient indicates an expected call of NotifyClient.
-func (mr *MockNotifyServiceMockRecorder) NotifyClient(ctx, certifications interface{}) *gomock.Call {
+// Notify indicates an expected call of Notify.
+func (mr *MockNotifyServiceMockRecorder) Notify(ctx, anchorID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NotifyClient", reflect.TypeOf((*MockNotifyService)(nil).NotifyClient), ctx, certifications)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Notify", reflect.TypeOf((*MockNotifyService)(nil).Notify), ctx, anchorID)
 }

@@ -1,16 +1,10 @@
 package response
 
-import (
-	autenticityResponse "bloock-managed-api/internal/service/authenticity/response"
-	availabilityResponse "bloock-managed-api/internal/service/availability/response"
-	integrityResponse "bloock-managed-api/internal/service/integrity/response"
-)
-
 type ProcessResponse struct {
 	hash                  string
-	certificationResponse *integrityResponse.CertificationResponse
-	signResponse          *autenticityResponse.SignResponse
-	availabilityResponse  *availabilityResponse.AvailabilityResponse
+	certificationResponse *IntegrityResponse
+	signResponse          *SignResponse
+	availabilityResponse  *AvailabilityResponse
 }
 
 type ProcessResponseBuilder struct {
@@ -28,17 +22,17 @@ func (b *ProcessResponseBuilder) HashResponse(hash string) *ProcessResponseBuild
 	return b
 }
 
-func (b *ProcessResponseBuilder) CertificationResponse(certificationResponse integrityResponse.CertificationResponse) *ProcessResponseBuilder {
+func (b *ProcessResponseBuilder) CertificationResponse(certificationResponse IntegrityResponse) *ProcessResponseBuilder {
 	b.processResponse.certificationResponse = &certificationResponse
 	return b
 }
 
-func (b *ProcessResponseBuilder) SignResponse(signResponse autenticityResponse.SignResponse) *ProcessResponseBuilder {
+func (b *ProcessResponseBuilder) SignResponse(signResponse SignResponse) *ProcessResponseBuilder {
 	b.processResponse.signResponse = &signResponse
 	return b
 }
 
-func (b *ProcessResponseBuilder) AvailabilityResponse(availabilityResponse availabilityResponse.AvailabilityResponse) *ProcessResponse {
+func (b *ProcessResponseBuilder) AvailabilityResponse(availabilityResponse AvailabilityResponse) *ProcessResponse {
 	b.processResponse.availabilityResponse = &availabilityResponse
 	return b.processResponse
 }
@@ -55,14 +49,14 @@ func (p ProcessResponse) Hash() string {
 	return p.hash
 }
 
-func (p ProcessResponse) CertificationResponse() *integrityResponse.CertificationResponse {
+func (p ProcessResponse) CertificationResponse() *IntegrityResponse {
 	return p.certificationResponse
 }
 
-func (p ProcessResponse) SignResponse() *autenticityResponse.SignResponse {
+func (p ProcessResponse) SignResponse() *SignResponse {
 	return p.signResponse
 }
 
-func (p ProcessResponse) AvailabilityResponse() *availabilityResponse.AvailabilityResponse {
+func (p ProcessResponse) AvailabilityResponse() *AvailabilityResponse {
 	return p.availabilityResponse
 }

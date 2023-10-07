@@ -4,37 +4,10 @@ on:
   push:
     tags:
     - 'v*'
-  pull_request:
-    branches:
-    - 'master'
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    name: Test
-    env:
-      GH_ACCESS_TOKEN: ${{ secrets.GH_ACCESS_TOKEN }}
-    steps:
-
-    - name: Checkout
-      uses: actions/checkout@v3
-    - name: Set up go
-      uses: actions/setup-go@v3
-      with:
-        go-version: 1.18
-
-    - name: Setup
-      run: |
-        go install github.com/golang/mock/mockgen@v1.6.0
-        go install entgo.io/ent/cmd/ent@latest
-        make cache
-        make mocks
-    - name: Run tests
-      run: make test
-
   push:
     runs-on: ubuntu-latest
-    needs: [test]
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -58,7 +31,7 @@ jobs:
       uses: docker/build-push-action@v4
       with:
         context: .
-        push: ${{ github.event_name != 'pull_request' }}
+        push: true
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
     - name: Update repo description
@@ -67,3 +40,14 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_PASSWORD }}
         repository: bloock/managed-api
+
+  create_release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: [push]
+    steps:
+    - uses: actions/checkout@v3
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        generate_release_notes: true

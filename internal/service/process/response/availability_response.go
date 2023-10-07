@@ -14,9 +14,9 @@ func NewAvailabilityResponse(id string, hostingType domain.HostingType) *Availab
 	var url string
 	switch hostingType {
 	case domain.IPFS:
-		url = fmt.Sprintf("https://api.bloock.com/hosting/v1/ipfs/%s", id)
+		url = fmt.Sprintf("https://cdn.bloock.com/hosting/v1/ipfs/%s", id)
 	case domain.HOSTED:
-		url = fmt.Sprintf("https://api.bloock.com/hosting/v1/hosted/%s", id)
+		url = fmt.Sprintf("https://cdn.bloock.com/hosting/v1/hosted/%s", id)
 	default:
 		url = ""
 	}

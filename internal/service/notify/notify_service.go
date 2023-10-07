@@ -1,27 +1,42 @@
 package notify
 
 import (
-	"bloock-managed-api/internal/config"
-	"bloock-managed-api/internal/domain"
 	"bloock-managed-api/internal/domain/repository"
 	"context"
+	"errors"
+)
+
+var (
+	ErrSignKeyNotSupported    = errors.New("key type not supported for signing")
+	ErrEncryptKeyNotSupported = errors.New("key type not supported for encrypting")
+	ErrUnsupportedHosting     = errors.New("unsupported hosting type")
 )
 
 type NotifyService struct {
-	notificationRepository repository.NotificationRepository
-	localStorageRepository repository.LocalStorageRepository
 	availabilityRepository repository.AvailabilityRepository
+	metadataRepository     repository.MetadataRepository
+	notificationRepository repository.NotificationRepository
 }
 
-func NewNotifyService(nr repository.NotificationRepository, lsr repository.LocalStorageRepository, ar repository.AvailabilityRepository) *NotifyService {
+func NewNotifyService(
+	availabilityRepository repository.AvailabilityRepository,
+	metadataRepository repository.MetadataRepository,
+	notificationRepository repository.NotificationRepository,
+) *NotifyService {
+
 	return &NotifyService{
-		notificationRepository: nr,
-		localStorageRepository: lsr,
-		availabilityRepository: ar,
+		availabilityRepository: availabilityRepository,
+		metadataRepository:     metadataRepository,
+		notificationRepository: notificationRepository,
 	}
 }
 
-func (n NotifyService) NotifyClient(ctx context.Context, certifications []domain.Certification) error {
+func (s NotifyService) Notify(ctx context.Context, anchorID int) error {
+	certifications, err := s.metadataRepository.GetCertificationsByAnchorID(ctx, anchorID)
+	if err != nil {
+		return err
+	}
+
 	for _, crt := range certifications {
 		var fileBytes []byte
 		var err error
@@ -30,19 +45,19 @@ func (n NotifyService) NotifyClient(ctx context.Context, certifications []domain
 			fileBytes = crt.Data
 		} else {
 			if crt.DataID != "" {
-				fileBytes, err = n.availabilityRepository.FindFile(ctx, crt.DataID)
+				fileBytes, err = s.availabilityRepository.FindFile(ctx, crt.DataID)
 				if err != nil {
 					return err
 				}
 			} else {
-				fileBytes, err = n.localStorageRepository.Retrieve(ctx, config.Configuration.FileDir, crt.Hash)
+				fileBytes, err = s.availabilityRepository.RetrieveTmp(ctx, crt.Hash)
 				if err != nil {
 					return err
 				}
 			}
 		}
 
-		if err = n.notificationRepository.NotifyCertification(crt.Hash, fileBytes); err != nil {
+		if err = s.notificationRepository.NotifyCertification(crt.Hash, fileBytes); err != nil {
 			return err
 		}
 	}
