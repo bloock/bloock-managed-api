@@ -60,5 +60,5 @@ func setDefaultConfigValues() {
 	viper.SetDefault("bloock_encryption_private_key", "")
 	viper.SetDefault("bloock_encryption_public_key", "")
 	viper.SetDefault("bloock_tmp_dir", "./tmp")
-	viper.SetDefault("bloock_storage_local_path", "")
+	viper.SetDefault("bloock_storage_local_path", "./data")
 }

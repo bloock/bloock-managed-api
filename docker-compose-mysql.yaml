@@ -16,7 +16,8 @@ services:
     image: bloock/managed-api:latest
     container_name: bloock-managed-api
     volumes:
-      - ./config.yml:/go/bin/config.yml:ro
+      - ./config.yaml:/app/config.yaml:ro
+      - ./data:/app/data
     ports:
       - 8080:8080
     depends_on:
