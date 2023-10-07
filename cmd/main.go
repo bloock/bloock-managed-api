@@ -3,25 +3,18 @@ package main
 import (
 	"bloock-managed-api/internal/config"
 	"bloock-managed-api/internal/platform/repository"
-	"bloock-managed-api/internal/platform/repository/hard_drive"
 	http_repository "bloock-managed-api/internal/platform/repository/http"
-	"bloock-managed-api/internal/platform/repository/sql"
 	"bloock-managed-api/internal/platform/repository/sql/connection"
 	"bloock-managed-api/internal/platform/rest"
-	"bloock-managed-api/internal/service/authenticity"
-	"bloock-managed-api/internal/service/availability"
-	"bloock-managed-api/internal/service/encryption"
-	"bloock-managed-api/internal/service/file"
-	"bloock-managed-api/internal/service/integrity"
 	"bloock-managed-api/internal/service/notify"
 	"bloock-managed-api/internal/service/process"
+	"time"
 
 	"github.com/bloock/bloock-sdk-go/v2"
 
 	"net/http"
 	"os"
 	"sync"
-	"time"
 
 	"github.com/rs/zerolog"
 )
@@ -44,29 +37,22 @@ func main() {
 
 	bloock.ApiKey = cfg.APIKey
 
-	certificationRepository := sql.NewSQLCertificationRepository(*conn, 5*time.Second, logger)
 	integrityRepository := repository.NewBloockIntegrityRepository(logger)
-	notificationRepository := http_repository.NewHttpNotificationRepository(http.Client{}, cfg.ClientEndpointUrl, logger)
 	authenticityRepository := repository.NewBloockAuthenticityRepository(logger)
 	encryptionRepository := repository.NewBloockEncryptionRepository(logger)
-	availabilityRepository := repository.NewBloockAvailabilityRepository(logger)
-	storageRepository := hard_drive.NewHardDriveLocalStorageRepository(cfg.FileDir, logger)
+	availabilityRepository := repository.NewBloockAvailabilityRepository(cfg.StorageLocalPath, cfg.TmpDir, logger)
+	metadataRepository := repository.NewBloockMetadataRepository(*conn, 5*time.Second, logger)
+	notificationRepository := http_repository.NewHttpNotificationRepository(http.Client{}, cfg.ClientEndpointUrl, logger)
 
-	integrityService := integrity.NewIntegrityService(certificationRepository, integrityRepository)
-	authenticityService := authenticity.NewAuthenticityService(authenticityRepository)
-	encryptionService := encryption.NewEncryptionService(encryptionRepository)
-	updateAnchorService := integrity.NewUpdateAnchorService(certificationRepository)
-	availabilityService := availability.NewAvailabilityService(availabilityRepository)
-	fileService := file.NewFileService(storageRepository)
-	notifyService := notify.NewNotifyService(notificationRepository, storageRepository, availabilityRepository)
-	processService := process.NewProcessService(integrityService, authenticityService, encryptionService, availabilityService, fileService, notifyService)
+	processService := process.NewProcessService(integrityRepository, authenticityRepository, encryptionRepository, availabilityRepository, metadataRepository, notificationRepository)
+	notifyServie := notify.NewNotifyService(availabilityRepository, metadataRepository, notificationRepository)
 
 	wg := sync.WaitGroup{}
 	wg.Add(1)
 
 	go func() {
 		defer wg.Done()
-		server, err := rest.NewServer(cfg.APIHost, cfg.APIPort, processService, availabilityService, updateAnchorService, notifyService, cfg.WebhookSecretKey, logger, cfg.DebugMode)
+		server, err := rest.NewServer(cfg.APIHost, cfg.APIPort, processService, notifyServie, cfg.WebhookSecretKey, logger, cfg.DebugMode)
 		if err != nil {
 			panic(err)
 		}

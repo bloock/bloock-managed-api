@@ -19,7 +19,8 @@ type Config struct {
 	AuthenticityPublicKey  string `mapstructure:"BLOOCK_AUTHENTICITY_PUBLIC_KEY"`
 	EncryptionPrivateKey   string `mapstructure:"BLOOCK_ENCRYPTION_PRIVATE_KEY"`
 	EncryptionPublicKey    string `mapstructure:"BLOOCK_ENCRYPTION_PUBLIC_KEY"`
-	FileDir                string `mapstructure:"BLOOCK_FILE_DIR"`
+	TmpDir                 string `mapstructure:"BLOOCK_TMP_DIR"`
+	StorageLocalPath       string `mapstructure:"BLOOCK_STORAGE_LOCAL_PATH"`
 }
 
 var Configuration = &Config{}
@@ -54,9 +55,10 @@ func setDefaultConfigValues() {
 	viper.SetDefault("bloock_api_host", "0.0.0.0")
 	viper.SetDefault("bloock_api_port", "8080")
 	viper.SetDefault("bloock_api_debug_mode", false)
-	viper.SetDefault("bloock_file_dir", "./tmp")
 	viper.SetDefault("bloock_authenticity_private_key", "")
 	viper.SetDefault("bloock_authenticity_public_key", "")
 	viper.SetDefault("bloock_encryption_private_key", "")
 	viper.SetDefault("bloock_encryption_public_key", "")
+	viper.SetDefault("bloock_tmp_dir", "./tmp")
+	viper.SetDefault("bloock_storage_local_path", "")
 }

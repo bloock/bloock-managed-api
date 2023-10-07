@@ -10,6 +10,7 @@ type HostingType int
 const (
 	IPFS   HostingType = iota
 	HOSTED HostingType = iota
+	LOCAL  HostingType = iota
 	NONE   HostingType = iota
 )
 
@@ -19,6 +20,8 @@ func ParseHostingType(value string) (HostingType, error) {
 		return IPFS, nil
 	case "hosted":
 		return HOSTED, nil
+	case "local":
+		return LOCAL, nil
 	case "none":
 		return NONE, nil
 	}
@@ -30,6 +33,8 @@ func (h HostingType) String() string {
 		return "ipfs"
 	case HOSTED:
 		return "hosted"
+	case LOCAL:
+		return "local"
 	case NONE:
 		return "none"
 	}

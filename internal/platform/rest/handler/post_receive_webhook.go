@@ -37,7 +37,7 @@ type WebhookResponse struct {
 	Success bool `json:"success"`
 }
 
-func PostReceiveWebhook(certification service.CertificateUpdateAnchorService, notify service.NotifyService, secretKey string) gin.HandlerFunc {
+func PostReceiveWebhook(notifyService service.NotifyService, secretKey string) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		buf, err := io.ReadAll(ctx.Request.Body)
 		if err != nil {
@@ -67,14 +67,7 @@ func PostReceiveWebhook(certification service.CertificateUpdateAnchorService, no
 			return
 		}
 
-		certifications, err := certification.GetCertificationsByAnchorID(ctx, webhookRequest.Data.Id)
-		if err != nil {
-			serverAPIError := NewInternalServerAPIError(err.Error())
-			ctx.JSON(serverAPIError.Status, serverAPIError)
-			return
-		}
-
-		if err = notify.NotifyClient(ctx, certifications); err != nil {
+		if err = notifyService.Notify(ctx, webhookRequest.Data.Id); err != nil {
 			serverAPIError := NewInternalServerAPIError(err.Error())
 			ctx.JSON(serverAPIError.Status, serverAPIError)
 			return

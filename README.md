@@ -294,10 +294,14 @@ Here are the configuration variables used by the Bloock Managed API:
   - **Description**: Enable or disable debug mode.
   - **Default**: false
   - **Purpose**: When set to true, debug mode provides more detailed log information, which can be useful for troubleshooting and debugging. Set it to false for normal operation.
-- **BLOOCK_FILE_DIR** (**_OPTIONAL_**)
-  - **Description**: The local directory path for storing processed files.
+- **BLOOCK_TMP_DIR** (**_OPTIONAL_**)
+  - **Description**: The temporary directory path for storing processed files.
   - **Default**: ./tmp
   - **Purpose**: Processed files can be temporarily stored in this directory while waiting for integrity confirmation. You can configure it to a specific directory path that suits your storage needs.
+- **BLOOCK_STORAGE_LOCAL_PATH** (**_OPTIONAL_**)
+  - **Description**: The local directory where files will be stored when using `LOCAL` availability type.
+  - **Default**: ./data
+  - **Purpose**: Processed files will be stored in this directory only when `LOCAL` availability type is specified when invoking the process endpoint.
 
 These configuration variables provide fine-grained control over the behavior of the Bloock Managed API. You can adjust them to match your specific requirements and deployment environment.
 
@@ -313,7 +317,6 @@ BLOOCK_API_PORT: "8080"
 BLOOCK_API_DEBUG_MODE: "false"
 
 BLOOCK_DB_CONNECTION_STRING: "file:bloock?mode=memory&cache=shared&_fk=1"
-BLOOCK_FILE_DIR: "./tmp"
 
 BLOOCK_API_KEY: ""
 BLOOCK_WEBHOOK_SECRET_KEY: ""
@@ -324,6 +327,9 @@ BLOOCK_AUTHENTICITY_PUBLIC_KEY: ""
 
 BLOOCK_ENCRYPTION_PRIVATE_KEY: ""
 BLOOCK_ENCRYPTION_PUBLIC_KEY: ""
+
+BLOOCK_TMP_DIR: "./tmp"
+BLOOCK_STORAGE_LOCAL_PATH: "./data"
 ```
 
 ### Database Support

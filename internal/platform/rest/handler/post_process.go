@@ -28,7 +28,7 @@ type postProcessForm struct {
 	EncryptionKey         string                `form:"encryption.key"`
 }
 
-func PostProcess(processService service.BaseProcessService, availabilityService service.AvailabilityService) gin.HandlerFunc {
+func PostProcess(processService service.ProcessService) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var formData postProcessForm
 		err := ctx.Bind(&formData)
@@ -39,6 +39,7 @@ func PostProcess(processService service.BaseProcessService, availabilityService 
 		}
 
 		var file []byte
+		var inputUrl string
 		if formData.File != nil {
 			fileReader, err := formData.File.Open()
 			if err != nil {
@@ -65,20 +66,14 @@ func PostProcess(processService service.BaseProcessService, availabilityService 
 				return
 			}
 
-			file, err = availabilityService.Download(ctx, u.String())
-			if err != nil {
-				badRequestAPIError := NewBadRequestAPIError(err.Error())
-				ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
-				return
-			}
-
+			inputUrl = u.String()
 		} else {
 			badRequestAPIError := NewBadRequestAPIError("You must provide a file or URL")
 			ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
 			return
 		}
 
-		processRequest, err := request.NewProcessRequest(file, formData.IntegrityEnabled, formData.AuthenticityEnabled, formData.AuthenticityKeySource, formData.AuthenticityKeyType, formData.AuthenticityKey, formData.AuthenticityUseEns, formData.EncryptionEnabled, formData.EncryptionKeySource, formData.EncryptionKeyType, formData.EncryptionKey, formData.AvailabilityType)
+		processRequest, err := request.NewProcessRequest(file, inputUrl, formData.IntegrityEnabled, formData.AuthenticityEnabled, formData.AuthenticityKeySource, formData.AuthenticityKeyType, formData.AuthenticityKey, formData.AuthenticityUseEns, formData.EncryptionEnabled, formData.EncryptionKeySource, formData.EncryptionKeyType, formData.EncryptionKey, formData.AvailabilityType)
 		if err != nil {
 			badRequestAPIError := NewBadRequestAPIError(err.Error())
 			ctx.JSON(badRequestAPIError.Status, badRequestAPIError)

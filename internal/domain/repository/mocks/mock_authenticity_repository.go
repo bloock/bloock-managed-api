@@ -37,11 +37,11 @@ func (m *MockAuthenticityRepository) EXPECT() *MockAuthenticityRepositoryMockRec
 }
 
 // SignECWithLocalKey mocks base method.
-func (m *MockAuthenticityRepository) SignECWithLocalKey(ctx context.Context, data []byte, kty key.KeyType, publicKey string, privateKey *string) (string, record.Record, error) {
+func (m *MockAuthenticityRepository) SignECWithLocalKey(ctx context.Context, data []byte, kty key.KeyType, publicKey string, privateKey *string) (string, *record.Record, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SignECWithLocalKey", ctx, data, kty, publicKey, privateKey)
 	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(record.Record)
+	ret1, _ := ret[1].(*record.Record)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
 }
@@ -53,11 +53,11 @@ func (mr *MockAuthenticityRepositoryMockRecorder) SignECWithLocalKey(ctx, data, 
 }
 
 // SignECWithLocalKeyEns mocks base method.
-func (m *MockAuthenticityRepository) SignECWithLocalKeyEns(ctx context.Context, data []byte, kty key.KeyType, publicKey string, privateKey *string) (string, record.Record, error) {
+func (m *MockAuthenticityRepository) SignECWithLocalKeyEns(ctx context.Context, data []byte, kty key.KeyType, publicKey string, privateKey *string) (string, *record.Record, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SignECWithLocalKeyEns", ctx, data, kty, publicKey, privateKey)
 	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(record.Record)
+	ret1, _ := ret[1].(*record.Record)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
 }
@@ -69,11 +69,11 @@ func (mr *MockAuthenticityRepositoryMockRecorder) SignECWithLocalKeyEns(ctx, dat
 }
 
 // SignECWithManagedKey mocks base method.
-func (m *MockAuthenticityRepository) SignECWithManagedKey(ctx context.Context, data []byte, kid string) (string, record.Record, error) {
+func (m *MockAuthenticityRepository) SignECWithManagedKey(ctx context.Context, data []byte, kid string) (string, *record.Record, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SignECWithManagedKey", ctx, data, kid)
 	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(record.Record)
+	ret1, _ := ret[1].(*record.Record)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
 }
@@ -85,11 +85,11 @@ func (mr *MockAuthenticityRepositoryMockRecorder) SignECWithManagedKey(ctx, data
 }
 
 // SignECWithManagedKeyEns mocks base method.
-func (m *MockAuthenticityRepository) SignECWithManagedKeyEns(ctx context.Context, data []byte, kid string) (string, record.Record, error) {
+func (m *MockAuthenticityRepository) SignECWithManagedKeyEns(ctx context.Context, data []byte, kid string) (string, *record.Record, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SignECWithManagedKeyEns", ctx, data, kid)
 	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(record.Record)
+	ret1, _ := ret[1].(*record.Record)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
 }

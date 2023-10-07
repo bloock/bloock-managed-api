@@ -11,6 +11,7 @@ import (
 
 type ProcessRequest struct {
 	file                         []byte
+	url                          string
 	integrityEnabled             bool
 	authenticityEnabled          bool
 	authenticityKeySource        domain.KeyType
@@ -24,10 +25,11 @@ type ProcessRequest struct {
 	hostingType                  domain.HostingType
 }
 
-func NewProcessRequest(data []byte, integrityEnabled bool, authenticityEnabled bool, authenticityKeySource string, authenticityKeyType string, authenticityKid string, authenticityUseEns bool, encryptionEnabled bool, encryptionKeySource string, encryptionKeyType string, encryptionKid string, availabilityType string) (*ProcessRequest, error) {
+func NewProcessRequest(file []byte, url string, integrityEnabled bool, authenticityEnabled bool, authenticityKeySource string, authenticityKeyType string, authenticityKid string, authenticityUseEns bool, encryptionEnabled bool, encryptionKeySource string, encryptionKeyType string, encryptionKid string, availabilityType string) (*ProcessRequest, error) {
 	processRequestInstance := &ProcessRequest{}
 
-	processRequestInstance.file = data
+	processRequestInstance.file = file
+	processRequestInstance.url = url
 	processRequestInstance.integrityEnabled = integrityEnabled
 
 	processRequestInstance.authenticityEnabled = authenticityEnabled
@@ -105,9 +107,14 @@ func NewProcessRequest(data []byte, integrityEnabled bool, authenticityEnabled b
 	return processRequestInstance, nil
 }
 
-func (s ProcessRequest) Data() []byte {
+func (s ProcessRequest) File() []byte {
 	return s.file
 }
+
+func (s ProcessRequest) URL() string {
+	return s.url
+}
+
 func (s *ProcessRequest) ReplaceDataWith(newData []byte) {
 	s.file = newData
 }

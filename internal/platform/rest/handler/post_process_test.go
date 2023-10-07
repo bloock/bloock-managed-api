@@ -24,16 +24,12 @@ import (
 
 func TestProcessServiceError(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	processService := mock_service.NewMockBaseProcessService(ctrl)
-	availabilityService := mock_service.NewMockAvailabilityService(ctrl)
+	processService := mock_service.NewMockProcessService(ctrl)
 	notifyService := mock_service.NewMockNotifyService(ctrl)
-	updateAnchor := mock_service.NewMockCertificateUpdateAnchorService(ctrl)
 	server, err := rest.NewServer(
 		"localhost",
 		"8085",
 		processService,
-		availabilityService,
-		updateAnchor,
 		notifyService,
 		"",
 		zerolog.Logger{},
@@ -46,6 +42,7 @@ func TestProcessServiceError(t *testing.T) {
 
 	t.Run("given service error it should return 500 status code", func(t *testing.T) {
 		data := []byte("Hello World")
+		inputUrl := ""
 		integrityEnabled := true
 		authenticityEnabled := true
 		authenticityKeySource := domain.MANAGED_KEY.String()
@@ -58,7 +55,7 @@ func TestProcessServiceError(t *testing.T) {
 		authenticityUseEnsResolution := true
 		availabilityType := domain.HOSTED.String()
 
-		processRequest, err := request.NewProcessRequest(data, integrityEnabled, authenticityEnabled, authenticityKeySource, authenticityKeyType, authenticityKid, authenticityUseEnsResolution, encryptionEnabled, encryptionKeySource, encryptionKeyType, encryptionKid, availabilityType)
+		processRequest, err := request.NewProcessRequest(data, inputUrl, integrityEnabled, authenticityEnabled, authenticityKeySource, authenticityKeyType, authenticityKid, authenticityUseEnsResolution, encryptionEnabled, encryptionKeySource, encryptionKeyType, encryptionKid, availabilityType)
 		require.NoError(t, err)
 		processService.EXPECT().Process(gomock.Any(), *processRequest).Return(nil, errors.New("some error"))
 		buf := new(bytes.Buffer)
@@ -93,16 +90,12 @@ func TestProcessServiceError(t *testing.T) {
 
 func TestPostProcessMultipart(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	processService := mock_service.NewMockBaseProcessService(ctrl)
-	availabilityService := mock_service.NewMockAvailabilityService(ctrl)
+	processService := mock_service.NewMockProcessService(ctrl)
 	notifyService := mock_service.NewMockNotifyService(ctrl)
-	updateAnchor := mock_service.NewMockCertificateUpdateAnchorService(ctrl)
 	server, err := rest.NewServer(
 		"localhost",
 		"8085",
 		processService,
-		availabilityService,
-		updateAnchor,
 		notifyService,
 		"",
 		zerolog.Logger{},
@@ -135,7 +128,7 @@ func TestPostProcessMultipart(t *testing.T) {
 			encryptionKid := "768e7955-9690-4ba5-8ff9-23206d14ceb8"
 			availabilityType := domain.HOSTED.String()
 
-			processRequest, err := request.NewProcessRequest(test.file, integrityEnabled, authenticityEnabled, authenticityKeySource, authenticityKeyType, authenticityKid, authenticityUseEnsResolution, encryptionEnabled, encryptionKeySource, encryptionKeyType, encryptionKid, availabilityType)
+			processRequest, err := request.NewProcessRequest(test.file, test.url, integrityEnabled, authenticityEnabled, authenticityKeySource, authenticityKeyType, authenticityKid, authenticityUseEnsResolution, encryptionEnabled, encryptionKeySource, encryptionKeyType, encryptionKid, availabilityType)
 			require.NoError(t, err)
 			processResponse := response.NewProcessResponseBuilder().Build()
 			processService.EXPECT().Process(gomock.Any(), *processRequest).Return(processResponse, nil)
@@ -148,7 +141,6 @@ func TestPostProcessMultipart(t *testing.T) {
 			}
 
 			if len(test.url) > 0 {
-				availabilityService.EXPECT().Download(gomock.Any(), test.url).Return(test.file, nil)
 				_ = writer.WriteField("url", test.url)
 			}
 
@@ -182,16 +174,12 @@ func TestPostProcessMultipart(t *testing.T) {
 
 func TestPostProcessBadRequests(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	processService := mock_service.NewMockBaseProcessService(ctrl)
-	availabilityService := mock_service.NewMockAvailabilityService(ctrl)
+	processService := mock_service.NewMockProcessService(ctrl)
 	notifyService := mock_service.NewMockNotifyService(ctrl)
-	updateAnchor := mock_service.NewMockCertificateUpdateAnchorService(ctrl)
 	server, err := rest.NewServer(
 		"localhost",
 		"8085",
 		processService,
-		availabilityService,
-		updateAnchor,
 		notifyService,
 		"",
 		zerolog.Logger{},
@@ -264,16 +252,12 @@ func TestPostProcessBadRequests(t *testing.T) {
 
 func TestWithoutFile(t *testing.T) {
 	ctrl := gomock.NewController(t)
-	processService := mock_service.NewMockBaseProcessService(ctrl)
-	availabilityService := mock_service.NewMockAvailabilityService(ctrl)
+	processService := mock_service.NewMockProcessService(ctrl)
 	notifyService := mock_service.NewMockNotifyService(ctrl)
-	updateAnchor := mock_service.NewMockCertificateUpdateAnchorService(ctrl)
 	server, err := rest.NewServer(
 		"localhost",
 		"8085",
 		processService,
-		availabilityService,
-		updateAnchor,
 		notifyService,
 		"",
 		zerolog.Logger{},

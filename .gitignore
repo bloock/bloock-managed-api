@@ -18,3 +18,7 @@ config.yaml
 vendor
 # Go workspace file
 go.work
+
+# Storage directories
+tmp
+data

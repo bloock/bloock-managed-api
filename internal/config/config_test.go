@@ -22,7 +22,8 @@ func TestInitConfig(t *testing.T) {
 		_ = os.Setenv("BLOOCK_AUTHENTICITY_PUBLIC_KEY", value)
 		_ = os.Setenv("BLOOCK_ENCRYPTION_PRIVATE_KEY", value)
 		_ = os.Setenv("BLOOCK_ENCRYPTION_PUBLIC_KEY", value)
-		_ = os.Setenv("BLOOCK_FILE_DIR", value)
+		_ = os.Setenv("BLOOCK_TMP_DIR", value)
+		_ = os.Setenv("BLOOCK_STORAGE_LOCAL_PATH", value)
 		config, err := InitConfig()
 
 		assert.NoError(t, err)
@@ -37,7 +38,8 @@ func TestInitConfig(t *testing.T) {
 		assert.Equal(t, value, config.AuthenticityPrivateKey)
 		assert.Equal(t, value, config.EncryptionPublicKey)
 		assert.Equal(t, value, config.EncryptionPrivateKey)
-		assert.Equal(t, value, config.FileDir)
+		assert.Equal(t, value, config.TmpDir)
+		assert.Equal(t, value, config.StorageLocalPath)
 		assert.Equal(t, true, config.DebugMode)
 
 	})
