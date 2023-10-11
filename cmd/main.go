@@ -36,6 +36,7 @@ func main() {
 	}
 
 	bloock.ApiKey = cfg.APIKey
+	bloock.DisableAnalytics = true
 
 	integrityRepository := repository.NewBloockIntegrityRepository(logger)
 	authenticityRepository := repository.NewBloockAuthenticityRepository(logger)
