@@ -6,7 +6,7 @@ EXPOSE 8080
 RUN update-ca-certificates
 WORKDIR /go/bin
 COPY . .
-RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -ldflags='-w -s -extldflags "-static"' -a -o /go/bin/managed-api cmd/main.go
+RUN CGO_ENABLED=1 go build -buildvcs=false -o /go/bin/managed-api cmd/main.go
 
 ############################
 # STEP 2 create final image
