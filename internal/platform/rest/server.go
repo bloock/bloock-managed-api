@@ -29,6 +29,7 @@ func NewServer(host string, port string, processService service.ProcessService, 
 	}
 
 	v1 := router.Group("/v1/")
+	v1.GET("health", handler.Health())
 	v1.POST("process", handler.PostProcess(processService))
 	v1.POST("webhook", handler.PostReceiveWebhook(notifyService, webhookSecretKey))
 	if debug {
