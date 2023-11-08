@@ -42,6 +42,7 @@ func TestProcessServiceError(t *testing.T) {
 
 	t.Run("given service error it should return 500 status code", func(t *testing.T) {
 		data := []byte("Hello World")
+		filename := "hello.txt"
 		inputUrl := ""
 		integrityEnabled := true
 		authenticityEnabled := true
@@ -55,12 +56,12 @@ func TestProcessServiceError(t *testing.T) {
 		authenticityUseEnsResolution := true
 		availabilityType := domain.HOSTED.String()
 
-		processRequest, err := request.NewProcessRequest(data, inputUrl, integrityEnabled, authenticityEnabled, authenticityKeySource, authenticityKeyType, authenticityKid, authenticityUseEnsResolution, encryptionEnabled, encryptionKeySource, encryptionKeyType, encryptionKid, availabilityType)
+		processRequest, err := request.NewProcessRequest(data, filename, "text/plain; charset=utf-8", inputUrl, integrityEnabled, authenticityEnabled, authenticityKeySource, authenticityKeyType, authenticityKid, authenticityUseEnsResolution, encryptionEnabled, encryptionKeySource, encryptionKeyType, encryptionKid, availabilityType)
 		require.NoError(t, err)
 		processService.EXPECT().Process(gomock.Any(), *processRequest).Return(nil, errors.New("some error"))
 		buf := new(bytes.Buffer)
 		writer := multipart.NewWriter(buf)
-		part, err := writer.CreateFormFile("file", uuid.New().String())
+		part, err := writer.CreateFormFile("file", filename)
 		require.NoError(t, err)
 		_, err = part.Write(data)
 		require.NoError(t, err)
@@ -107,12 +108,16 @@ func TestPostProcessMultipart(t *testing.T) {
 	engine := server.Engine()
 
 	tests := []struct {
-		name string
-		url  string
-		file []byte
+		name                string
+		url                 string
+		file                []byte
+		filename            string
+		expectedFilename    string
+		expectedContentType string
 	}{
-		{name: "given a valid request with file it should return 202 when no error occurs", file: fixtures.PDFContent},
-		{name: "given a valid request with url it should return 202 when no error occurs", url: "https://valid.url"},
+		{name: "given a valid request with file it should return 202 when no error occurs", file: fixtures.PDFContent, filename: "hello.pdf", expectedFilename: "hello.pdf", expectedContentType: "application/pdf"},
+		{name: "given a valid request with url it should return 202 when no error occurs", url: "https://valid.url/url.txt", expectedFilename: "url.txt", expectedContentType: ""},
+		{name: "given a valid request with url without filename it should return 202 when no error occurs", url: "https://valid.url/url", expectedFilename: "url", expectedContentType: ""},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -128,7 +133,7 @@ func TestPostProcessMultipart(t *testing.T) {
 			encryptionKid := "768e7955-9690-4ba5-8ff9-23206d14ceb8"
 			availabilityType := domain.HOSTED.String()
 
-			processRequest, err := request.NewProcessRequest(test.file, test.url, integrityEnabled, authenticityEnabled, authenticityKeySource, authenticityKeyType, authenticityKid, authenticityUseEnsResolution, encryptionEnabled, encryptionKeySource, encryptionKeyType, encryptionKid, availabilityType)
+			processRequest, err := request.NewProcessRequest(test.file, test.expectedFilename, test.expectedContentType, test.url, integrityEnabled, authenticityEnabled, authenticityKeySource, authenticityKeyType, authenticityKid, authenticityUseEnsResolution, encryptionEnabled, encryptionKeySource, encryptionKeyType, encryptionKid, availabilityType)
 			require.NoError(t, err)
 			processResponse := response.NewProcessResponseBuilder().Build()
 			processService.EXPECT().Process(gomock.Any(), *processRequest).Return(processResponse, nil)
@@ -136,7 +141,7 @@ func TestPostProcessMultipart(t *testing.T) {
 			writer := multipart.NewWriter(buf)
 
 			if len(test.file) > 0 {
-				part, _ := writer.CreateFormFile("file", uuid.New().String())
+				part, _ := writer.CreateFormFile("file", test.filename)
 				_, err = part.Write(test.file)
 			}
 

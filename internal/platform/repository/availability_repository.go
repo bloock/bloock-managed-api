@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"bloock-managed-api/internal/domain"
 	"context"
 	"errors"
 	"fmt"
@@ -16,21 +17,23 @@ import (
 )
 
 type BloockAvailabilityRepository struct {
-	recordClient       client.RecordClient
-	availabilityClient client.AvailabilityClient
-	localStoragePath   string
-	tmpPath            string
-	logger             zerolog.Logger
+	recordClient         client.RecordClient
+	availabilityClient   client.AvailabilityClient
+	localStoragePath     string
+	localStorageStrategy domain.LocalStorageStrategy
+	tmpPath              string
+	logger               zerolog.Logger
 }
 
-func NewBloockAvailabilityRepository(localStoragePath, tmpPath string, logger zerolog.Logger) *BloockAvailabilityRepository {
+func NewBloockAvailabilityRepository(localStoragePath string, localStorageStrategy domain.LocalStorageStrategy, tmpPath string, logger zerolog.Logger) *BloockAvailabilityRepository {
 	logger.With().Caller().Str("component", "availability-repository").Logger()
 	return &BloockAvailabilityRepository{
-		recordClient:       client.NewRecordClient(),
-		availabilityClient: client.NewAvailabilityClient(),
-		localStoragePath:   localStoragePath,
-		tmpPath:            tmpPath,
-		logger:             logger,
+		recordClient:         client.NewRecordClient(),
+		availabilityClient:   client.NewAvailabilityClient(),
+		localStoragePath:     localStoragePath,
+		localStorageStrategy: localStorageStrategy,
+		tmpPath:              tmpPath,
+		logger:               logger,
 	}
 }
 
@@ -42,16 +45,26 @@ func (b BloockAvailabilityRepository) UploadIpfs(ctx context.Context, record *re
 	return b.availabilityClient.Publish(*record, availability.NewIpfsPublisher())
 }
 
-func (b BloockAvailabilityRepository) UploadLocal(ctx context.Context, record *record.Record) (string, error) {
-	hash, err := record.GetHash()
-	if err != nil {
-		if !errors.Is(err, os.ErrExist) {
-			b.logger.Log().Err(err).Msg("")
-			return "", errors.New("error retrieving record hash")
+func (b BloockAvailabilityRepository) UploadLocal(ctx context.Context, filename string, record *record.Record) (string, error) {
+	var name string
+	switch b.localStorageStrategy {
+	case domain.LocalStorageStrategyHash:
+		hash, err := record.GetHash()
+		if err != nil {
+			if !errors.Is(err, os.ErrExist) {
+				b.logger.Log().Err(err).Msg("")
+				return "", errors.New("error retrieving record hash")
+			}
 		}
+
+		name = hash
+	case domain.LocalStorageStrategyFilename:
+		name = filename
+	default:
+		return "", errors.New("invalid local storage strategy defined ")
 	}
 
-	return b.saveLocalFile(ctx, b.localStoragePath, hash, record)
+	return b.saveLocalFile(ctx, b.localStoragePath, name, record)
 }
 
 func (b BloockAvailabilityRepository) UploadTmp(ctx context.Context, record *record.Record) (string, error) {
@@ -105,16 +118,8 @@ func (b BloockAvailabilityRepository) saveLocalFile(ctx context.Context, dir str
 		}
 	}
 
-	hash, err := record.GetHash()
-	if err != nil {
-		if !errors.Is(err, os.ErrExist) {
-			b.logger.Log().Err(err).Msg("")
-			return "", errors.New("error retrieving record hash")
-		}
-	}
-
 	fileBytes := record.Retrieve()
-	path := fmt.Sprintf("%s/%s", dir, hash)
+	path := fmt.Sprintf("%s/%s", dir, name)
 	if err = os.WriteFile(path, fileBytes, 0644); err != nil {
 		b.logger.Log().Err(err).Msg("")
 		return "", err

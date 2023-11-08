@@ -21,6 +21,7 @@ type Config struct {
 	EncryptionPublicKey    string `mapstructure:"BLOOCK_ENCRYPTION_PUBLIC_KEY"`
 	TmpDir                 string `mapstructure:"BLOOCK_TMP_DIR"`
 	StorageLocalPath       string `mapstructure:"BLOOCK_STORAGE_LOCAL_PATH"`
+	StorageLocalStrategy   string `mapstructure:"BLOOCK_STORAGE_LOCAL_STRATEGY"`
 }
 
 var Configuration = &Config{}
@@ -61,4 +62,5 @@ func setDefaultConfigValues() {
 	viper.SetDefault("bloock_encryption_public_key", "")
 	viper.SetDefault("bloock_tmp_dir", "./tmp")
 	viper.SetDefault("bloock_storage_local_path", "./data")
+	viper.SetDefault("bloock_storage_local_strategy", "HASH")
 }

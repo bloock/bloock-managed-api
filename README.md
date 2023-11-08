@@ -302,6 +302,10 @@ Here are the configuration variables used by the Bloock Managed API:
   - **Description**: The local directory where files will be stored when using `LOCAL` availability type.
   - **Default**: ./data
   - **Purpose**: Processed files will be stored in this directory only when `LOCAL` availability type is specified when invoking the process endpoint.
+- **BLOOCK_STORAGE_LOCAL_STRATEGY** (**_OPTIONAL_**)
+  - **Description**: The filename strategy to follow when using `LOCAL` availability type.
+  - **Default**: HASH
+  - **Purpose**: Currently it supports two possible values: `HASH` (default) will set the file name to the content's hash and `FILENAME` will try to compute the file name based on the URL or the file provided (WARNING: this strategy may overwrite files if two of them compute to the same filename, i.e. uploading to files with the same name).
 
 These configuration variables provide fine-grained control over the behavior of the Bloock Managed API. You can adjust them to match your specific requirements and deployment environment.
 

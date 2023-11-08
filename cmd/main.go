@@ -2,6 +2,7 @@ package main
 
 import (
 	"bloock-managed-api/internal/config"
+	"bloock-managed-api/internal/domain"
 	"bloock-managed-api/internal/platform/repository"
 	http_repository "bloock-managed-api/internal/platform/repository/http"
 	"bloock-managed-api/internal/platform/repository/sql/connection"
@@ -41,7 +42,7 @@ func main() {
 	integrityRepository := repository.NewBloockIntegrityRepository(logger)
 	authenticityRepository := repository.NewBloockAuthenticityRepository(logger)
 	encryptionRepository := repository.NewBloockEncryptionRepository(logger)
-	availabilityRepository := repository.NewBloockAvailabilityRepository(cfg.StorageLocalPath, cfg.TmpDir, logger)
+	availabilityRepository := repository.NewBloockAvailabilityRepository(cfg.StorageLocalPath, domain.LocalStorageStrategyFromString(cfg.StorageLocalStrategy), cfg.TmpDir, logger)
 	metadataRepository := repository.NewBloockMetadataRepository(*conn, 5*time.Second, logger)
 	notificationRepository := http_repository.NewHttpNotificationRepository(http.Client{}, cfg.ClientEndpointUrl, logger)
 

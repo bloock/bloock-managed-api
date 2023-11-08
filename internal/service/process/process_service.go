@@ -8,6 +8,8 @@ import (
 	"bloock-managed-api/internal/service/process/response"
 	"context"
 	"errors"
+	"fmt"
+	"net/http"
 
 	"github.com/bloock/bloock-sdk-go/v2/entity/key"
 	"github.com/bloock/bloock-sdk-go/v2/entity/record"
@@ -56,6 +58,7 @@ func (s ProcessService) Process(ctx context.Context, req request.ProcessRequest)
 		if err != nil {
 			return nil, err
 		}
+		req = req.SetContentType(http.DetectContentType(fileBytes))
 		file = fileBytes
 	} else {
 		return nil, errors.New("you must provide a file or URL")
@@ -139,7 +142,7 @@ func (s ProcessService) Process(ctx context.Context, req request.ProcessRequest)
 	}
 
 	if req.HostingType() != domain.NONE {
-		dataID, err := s.upload(ctx, certification.Record, req.HostingType())
+		dataID, err := s.upload(ctx, fmt.Sprintf("%s%s", req.Filename(), req.FileExtension()), certification.Record, req.HostingType())
 		if err != nil {
 			return nil, err
 		}
@@ -306,7 +309,7 @@ func (s ProcessService) encrypt(ctx context.Context, request request.EncryptRequ
 	return nil, ErrEncryptKeyNotSupported
 }
 
-func (a ProcessService) upload(ctx context.Context, record *record.Record, hostingType domain.HostingType) (string, error) {
+func (a ProcessService) upload(ctx context.Context, filename string, record *record.Record, hostingType domain.HostingType) (string, error) {
 	switch hostingType {
 	case domain.HOSTED:
 		hostedID, err := a.availabilityRepository.UploadHosted(ctx, record)
@@ -321,7 +324,7 @@ func (a ProcessService) upload(ctx context.Context, record *record.Record, hosti
 		}
 		return ipfsID, err
 	case domain.LOCAL:
-		path, err := a.availabilityRepository.UploadLocal(ctx, record)
+		path, err := a.availabilityRepository.UploadLocal(ctx, filename, record)
 		if err != nil {
 			return "", err
 		}

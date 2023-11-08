@@ -8,6 +8,8 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/url"
+	"path"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -39,6 +41,8 @@ func PostProcess(processService service.ProcessService) gin.HandlerFunc {
 		}
 
 		var file []byte
+		var filename string
+		contentType := ""
 		var inputUrl string
 		if formData.File != nil {
 			fileReader, err := formData.File.Open()
@@ -47,6 +51,8 @@ func PostProcess(processService service.ProcessService) gin.HandlerFunc {
 				ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
 				return
 			}
+
+			filename = formData.File.Filename
 			file, err = io.ReadAll(fileReader)
 			if err != nil {
 				serverAPIError := NewInternalServerAPIError(err.Error())
@@ -58,6 +64,8 @@ func PostProcess(processService service.ProcessService) gin.HandlerFunc {
 				ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
 				return
 			}
+
+			contentType = http.DetectContentType(file)
 		} else if formData.Url != "" {
 			u, err := url.ParseRequestURI(formData.Url)
 			if err != nil {
@@ -66,6 +74,16 @@ func PostProcess(processService service.ProcessService) gin.HandlerFunc {
 				return
 			}
 
+			base := path.Base(u.Path)
+			if base == "" {
+				pathParts := strings.Split(u.Path, "/")
+
+				// If it's empty, use the second-to-last part as the filename
+				if len(pathParts) >= 2 {
+					base = pathParts[len(pathParts)-2]
+				}
+			}
+			filename = base
 			inputUrl = u.String()
 		} else {
 			badRequestAPIError := NewBadRequestAPIError("You must provide a file or URL")
@@ -73,7 +91,7 @@ func PostProcess(processService service.ProcessService) gin.HandlerFunc {
 			return
 		}
 
-		processRequest, err := request.NewProcessRequest(file, inputUrl, formData.IntegrityEnabled, formData.AuthenticityEnabled, formData.AuthenticityKeySource, formData.AuthenticityKeyType, formData.AuthenticityKey, formData.AuthenticityUseEns, formData.EncryptionEnabled, formData.EncryptionKeySource, formData.EncryptionKeyType, formData.EncryptionKey, formData.AvailabilityType)
+		processRequest, err := request.NewProcessRequest(file, filename, contentType, inputUrl, formData.IntegrityEnabled, formData.AuthenticityEnabled, formData.AuthenticityKeySource, formData.AuthenticityKeyType, formData.AuthenticityKey, formData.AuthenticityUseEns, formData.EncryptionEnabled, formData.EncryptionKeySource, formData.EncryptionKeyType, formData.EncryptionKey, formData.AvailabilityType)
 		if err != nil {
 			badRequestAPIError := NewBadRequestAPIError(err.Error())
 			ctx.JSON(badRequestAPIError.Status, badRequestAPIError)

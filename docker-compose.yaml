@@ -1,6 +1,7 @@
 services:
   bloock-managed-api:
     image: bloock/managed-api:latest
+    platform: linux/amd64
     container_name: bloock-managed-api
     volumes:
       - ./config.yaml:/app/config.yaml:ro
@@ -8,4 +9,4 @@ services:
     ports:
       - 8080:8080
     environment:
-      BLOOCK_API_KEY: ""
+      BLOOCK_API_KEY: "942NwSPZd8Ha7nLoPW69QYB-ju8NmqPCGB-gO01ylSHrUZbns-3mTVcTP3Jv8oad"

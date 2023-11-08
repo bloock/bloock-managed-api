@@ -4,6 +4,9 @@ import (
 	"bloock-managed-api/internal/config"
 	"bloock-managed-api/internal/domain"
 	"errors"
+	"mime"
+	"path/filepath"
+	"strings"
 
 	"github.com/bloock/bloock-sdk-go/v2/entity/key"
 	"github.com/google/uuid"
@@ -11,6 +14,9 @@ import (
 
 type ProcessRequest struct {
 	file                         []byte
+	filename                     string
+	extension                    string
+	contentType                  string
 	url                          string
 	integrityEnabled             bool
 	authenticityEnabled          bool
@@ -25,10 +31,14 @@ type ProcessRequest struct {
 	hostingType                  domain.HostingType
 }
 
-func NewProcessRequest(file []byte, url string, integrityEnabled bool, authenticityEnabled bool, authenticityKeySource string, authenticityKeyType string, authenticityKid string, authenticityUseEns bool, encryptionEnabled bool, encryptionKeySource string, encryptionKeyType string, encryptionKid string, availabilityType string) (*ProcessRequest, error) {
+func NewProcessRequest(file []byte, filename string, contentType string, url string, integrityEnabled bool, authenticityEnabled bool, authenticityKeySource string, authenticityKeyType string, authenticityKid string, authenticityUseEns bool, encryptionEnabled bool, encryptionKeySource string, encryptionKeyType string, encryptionKid string, availabilityType string) (*ProcessRequest, error) {
 	processRequestInstance := &ProcessRequest{}
 
 	processRequestInstance.file = file
+	processRequestInstance.extension = filepath.Ext(filename)
+	processRequestInstance.filename = strings.TrimSuffix(filename, filepath.Ext(filename))
+
+	processRequestInstance.contentType = contentType
 	processRequestInstance.url = url
 	processRequestInstance.integrityEnabled = integrityEnabled
 
@@ -109,6 +119,32 @@ func NewProcessRequest(file []byte, url string, integrityEnabled bool, authentic
 
 func (s ProcessRequest) File() []byte {
 	return s.file
+}
+
+func (s ProcessRequest) Filename() string {
+	return s.filename
+}
+
+func (s ProcessRequest) ContentType() string {
+	return s.contentType
+}
+
+func (s ProcessRequest) SetContentType(c string) ProcessRequest {
+	s.contentType = c
+	return s
+}
+
+func (s ProcessRequest) FileExtension() string {
+	if s.extension != "" {
+		return s.extension
+	}
+
+	ext := ""
+	exts, err := mime.ExtensionsByType(s.ContentType())
+	if err == nil {
+		ext = exts[0]
+	}
+	return ext
 }
 
 func (s ProcessRequest) URL() string {
