@@ -8,11 +8,11 @@ import (
 
 	"github.com/bloock/bloock-managed-api/internal/domain"
 	api_error "github.com/bloock/bloock-managed-api/internal/platform/rest/error"
-	http_request "github.com/bloock/bloock-managed-api/internal/platform/rest/handler/process/request"
-	http_response "github.com/bloock/bloock-managed-api/internal/platform/rest/handler/process/response"
 	"github.com/bloock/bloock-managed-api/internal/service/process"
 	"github.com/bloock/bloock-managed-api/internal/service/process/request"
 	"github.com/bloock/bloock-managed-api/internal/service/process/response"
+	http_request "github.com/bloock/bloock-managed-api/pkg/request"
+	http_response "github.com/bloock/bloock-managed-api/pkg/response"
 	"github.com/rs/zerolog"
 
 	"github.com/gin-gonic/gin"

@@ -5,7 +5,7 @@ import (
 
 	"github.com/bloock/bloock-managed-api/internal/config"
 	"github.com/bloock/bloock-managed-api/internal/domain"
-	"github.com/bloock/bloock-managed-api/internal/platform/rest/handler/process/request"
+	"github.com/bloock/bloock-managed-api/pkg/request"
 
 	"github.com/bloock/bloock-sdk-go/v2/entity/key"
 	"github.com/google/uuid"
