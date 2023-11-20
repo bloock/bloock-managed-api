@@ -3,12 +3,12 @@
 package enttest
 
 import (
-	"bloock-managed-api/internal/platform/repository/sql/ent"
 	"context"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent"
 	// required by schema hooks.
-	_ "bloock-managed-api/internal/platform/repository/sql/ent/runtime"
+	_ "github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/runtime"
 
-	"bloock-managed-api/internal/platform/repository/sql/ent/migrate"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/migrate"
 
 	"entgo.io/ent/dialect/sql/schema"
 )

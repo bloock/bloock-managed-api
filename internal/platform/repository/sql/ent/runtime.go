@@ -3,9 +3,9 @@
 package ent
 
 import (
-	"bloock-managed-api/internal/platform/repository/sql/ent/certification"
-	"bloock-managed-api/internal/platform/repository/sql/ent/localkey"
-	"bloock-managed-api/internal/platform/repository/sql/schema"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/certification"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/localkey"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/schema"
 
 	"github.com/google/uuid"
 )

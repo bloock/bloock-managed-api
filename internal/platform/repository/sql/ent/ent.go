@@ -3,11 +3,11 @@
 package ent
 
 import (
-	"bloock-managed-api/internal/platform/repository/sql/ent/certification"
-	"bloock-managed-api/internal/platform/repository/sql/ent/localkey"
 	"context"
 	"errors"
 	"fmt"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/certification"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/localkey"
 	"reflect"
 	"sync"
 

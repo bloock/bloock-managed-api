@@ -4,6 +4,7 @@ type ProcessResponse struct {
 	hash                  string
 	certificationResponse *IntegrityResponse
 	signResponse          *SignResponse
+	encryptResponse       *EncryptResponse
 	availabilityResponse  *AvailabilityResponse
 }
 
@@ -32,9 +33,14 @@ func (b *ProcessResponseBuilder) SignResponse(signResponse SignResponse) *Proces
 	return b
 }
 
-func (b *ProcessResponseBuilder) AvailabilityResponse(availabilityResponse AvailabilityResponse) *ProcessResponse {
+func (b *ProcessResponseBuilder) EncryptResponse(encryptResponse EncryptResponse) *ProcessResponseBuilder {
+	b.processResponse.encryptResponse = &encryptResponse
+	return b
+}
+
+func (b *ProcessResponseBuilder) AvailabilityResponse(availabilityResponse AvailabilityResponse) *ProcessResponseBuilder {
 	b.processResponse.availabilityResponse = &availabilityResponse
-	return b.processResponse
+	return b
 }
 
 func (b *ProcessResponseBuilder) Build() *ProcessResponse {
@@ -55,6 +61,10 @@ func (p ProcessResponse) CertificationResponse() *IntegrityResponse {
 
 func (p ProcessResponse) SignResponse() *SignResponse {
 	return p.signResponse
+}
+
+func (p ProcessResponse) EncryptResponse() *EncryptResponse {
+	return p.encryptResponse
 }
 
 func (p ProcessResponse) AvailabilityResponse() *AvailabilityResponse {

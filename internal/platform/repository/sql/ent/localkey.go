@@ -3,9 +3,9 @@
 package ent
 
 import (
-	"bloock-managed-api/internal/platform/repository/sql/ent/localkey"
 	"encoding/json"
 	"fmt"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/localkey"
 	"strings"
 
 	"entgo.io/ent"

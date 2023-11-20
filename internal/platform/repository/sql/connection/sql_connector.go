@@ -1,7 +1,7 @@
 package connection
 
 import (
-	"bloock-managed-api/internal/platform/repository/sql/ent"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent"
 )
 
 type SQLConnector interface {

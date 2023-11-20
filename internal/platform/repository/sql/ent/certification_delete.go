@@ -3,9 +3,9 @@
 package ent
 
 import (
-	"bloock-managed-api/internal/platform/repository/sql/ent/certification"
-	"bloock-managed-api/internal/platform/repository/sql/ent/predicate"
 	"context"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/certification"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"

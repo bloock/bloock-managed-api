@@ -5,11 +5,13 @@
 package mock_service
 
 import (
-	request "bloock-managed-api/internal/service/process/request"
-	response "bloock-managed-api/internal/service/process/response"
 	context "context"
+	url "net/url"
 	reflect "reflect"
 
+	domain "github.com/bloock/bloock-managed-api/internal/domain"
+	request "github.com/bloock/bloock-managed-api/internal/service/process/request"
+	response "github.com/bloock/bloock-managed-api/internal/service/process/response"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -34,6 +36,21 @@ func NewMockProcessService(ctrl *gomock.Controller) *MockProcessService {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockProcessService) EXPECT() *MockProcessServiceMockRecorder {
 	return m.recorder
+}
+
+// LoadUrl mocks base method.
+func (m *MockProcessService) LoadUrl(ctx context.Context, url *url.URL) (domain.File, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "LoadUrl", ctx, url)
+	ret0, _ := ret[0].(domain.File)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// LoadUrl indicates an expected call of LoadUrl.
+func (mr *MockProcessServiceMockRecorder) LoadUrl(ctx, url interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LoadUrl", reflect.TypeOf((*MockProcessService)(nil).LoadUrl), ctx, url)
 }
 
 // Process mocks base method.

@@ -3,7 +3,7 @@
 package certification
 
 import (
-	"bloock-managed-api/internal/platform/repository/sql/ent/predicate"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/google/uuid"

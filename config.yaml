@@ -1,21 +1,41 @@
-BLOOCK_API_HOST: "0.0.0.0"
-BLOOCK_API_PORT: "8080"
-BLOOCK_API_DEBUG_MODE: false
+api:
+  host: "0.0.0.0"
+  port: 8080
+  debug_mode: false
 
-BLOOCK_DB_CONNECTION_STRING: "file:bloock?mode=memory&cache=shared&_fk=1"
+auth:
+  secret: secret
 
-BLOOCK_API_KEY: "942NwSPZd8Ha7nLoPW69QYB-ju8NmqPCGB-gO01ylSHrUZbns-3mTVcTP3Jv8oad"
+db:
+  connection_string: "file:bloock?mode=memory&cache=shared&_fk=1"
 
-BLOOCK_WEBHOOK_SECRET_KEY: ""
+bloock:
+  api_host: "https://api.bloock.dev"
+  api_key: "ygTYw85v26j1Zazm61CpJdhMaOB53kZTJvDTaS0Qlw9-LPJS1LSbQAS91ZvZiq45"
+  webhook_secret_key: ""
 
-BLOOCK_CLIENT_ENDPOINT_URL: ""
+webhook:
+  client_endpoint_url: ""
 
-BLOOCK_AUTHENTICITY_PRIVATE_KEY: ""
-BLOOCK_AUTHENTICITY_PUBLIC_KEY: ""
+authenticity:
+  key:
+    key_type: ""
+    private_key: ""
+    public_key: ""
+  certificate:
+    pkcs12_path: "./"
+    pkcs12_password: ""
 
-BLOOCK_ENCRYPTION_PRIVATE_KEY: ""
-BLOOCK_ENCRYPTION_PUBLIC_KEY: ""
+encryption:
+  key:
+    key_type: ""
+    private_key: ""
+    public_key: ""
+  certificate:
+    pkcs12_path: "./"
+    pkcs12_password: ""
 
-BLOOCK_TMP_DIR: "./tmp"
-BLOOCK_STORAGE_LOCAL_PATH: "./data"
-BLOOCK_STORAGE_LOCAL_STRATEGY: "FILENAME"
+storage:
+  tmp_dir: "./tmp"
+  local_strategy: "FILENAME"
+  local_path: "./data"

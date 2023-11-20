@@ -5,8 +5,8 @@
 package mock_repository
 
 import (
-	domain "bloock-managed-api/internal/domain"
 	context "context"
+	domain "github.com/bloock/bloock-managed-api/internal/domain"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"

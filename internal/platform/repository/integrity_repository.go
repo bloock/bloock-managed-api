@@ -1,8 +1,11 @@
 package repository
 
 import (
-	"bloock-managed-api/internal/domain"
 	"context"
+
+	"github.com/bloock/bloock-managed-api/internal/domain"
+	"github.com/bloock/bloock-managed-api/internal/domain/repository"
+	"github.com/bloock/bloock-managed-api/internal/pkg"
 
 	"github.com/bloock/bloock-sdk-go/v2/client"
 	"github.com/bloock/bloock-sdk-go/v2/entity/record"
@@ -10,15 +13,18 @@ import (
 )
 
 type BloockIntegrityRepository struct {
-	integrityClient client.IntegrityClient
-	logger          zerolog.Logger
+	client client.BloockClient
+	logger zerolog.Logger
 }
 
-func NewBloockIntegrityRepository(logger zerolog.Logger) *BloockIntegrityRepository {
+func NewBloockIntegrityRepository(ctx context.Context, logger zerolog.Logger) repository.IntegrityRepository {
 	logger.With().Caller().Str("component", "integrity-repository").Logger()
+
+	c := client.NewBloockClient(pkg.GetApiKeyFromContext(ctx), "", pkg.GetEnvFromContext(ctx))
+
 	return &BloockIntegrityRepository{
-		integrityClient: client.NewIntegrityClient(),
-		logger:          logger,
+		client: c,
+		logger: logger,
 	}
 }
 
@@ -29,7 +35,7 @@ func (b BloockIntegrityRepository) Certify(ctx context.Context, file []byte) (do
 		return domain.Certification{}, err
 	}
 
-	receipt, err := b.integrityClient.SendRecords([]record.Record{rec})
+	receipt, err := b.client.IntegrityClient.SendRecords([]record.Record{rec})
 	if err != nil {
 		b.logger.Error().Err(err).Msg(err.Error())
 		return domain.Certification{}, err

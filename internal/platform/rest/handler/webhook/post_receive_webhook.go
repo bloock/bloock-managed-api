@@ -1,10 +1,14 @@
-package handler
+package webhook
 
 import (
-	"bloock-managed-api/internal/service"
 	"encoding/json"
 	"io"
 	"net/http"
+
+	"github.com/bloock/bloock-managed-api/internal/config"
+	api_error "github.com/bloock/bloock-managed-api/internal/platform/rest/error"
+	"github.com/bloock/bloock-managed-api/internal/service/notify"
+	"github.com/rs/zerolog"
 
 	"github.com/bloock/bloock-sdk-go/v2/client"
 	"github.com/gin-gonic/gin"
@@ -37,38 +41,39 @@ type WebhookResponse struct {
 	Success bool `json:"success"`
 }
 
-func PostReceiveWebhook(notifyService service.NotifyService, secretKey string) gin.HandlerFunc {
+func PostReceiveWebhook(l zerolog.Logger) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		buf, err := io.ReadAll(ctx.Request.Body)
 		if err != nil {
-			webhookErr := NewInternalServerAPIError("error while reading webhook body")
+			webhookErr := api_error.NewInternalServerAPIError("error while reading webhook body")
 			ctx.JSON(webhookErr.Status, webhookErr)
 			return
 		}
 
 		var webhookRequest WebhookRequest
 		if err = json.Unmarshal(buf, &webhookRequest); err != nil {
-			webhookErr := NewBadRequestAPIError("invalid json body")
+			webhookErr := api_error.NewBadRequestAPIError("invalid json body")
 			ctx.JSON(webhookErr.Status, webhookErr)
 			return
 		}
 		bloockSignature := ctx.GetHeader("Bloock-Signature")
 
 		webhookClient := client.NewWebhookClient()
-		ok, err := webhookClient.VerifyWebhookSignature(buf, bloockSignature, secretKey, false)
+		ok, err := webhookClient.VerifyWebhookSignature(buf, bloockSignature, config.Configuration.Bloock.WebhookSecretKey, false)
 		if err != nil {
-			serverAPIError := NewInternalServerAPIError(err.Error())
+			serverAPIError := api_error.NewInternalServerAPIError(err.Error())
 			ctx.JSON(serverAPIError.Status, serverAPIError)
 			return
 		}
 		if !ok {
-			badRequestAPIError := NewBadRequestAPIError("invalid bloock webhook signature")
+			badRequestAPIError := api_error.NewBadRequestAPIError("invalid bloock webhook signature")
 			ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
 			return
 		}
 
+		notifyService := notify.NewNotifyService(ctx, l)
 		if err = notifyService.Notify(ctx, webhookRequest.Data.Id); err != nil {
-			serverAPIError := NewInternalServerAPIError(err.Error())
+			serverAPIError := api_error.NewInternalServerAPIError(err.Error())
 			ctx.JSON(serverAPIError.Status, serverAPIError)
 			return
 		}

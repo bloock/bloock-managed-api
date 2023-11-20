@@ -1,10 +1,14 @@
 package rest
 
 import (
-	"bloock-managed-api/internal/platform/rest/handler"
-	"bloock-managed-api/internal/service"
 	"fmt"
 
+	"github.com/bloock/bloock-managed-api/internal/config"
+	"github.com/bloock/bloock-managed-api/internal/platform/rest/handler"
+	"github.com/bloock/bloock-managed-api/internal/platform/rest/handler/process"
+	"github.com/bloock/bloock-managed-api/internal/platform/rest/handler/webhook"
+	"github.com/bloock/bloock-managed-api/internal/platform/rest/middleware"
+	"github.com/gin-contrib/logger"
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 )
@@ -13,13 +17,16 @@ type Server struct {
 	host   string
 	port   string
 	engine *gin.Engine
-	debug  bool
 	logger zerolog.Logger
 }
 
-func NewServer(host string, port string, processService service.ProcessService, notifyService service.NotifyService, webhookSecretKey string, logger zerolog.Logger, debug bool) (*Server, error) {
+func NewServer(l zerolog.Logger) (*Server, error) {
+	l = l.With().Str("layer", "infrastructure").Str("component", "gin").Logger()
+	gin.DefaultWriter = l.With().Str("level", "info").Logger()
+	gin.DefaultErrorWriter = l.With().Str("level", "error").Logger()
+
 	router := gin.Default()
-	if debug {
+	if config.Configuration.Api.DebugMode {
 		gin.SetMode(gin.DebugMode)
 	} else {
 		gin.SetMode(gin.ReleaseMode)
@@ -28,15 +35,24 @@ func NewServer(host string, port string, processService service.ProcessService, 
 		return nil, err
 	}
 
+	router.Use(middleware.ErrorMiddleware())
+	router.Use(logger.SetLogger(
+		logger.WithSkipPath([]string{"/health"}),
+		logger.WithUTC(true),
+		logger.WithLogger(func(c *gin.Context, _ zerolog.Logger) zerolog.Logger {
+			return l
+		}),
+	))
+
 	v1 := router.Group("/v1/")
 	v1.GET("health", handler.Health())
-	v1.POST("process", handler.PostProcess(processService))
-	v1.POST("webhook", handler.PostReceiveWebhook(notifyService, webhookSecretKey))
-	if debug {
+	v1.POST("process", middleware.AuthMiddleware(), process.PostProcess(l))
+	v1.POST("webhook", webhook.PostReceiveWebhook(l))
+	if config.Configuration.Api.DebugMode {
 		v1.POST("certification", handler.Debug())
 	}
 
-	return &Server{host: host, port: port, engine: router, debug: debug, logger: logger}, nil
+	return &Server{host: config.Configuration.Api.Host, port: config.Configuration.Api.Port, engine: router, logger: l}, nil
 }
 
 func (s *Server) Start() error {

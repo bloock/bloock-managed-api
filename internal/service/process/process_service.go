@@ -1,17 +1,20 @@
 package process
 
 import (
-	"bloock-managed-api/internal/config"
-	"bloock-managed-api/internal/domain"
-	"bloock-managed-api/internal/domain/repository"
-	"bloock-managed-api/internal/service/process/request"
-	"bloock-managed-api/internal/service/process/response"
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
+	"net/url"
+	"path"
+	"strings"
 
-	"github.com/bloock/bloock-sdk-go/v2/entity/key"
+	"github.com/bloock/bloock-managed-api/internal/domain"
+	"github.com/bloock/bloock-managed-api/internal/domain/repository"
+	bloock_repository "github.com/bloock/bloock-managed-api/internal/platform/repository"
+	"github.com/bloock/bloock-managed-api/internal/service/process/request"
+	"github.com/bloock/bloock-managed-api/internal/service/process/response"
+	"github.com/rs/zerolog"
+
 	"github.com/bloock/bloock-sdk-go/v2/entity/record"
 )
 
@@ -23,6 +26,7 @@ var (
 
 type ProcessService struct {
 	integrityRepository    repository.IntegrityRepository
+	keyRepository          repository.KeyRepository
 	authenticityRepository repository.AuthenticityRepository
 	encryptionRepository   repository.EncryptionRepository
 	availabilityRepository repository.AvailabilityRepository
@@ -30,41 +34,39 @@ type ProcessService struct {
 	notificationRepository repository.NotificationRepository
 }
 
-func NewProcessService(
-	integrityRepository repository.IntegrityRepository,
-	authenticityRepository repository.AuthenticityRepository,
-	encryptionRepository repository.EncryptionRepository,
-	availabilityRepository repository.AvailabilityRepository,
-	metadataRepository repository.MetadataRepository,
-	notificationRepository repository.NotificationRepository,
-) *ProcessService {
-
+func NewProcessService(ctx context.Context, logger zerolog.Logger) *ProcessService {
 	return &ProcessService{
-		integrityRepository:    integrityRepository,
-		authenticityRepository: authenticityRepository,
-		encryptionRepository:   encryptionRepository,
-		availabilityRepository: availabilityRepository,
-		metadataRepository:     metadataRepository,
-		notificationRepository: notificationRepository,
+		integrityRepository:    bloock_repository.NewBloockIntegrityRepository(ctx, logger),
+		keyRepository:          bloock_repository.NewBloockKeyRepository(ctx, logger),
+		authenticityRepository: bloock_repository.NewBloockAuthenticityRepository(ctx, logger),
+		encryptionRepository:   bloock_repository.NewBloockEncryptionRepository(ctx, logger),
+		availabilityRepository: bloock_repository.NewBloockAvailabilityRepository(ctx, logger),
+		metadataRepository:     bloock_repository.NewBloockMetadataRepository(ctx, logger),
+		notificationRepository: bloock_repository.NewHttpNotificationRepository(ctx, logger),
 	}
 }
 
-func (s ProcessService) Process(ctx context.Context, req request.ProcessRequest) (*response.ProcessResponse, error) {
-	var file []byte
-	if req.File() != nil {
-		file = req.File()
-	} else if req.URL() != "" {
-		fileBytes, err := s.availabilityRepository.FindFile(ctx, req.URL())
-		if err != nil {
-			return nil, err
-		}
-		req = req.SetContentType(http.DetectContentType(fileBytes))
-		file = fileBytes
-	} else {
-		return nil, errors.New("you must provide a file or URL")
+func (s ProcessService) LoadUrl(ctx context.Context, url *url.URL) (domain.File, error) {
+	fileBytes, err := s.availabilityRepository.FindFile(ctx, url.String())
+	if err != nil {
+		return domain.File{}, err
 	}
 
-	record, err := s.metadataRepository.GetRecord(ctx, file)
+	filename := path.Base(url.Path)
+	if filename == "" {
+		pathParts := strings.Split(url.Path, "/")
+
+		// If it's empty, use the second-to-last part as the filename
+		if len(pathParts) >= 2 {
+			filename = pathParts[len(pathParts)-2]
+		}
+	}
+
+	return domain.NewFile(fileBytes, filename, http.DetectContentType(fileBytes)), nil
+}
+
+func (s ProcessService) Process(ctx context.Context, req request.ProcessRequest) (*response.ProcessResponse, error) {
+	record, err := s.metadataRepository.GetRecord(ctx, req.File.Bytes())
 	if err != nil {
 		return nil, err
 	}
@@ -75,24 +77,15 @@ func (s ProcessService) Process(ctx context.Context, req request.ProcessRequest)
 	}
 
 	certification := domain.Certification{
-		Data:   file,
+		Data:   req.File.Bytes(),
 		Hash:   fileHash,
 		Record: record,
 	}
 
 	responseBuilder := response.NewProcessResponseBuilder()
 
-	if req.IsAuthenticityEnabled() {
-		signRequest := request.NewSignRequest(
-			config.Configuration.AuthenticityPublicKey,
-			&config.Configuration.AuthenticityPrivateKey,
-			req.AuthenticityKeySource(),
-			req.AuthenticityKeyID(),
-			req.AuthenticityKeyType(),
-			req.AuthenticityUseEnsResolution(),
-			file,
-		)
-		signature, record, err := s.sign(ctx, signRequest)
+	if req.Authenticity.Enabled {
+		key, signature, record, err := s.sign(ctx, &req.File, &req.Authenticity)
 		if err != nil {
 			return nil, err
 		}
@@ -102,13 +95,15 @@ func (s ProcessService) Process(ctx context.Context, req request.ProcessRequest)
 			return nil, err
 		}
 
+		req.File.File = record.Retrieve()
+
 		certification.Data = record.Retrieve()
 		certification.Record = record
 		certification.Hash = newHash
-		responseBuilder.SignResponse(*response.NewSignResponse(signature))
+		responseBuilder.SignResponse(*response.NewSignResponse(key, signature))
 	}
 
-	if req.IsIntegrityEnabled() {
+	if req.Integrity.Enabled {
 		newCertification, err := s.certify(ctx, certification.Data)
 		if err != nil {
 			return nil, err
@@ -117,16 +112,8 @@ func (s ProcessService) Process(ctx context.Context, req request.ProcessRequest)
 		responseBuilder.CertificationResponse(*response.NewIntegrityResponse(certification.Hash, certification.AnchorID))
 	}
 
-	if req.IsEncryptionEnabled() {
-		encryptRequest := request.NewEncryptRequest(
-			config.Configuration.EncryptionPublicKey,
-			&config.Configuration.EncryptionPrivateKey,
-			req.EncryptionKeySource(),
-			req.EncryptionKeyID(),
-			req.EncryptionKeyType(),
-			file,
-		)
-		encryptedRecord, err := s.encrypt(ctx, encryptRequest)
+	if req.Encryption.Enabled {
+		key, encryptedRecord, err := s.encrypt(ctx, &req.File, &req.Encryption)
 		if err != nil {
 			return nil, err
 		}
@@ -139,10 +126,12 @@ func (s ProcessService) Process(ctx context.Context, req request.ProcessRequest)
 		certification.Data = encryptedRecord.Retrieve()
 		certification.Record = encryptedRecord
 		certification.Hash = newHash
+
+		responseBuilder.EncryptResponse(*response.NewEncryptResponse(key))
 	}
 
-	if req.HostingType() != domain.NONE {
-		dataID, err := s.upload(ctx, fmt.Sprintf("%s%s", req.Filename(), req.FileExtension()), certification.Record, req.HostingType())
+	if req.Availability.Enabled {
+		dataID, err := s.upload(ctx, &req.File, &req.Availability)
 		if err != nil {
 			return nil, err
 		}
@@ -150,14 +139,16 @@ func (s ProcessService) Process(ctx context.Context, req request.ProcessRequest)
 		if err = s.metadataRepository.UpdateCertification(ctx, certification); err != nil {
 			return nil, err
 		}
-		responseBuilder.AvailabilityResponse(*response.NewAvailabilityResponse(certification.DataID, req.HostingType()))
+
+		responseBuilder.AvailabilityResponse(*response.NewAvailabilityResponse(certification.DataID, req.Availability.Hostingtype))
 	} else {
-		if req.IsIntegrityEnabled() {
-			if _, err = s.availabilityRepository.UploadTmp(ctx, certification.Record); err != nil {
+		if req.Integrity.Enabled {
+			if _, err = s.availabilityRepository.UploadTmp(ctx, &req.File); err != nil {
 				return nil, err
 			}
 		}
 	}
+
 	responseBuilder.HashResponse(certification.Hash)
 
 	if certification.AnchorID == 0 {
@@ -182,155 +173,128 @@ func (s ProcessService) certify(ctx context.Context, data []byte) (domain.Certif
 	return certification, nil
 }
 
-func (s ProcessService) sign(ctx context.Context, request request.SignRequest) (string, *record.Record, error) {
-	switch request.KeySource() {
+func (s ProcessService) sign(ctx context.Context, file *domain.File, request *request.AuthenticityRequest) (string, string, *record.Record, error) {
+	switch request.KeySource {
 	case domain.LOCAL_KEY:
-		if request.KeyType() == key.EcP256k && !request.UseEnsResolution() {
-			signature, record, err := s.authenticityRepository.
-				SignECWithLocalKey(ctx, request.Data(), request.KeyType(), request.PublicKey(), request.PrivateKey())
-			if err != nil {
-				return "", nil, err
-			}
-			return signature, record, nil
+		localKey, err := s.keyRepository.LoadLocalKey(ctx, request.LocalKey.KeyType, request.LocalKey.PublicKey, &request.LocalKey.PrivateKey)
+		if err != nil {
+			return request.LocalKey.PublicKey, "", nil, err
 		}
 
-		if request.KeyType() == key.EcP256k && request.UseEnsResolution() {
-			signature, record, err := s.authenticityRepository.
-				SignECWithLocalKeyEns(ctx, request.Data(), request.KeyType(), request.PublicKey(), request.PrivateKey())
-			if err != nil {
-				return "", nil, err
-			}
-			return signature, record, nil
+		signature, record, err := s.authenticityRepository.
+			SignWithLocalKey(ctx, file.Bytes(), localKey)
+		if err != nil {
+			return request.LocalKey.PublicKey, "", nil, err
 		}
+		return request.LocalKey.PublicKey, signature, record, nil
 
 	case domain.MANAGED_KEY:
-		if request.KeyType() == key.EcP256k && !request.UseEnsResolution() {
-			signature, record, err := s.authenticityRepository.
-				SignECWithManagedKey(ctx, request.Data(), request.KeyID().String())
-			if err != nil {
-				return "", nil, err
-			}
-			return signature, record, nil
+		managedKey, err := s.keyRepository.LoadManagedKey(ctx, request.ManagedKey.Uuid.String())
+		if err != nil {
+			return request.ManagedKey.Uuid.String(), "", nil, err
 		}
 
-		if request.KeyType() == key.EcP256k && request.UseEnsResolution() {
-			signature, record, err := s.authenticityRepository.
-				SignECWithManagedKeyEns(ctx, request.Data(), request.KeyID().String())
-			if err != nil {
-				return "", nil, err
-			}
-			return signature, record, nil
+		signature, record, err := s.authenticityRepository.
+			SignWithManagedKey(ctx, file.Bytes(), managedKey)
+		if err != nil {
+			return request.ManagedKey.Uuid.String(), "", nil, err
 		}
+		return request.ManagedKey.Uuid.String(), signature, record, nil
 
 	case domain.LOCAL_CERTIFICATE:
-		return "", nil, nil
-	case domain.MANAGED_CERTIFICATE:
-		if request.KeyType() == key.EcP256k && !request.UseEnsResolution() {
-			signature, record, err := s.authenticityRepository.
-				SignECWithManagedKey(ctx, request.Data(), request.KeyID().String())
-			if err != nil {
-				return "", nil, err
-			}
-			return signature, record, nil
+		localCertificate, err := s.keyRepository.LoadLocalCertificate(ctx, request.LocalCertificate.Pkcs12, request.LocalCertificate.Pkcs12Pasword)
+		if err != nil {
+			return "", "", nil, err
 		}
 
-		if request.KeyType() == key.EcP256k && request.UseEnsResolution() {
-			signature, record, err := s.authenticityRepository.
-				SignECWithManagedKeyEns(ctx, request.Data(), request.KeyID().String())
-			if err != nil {
-				return "", nil, err
-			}
-			return signature, record, nil
+		signature, record, err := s.authenticityRepository.
+			SignWithLocalCertificate(ctx, file.Bytes(), localCertificate)
+		if err != nil {
+			return "", "", nil, err
 		}
+		return "certificate_id", signature, record, nil
+
+	case domain.MANAGED_CERTIFICATE:
+		managedCertificate, err := s.keyRepository.LoadManagedCertificate(ctx, request.ManagedCertificate.Uuid.String())
+		if err != nil {
+			return request.ManagedCertificate.Uuid.String(), "", nil, err
+		}
+
+		signature, record, err := s.authenticityRepository.
+			SignWithManagedCertificate(ctx, file.Bytes(), managedCertificate)
+		if err != nil {
+			return request.ManagedCertificate.Uuid.String(), "", nil, err
+		}
+		return request.ManagedCertificate.Uuid.String(), signature, record, nil
 	}
 
-	return "", nil, ErrSignKeyNotSupported
+	return "", "", nil, ErrSignKeyNotSupported
 }
 
-func (s ProcessService) encrypt(ctx context.Context, request request.EncryptRequest) (*record.Record, error) {
-	switch request.KeySource() {
+func (s ProcessService) encrypt(ctx context.Context, file *domain.File, request *request.EncryptionRequest) (string, *record.Record, error) {
+	switch request.KeySource {
 	case domain.LOCAL_KEY:
-		switch request.KeyType() {
-		case key.Rsa2048, key.Rsa3072, key.Rsa4096:
-			record, err := s.encryptionRepository.EncryptRSAWithLocalKey(ctx, request.Data(), request.KeyType(), request.PublicKey(), request.PrivateKey())
-			if err != nil {
-				return record, err
-			}
-
-			return record, nil
-		case key.Aes128, key.Aes256:
-			record, err := s.encryptionRepository.EncryptAESWithLocalKey(ctx, request.Data(), request.KeyType(), request.PublicKey())
-			if err != nil {
-				return nil, err
-			}
-
-			return record, nil
+		localKey, err := s.keyRepository.LoadLocalKey(ctx, request.LocalKey.KeyType, request.LocalKey.PublicKey, &request.LocalKey.PrivateKey)
+		if err != nil {
+			return request.LocalKey.PublicKey, nil, err
 		}
+
+		record, err := s.encryptionRepository.EncryptWithLocalKey(ctx, file.Bytes(), localKey)
+		if err != nil {
+			return request.LocalKey.PublicKey, record, err
+		}
+		return request.LocalKey.PublicKey, record, nil
 
 	case domain.MANAGED_KEY:
-		switch request.KeyType() {
-		case key.Rsa2048, key.Rsa3072, key.Rsa4096:
-			record, err := s.encryptionRepository.EncryptRSAWithManagedKey(ctx, request.Data(), request.KeyID().String())
-			if err != nil {
-				return nil, err
-			}
-
-			return record, nil
-		case key.Aes128, key.Aes256:
-			record, err := s.encryptionRepository.EncryptAESWithManagedKey(ctx, request.Data(), request.KeyID().String())
-			if err != nil {
-				return nil, err
-			}
-
-			return record, nil
+		managedKey, err := s.keyRepository.LoadManagedKey(ctx, request.ManagedKey.Uuid.String())
+		if err != nil {
+			return request.ManagedKey.Uuid.String(), nil, err
 		}
+
+		record, err := s.encryptionRepository.EncryptWithManagedKey(ctx, file.Bytes(), managedKey)
+		if err != nil {
+			return request.ManagedKey.Uuid.String(), record, err
+		}
+		return request.ManagedKey.Uuid.String(), record, nil
 
 	case domain.LOCAL_CERTIFICATE:
-		return nil, nil
+		return "", nil, ErrEncryptKeyNotSupported
 	case domain.MANAGED_CERTIFICATE:
-		switch request.KeyType() {
-		case key.Rsa2048, key.Rsa3072, key.Rsa4096:
-			record, err := s.encryptionRepository.EncryptRSAWithManagedKey(ctx, request.Data(), request.KeyID().String())
-			if err != nil {
-				return nil, err
-			}
-
-			return record, nil
-		case key.Aes128, key.Aes256:
-			record, err := s.encryptionRepository.EncryptAESWithManagedKey(ctx, request.Data(), request.KeyID().String())
-			if err != nil {
-				return nil, err
-			}
-
-			return record, nil
+		managedKey, err := s.keyRepository.LoadManagedKey(ctx, request.ManagedCertificate.Uuid.String())
+		if err != nil {
+			return request.ManagedKey.Uuid.String(), nil, err
 		}
+
+		record, err := s.encryptionRepository.EncryptWithManagedKey(ctx, file.Bytes(), managedKey)
+		if err != nil {
+			return request.ManagedKey.Uuid.String(), record, err
+		}
+		return request.ManagedKey.Uuid.String(), record, nil
 	}
 
-	return nil, ErrEncryptKeyNotSupported
+	return "", nil, ErrEncryptKeyNotSupported
 }
 
-func (a ProcessService) upload(ctx context.Context, filename string, record *record.Record, hostingType domain.HostingType) (string, error) {
-	switch hostingType {
+func (a ProcessService) upload(ctx context.Context, file *domain.File, request *request.AvailabilityRequest) (string, error) {
+	switch request.Hostingtype {
 	case domain.HOSTED:
-		hostedID, err := a.availabilityRepository.UploadHosted(ctx, record)
+		hostedID, err := a.availabilityRepository.UploadHosted(ctx, file)
 		if err != nil {
 			return "", err
 		}
 		return hostedID, err
 	case domain.IPFS:
-		ipfsID, err := a.availabilityRepository.UploadIpfs(ctx, record)
+		ipfsID, err := a.availabilityRepository.UploadIpfs(ctx, file)
 		if err != nil {
 			return "", err
 		}
 		return ipfsID, err
 	case domain.LOCAL:
-		path, err := a.availabilityRepository.UploadLocal(ctx, filename, record)
+		path, err := a.availabilityRepository.UploadLocal(ctx, file)
 		if err != nil {
 			return "", err
 		}
 		return path, err
-	case domain.NONE:
-		return "", nil
 	default:
 		return "", ErrUnsupportedHosting
 	}

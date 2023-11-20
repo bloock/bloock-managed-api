@@ -3,8 +3,8 @@
 package ent
 
 import (
-	"bloock-managed-api/internal/platform/repository/sql/ent/certification"
 	"fmt"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/certification"
 	"strings"
 
 	"entgo.io/ent"

@@ -3,9 +3,9 @@
 package hook
 
 import (
-	"bloock-managed-api/internal/platform/repository/sql/ent"
 	"context"
 	"fmt"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent"
 )
 
 // The CertificationFunc type is an adapter to allow the use of ordinary

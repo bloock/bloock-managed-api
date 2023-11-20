@@ -3,11 +3,11 @@
 package ent
 
 import (
-	"bloock-managed-api/internal/platform/repository/sql/ent/localkey"
-	"bloock-managed-api/internal/platform/repository/sql/ent/predicate"
 	"context"
 	"errors"
 	"fmt"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/localkey"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"

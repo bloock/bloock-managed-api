@@ -1,9 +1,12 @@
 package notify
 
 import (
-	"bloock-managed-api/internal/domain/repository"
 	"context"
 	"errors"
+
+	"github.com/bloock/bloock-managed-api/internal/domain/repository"
+	bloock_repository "github.com/bloock/bloock-managed-api/internal/platform/repository"
+	"github.com/rs/zerolog"
 )
 
 var (
@@ -16,18 +19,16 @@ type NotifyService struct {
 	availabilityRepository repository.AvailabilityRepository
 	metadataRepository     repository.MetadataRepository
 	notificationRepository repository.NotificationRepository
+	logger                 zerolog.Logger
 }
 
-func NewNotifyService(
-	availabilityRepository repository.AvailabilityRepository,
-	metadataRepository repository.MetadataRepository,
-	notificationRepository repository.NotificationRepository,
-) *NotifyService {
+func NewNotifyService(ctx context.Context, l zerolog.Logger) *NotifyService {
 
 	return &NotifyService{
-		availabilityRepository: availabilityRepository,
-		metadataRepository:     metadataRepository,
-		notificationRepository: notificationRepository,
+		availabilityRepository: bloock_repository.NewBloockAvailabilityRepository(ctx, l),
+		metadataRepository:     bloock_repository.NewBloockMetadataRepository(ctx, l),
+		notificationRepository: bloock_repository.NewHttpNotificationRepository(ctx, l),
+		logger:                 l,
 	}
 }
 

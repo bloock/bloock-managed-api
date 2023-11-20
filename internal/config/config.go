@@ -1,66 +1,137 @@
 package config
 
 import (
-	"log"
+	"fmt"
+	"reflect"
+	"regexp"
+	"strings"
 
-	"github.com/go-playground/validator/v10"
+	"github.com/bloock/bloock-sdk-go/v2"
+	"github.com/mcuadros/go-defaults"
+	"github.com/rs/zerolog"
 	"github.com/spf13/viper"
 )
 
+type APIConfig struct {
+	Host      string `mapstructure:"host" default:"0.0.0.0"`
+	Port      string `mapstructure:"port" default:"8080"`
+	DebugMode bool   `mapstructure:"debug_mode" default:"false"`
+}
+
+type AuthConfig struct {
+	Secret string `mapstructure:"secret"`
+}
+
+type DBConfig struct {
+	ConnectionString string `mapstructure:"connection_string" default:"file:managed?mode=memory&cache=shared&_fk=1"`
+}
+
+type BloockConfig struct {
+	ApiHost          string `mapstructure:"api_host" default:"https://api.bloock.com"`
+	ApiKey           string `mapstructure:"api_key"`
+	WebhookSecretKey string `mapstructure:"webhook_secret_key"`
+}
+
+type WebhookConfig struct {
+	ClientEndpointUrl string `mapstructure:"client_endpoint_url"`
+}
+
+type KeyConfig struct {
+	KeyType    string `mapstructure:"key_type"`
+	PrivateKey string `mapstructure:"private_key"`
+	PublicKey  string `mapstructure:"public_key"`
+}
+
+type CertificateConfig struct {
+	Pkcs12Path     string `mapstructure:"pkcs12_path"`
+	Pkcs12Password string `mapstructure:"pkcs12_password"`
+}
+
+type AuthenticityConfig struct {
+	KeyConfig         KeyConfig         `mapstructure:"key"`
+	CertificateConfig CertificateConfig `mapstructure:"certificate"`
+}
+
+type EncryptionConfig struct {
+	KeyConfig         KeyConfig         `mapstructure:"key"`
+	CertificateConfig CertificateConfig `mapstructure:"certificate"`
+}
+
+type StorageConfig struct {
+	TmpDir        string `mapstructure:"tmp_dir" default:"./tmp"`
+	LocalPath     string `mapstructure:"local_path" default:"./data"`
+	LocalStrategy string `mapstructure:"local_strategy" default:"HASH"`
+}
+
 type Config struct {
-	DBConnectionString     string `mapstructure:"BLOOCK_DB_CONNECTION_STRING"`
-	APIKey                 string `mapstructure:"BLOOCK_API_KEY" validate:"required"`
-	APIHost                string `mapstructure:"BLOOCK_API_HOST"`
-	APIPort                string `mapstructure:"BLOOCK_API_PORT"`
-	ClientEndpointUrl      string `mapstructure:"BLOOCK_CLIENT_ENDPOINT_URL"`
-	WebhookSecretKey       string `mapstructure:"BLOOCK_WEBHOOK_SECRET_KEY"`
-	DebugMode              bool   `mapstructure:"BLOOCK_API_DEBUG_MODE"`
-	AuthenticityPrivateKey string `mapstructure:"BLOOCK_AUTHENTICITY_PRIVATE_KEY"`
-	AuthenticityPublicKey  string `mapstructure:"BLOOCK_AUTHENTICITY_PUBLIC_KEY"`
-	EncryptionPrivateKey   string `mapstructure:"BLOOCK_ENCRYPTION_PRIVATE_KEY"`
-	EncryptionPublicKey    string `mapstructure:"BLOOCK_ENCRYPTION_PUBLIC_KEY"`
-	TmpDir                 string `mapstructure:"BLOOCK_TMP_DIR"`
-	StorageLocalPath       string `mapstructure:"BLOOCK_STORAGE_LOCAL_PATH"`
-	StorageLocalStrategy   string `mapstructure:"BLOOCK_STORAGE_LOCAL_STRATEGY"`
+	Api          APIConfig
+	Auth         AuthConfig
+	Db           DBConfig
+	Bloock       BloockConfig
+	Webhook      WebhookConfig
+	Authenticity AuthenticityConfig
+	Encryption   EncryptionConfig
+	Storage      StorageConfig
 }
 
-var Configuration = &Config{}
+var Configuration = Config{}
 
-func InitConfig() (*Config, error) {
-
-	setDefaultConfigValues()
-	viper.AddConfigPath("./")
-	viper.SetConfigName("config")
-	viper.SetConfigType("yaml")
+func InitConfig(logger zerolog.Logger) (*Config, error) {
 	viper.AutomaticEnv()
-	_ = viper.ReadInConfig()
+	viper.SetEnvPrefix("bloock")
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
-	err := viper.Unmarshal(Configuration)
+	viper.AddConfigPath("./")
+	err := viper.ReadInConfig()
 	if err != nil {
-		return &Config{}, err
+		switch err.(type) {
+		default:
+			return nil, fmt.Errorf("fatal error loading config file: %s", err)
+		case viper.ConfigFileNotFoundError:
+			logger.Warn().Msg("No config file found. Using defaults and environment variables")
+		}
 	}
 
-	validate := validator.New()
-	if err := validate.Struct(Configuration); err != nil {
-		log.Fatalf("Missing required attributes %v\n", err)
-	}
+	bindEnvs(Configuration)
 
-	return Configuration, nil
+	err = viper.Unmarshal(&Configuration)
+	if err != nil {
+		return nil, fmt.Errorf("fatal error loading config file: %s", err)
+	}
+	defaults.SetDefaults(&Configuration)
+
+	bloock.ApiHost = Configuration.Bloock.ApiHost
+	bloock.DisableAnalytics = true
+
+	return &Configuration, nil
 }
 
-func setDefaultConfigValues() {
-	viper.SetDefault("bloock_db_connection_string", "file:managed?mode=memory&cache=shared&_fk=1")
-	viper.SetDefault("bloock_api_key", "")
-	viper.SetDefault("bloock_client_endpoint_url", "")
-	viper.SetDefault("bloock_webhook_secret_key", "")
-	viper.SetDefault("bloock_api_host", "0.0.0.0")
-	viper.SetDefault("bloock_api_port", "8080")
-	viper.SetDefault("bloock_api_debug_mode", false)
-	viper.SetDefault("bloock_authenticity_private_key", "")
-	viper.SetDefault("bloock_authenticity_public_key", "")
-	viper.SetDefault("bloock_encryption_private_key", "")
-	viper.SetDefault("bloock_encryption_public_key", "")
-	viper.SetDefault("bloock_tmp_dir", "./tmp")
-	viper.SetDefault("bloock_storage_local_path", "./data")
-	viper.SetDefault("bloock_storage_local_strategy", "HASH")
+func bindEnvs(iface interface{}, parts ...string) {
+	ifv := reflect.ValueOf(iface)
+	ift := reflect.TypeOf(iface)
+	for i := 0; i < ift.NumField(); i++ {
+		v := ifv.Field(i)
+		t := ift.Field(i)
+
+		var tv string
+		tv, ok := t.Tag.Lookup("mapstructure")
+		if !ok {
+			tv = toSnakeCase(t.Name)
+		}
+		switch v.Kind() {
+		case reflect.Struct:
+			bindEnvs(v.Interface(), append(parts, tv)...)
+		default:
+			viper.BindEnv(strings.Join(append(parts, tv), "."))
+		}
+	}
+}
+
+var matchFirstCap = regexp.MustCompile("(.)([A-Z][a-z]+)")
+var matchAllCap = regexp.MustCompile("([a-z0-9])([A-Z])")
+
+func toSnakeCase(str string) string {
+	snake := matchFirstCap.ReplaceAllString(str, "${1}_${2}")
+	snake = matchAllCap.ReplaceAllString(snake, "${1}_${2}")
+	return strings.ToLower(snake)
 }

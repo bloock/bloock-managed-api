@@ -5,10 +5,10 @@
 package mock_repository
 
 import (
-	domain "bloock-managed-api/internal/domain"
 	context "context"
 	reflect "reflect"
 
+	domain "github.com/bloock/bloock-managed-api/internal/domain"
 	record "github.com/bloock/bloock-sdk-go/v2/entity/record"
 	gomock "github.com/golang/mock/gomock"
 )

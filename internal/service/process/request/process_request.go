@@ -1,200 +1,198 @@
 package request
 
 import (
-	"bloock-managed-api/internal/config"
-	"bloock-managed-api/internal/domain"
-	"errors"
-	"mime"
-	"path/filepath"
-	"strings"
+	"os"
+
+	"github.com/bloock/bloock-managed-api/internal/config"
+	"github.com/bloock/bloock-managed-api/internal/domain"
+	"github.com/bloock/bloock-managed-api/internal/platform/rest/handler/process/request"
 
 	"github.com/bloock/bloock-sdk-go/v2/entity/key"
 	"github.com/google/uuid"
 )
 
-type ProcessRequest struct {
-	file                         []byte
-	filename                     string
-	extension                    string
-	contentType                  string
-	url                          string
-	integrityEnabled             bool
-	authenticityEnabled          bool
-	authenticityKeySource        domain.KeyType
-	authenticityKeyID            uuid.UUID
-	authenticityKeyType          key.KeyType
-	authenticityUseEnsResolution bool
-	encryptionEnabled            bool
-	encryptionKeySource          domain.KeyType
-	encryptionKeyID              uuid.UUID
-	encryptionKeyType            key.KeyType
-	hostingType                  domain.HostingType
+type IntegrityRequest struct {
+	Enabled bool
 }
 
-func NewProcessRequest(file []byte, filename string, contentType string, url string, integrityEnabled bool, authenticityEnabled bool, authenticityKeySource string, authenticityKeyType string, authenticityKid string, authenticityUseEns bool, encryptionEnabled bool, encryptionKeySource string, encryptionKeyType string, encryptionKid string, availabilityType string) (*ProcessRequest, error) {
+type LocalKeyRequest struct {
+	KeyType    key.KeyType
+	PrivateKey string
+	PublicKey  string
+}
+
+type LocalCertificateRequest struct {
+	Pkcs12        []byte
+	Pkcs12Pasword string
+}
+
+type ManagedKeyRequest struct {
+	Uuid uuid.UUID
+}
+
+type ManagedCertificateRequest struct {
+	Uuid uuid.UUID
+}
+
+type AuthenticityRequest struct {
+	Enabled            bool
+	KeySource          domain.KeyType
+	LocalKey           *LocalKeyRequest
+	LocalCertificate   *LocalCertificateRequest
+	ManagedKey         *ManagedKeyRequest
+	ManagedCertificate *ManagedCertificateRequest
+}
+
+type EncryptionRequest struct {
+	Enabled            bool
+	KeySource          domain.KeyType
+	LocalKey           *LocalKeyRequest
+	LocalCertificate   *LocalCertificateRequest
+	ManagedKey         *ManagedKeyRequest
+	ManagedCertificate *ManagedCertificateRequest
+}
+
+type AvailabilityRequest struct {
+	Enabled     bool
+	Hostingtype domain.HostingType
+}
+
+type ProcessRequest struct {
+	File         domain.File
+	Integrity    IntegrityRequest
+	Authenticity AuthenticityRequest
+	Encryption   EncryptionRequest
+	Availability AvailabilityRequest
+}
+
+func NewProcessRequest(file domain.File, request *request.ProcessFormRequest) (*ProcessRequest, error) {
 	processRequestInstance := &ProcessRequest{}
 
-	processRequestInstance.file = file
-	processRequestInstance.extension = filepath.Ext(filename)
-	processRequestInstance.filename = strings.TrimSuffix(filename, filepath.Ext(filename))
+	processRequestInstance.File = file
 
-	processRequestInstance.contentType = contentType
-	processRequestInstance.url = url
-	processRequestInstance.integrityEnabled = integrityEnabled
+	if request.Integrity.Enabled {
+		integrityRequest := IntegrityRequest{
+			Enabled: request.Integrity.Enabled,
+		}
+		processRequestInstance.Integrity = integrityRequest
+	}
 
-	processRequestInstance.authenticityEnabled = authenticityEnabled
-	if authenticityEnabled {
-		authenticityKeySource, err := domain.ParseKeySource(authenticityKeySource)
+	if request.Authenticity.Enabled {
+		authenticityRequest := AuthenticityRequest{
+			Enabled: request.Authenticity.Enabled,
+		}
+
+		authenticityKeySource, err := domain.ParseKeySource(request.Authenticity.KeySource)
 		if err != nil {
 			return nil, err
 		}
-		processRequestInstance.authenticityKeySource = authenticityKeySource
+		authenticityRequest.KeySource = authenticityKeySource
 
-		kty, err := domain.ValidateKeyType(authenticityKeyType)
-		if err != nil {
-			return nil, err
-		}
-		processRequestInstance.authenticityKeyType = kty
-
-		if authenticityKeySource == domain.MANAGED_KEY || authenticityKeySource == domain.MANAGED_CERTIFICATE {
-			// Managed key or certificate
-
-			keyID, err := uuid.Parse(authenticityKid)
+		switch authenticityKeySource {
+		case domain.LOCAL_KEY:
+			kty, err := domain.ValidateKeyType(config.Configuration.Authenticity.KeyConfig.KeyType)
 			if err != nil {
 				return nil, err
 			}
-			processRequestInstance.authenticityKeyID = keyID
-		} else {
-			if config.Configuration.AuthenticityPublicKey == "" {
-				return nil, errors.New("no public key loaded")
+
+			authenticityRequest.LocalKey = &LocalKeyRequest{
+				KeyType:    kty,
+				PrivateKey: config.Configuration.Authenticity.KeyConfig.PrivateKey,
+				PublicKey:  config.Configuration.Authenticity.KeyConfig.PublicKey,
 			}
-
-			if config.Configuration.AuthenticityPrivateKey == "" {
-				return nil, errors.New("no private key loaded")
-			}
-		}
-
-		processRequestInstance.authenticityUseEnsResolution = authenticityUseEns
-	}
-
-	processRequestInstance.encryptionEnabled = encryptionEnabled
-	if encryptionEnabled {
-		encryptionKeySource, err := domain.ParseKeySource(encryptionKeySource)
-		if err != nil {
-			return nil, err
-		}
-		processRequestInstance.encryptionKeySource = encryptionKeySource
-
-		kty, err := domain.ValidateKeyType(encryptionKeyType)
-		if err != nil {
-			return nil, err
-		}
-		processRequestInstance.encryptionKeyType = kty
-
-		if encryptionKeySource == domain.MANAGED_KEY || encryptionKeySource == domain.MANAGED_CERTIFICATE {
-			// Managed key or certificate
-
-			encryptionKeyID, err := uuid.Parse(encryptionKid)
+		case domain.MANAGED_KEY:
+			keyID, err := uuid.Parse(request.Authenticity.Key)
 			if err != nil {
 				return nil, err
 			}
-			processRequestInstance.encryptionKeyID = encryptionKeyID
-		} else {
-			if config.Configuration.EncryptionPublicKey == "" {
-				return nil, errors.New("no public key loaded")
+			authenticityRequest.ManagedKey = &ManagedKeyRequest{
+				Uuid: keyID,
+			}
+		case domain.LOCAL_CERTIFICATE:
+			pkcs12, err := os.ReadFile(config.Configuration.Authenticity.CertificateConfig.Pkcs12Path)
+			if err != nil {
+				return nil, err
+			}
+			authenticityRequest.LocalCertificate = &LocalCertificateRequest{
+				Pkcs12:        pkcs12,
+				Pkcs12Pasword: config.Configuration.Authenticity.CertificateConfig.Pkcs12Password,
+			}
+		case domain.MANAGED_CERTIFICATE:
+			keyID, err := uuid.Parse(request.Authenticity.Key)
+			if err != nil {
+				return nil, err
+			}
+			authenticityRequest.ManagedCertificate = &ManagedCertificateRequest{
+				Uuid: keyID,
 			}
 		}
 
-		processRequestInstance.authenticityUseEnsResolution = authenticityUseEns
+		processRequestInstance.Authenticity = authenticityRequest
 	}
 
-	hostingType, err := domain.ParseHostingType(availabilityType)
-	if err != nil {
-		return nil, err
+	if request.Encryption.Enabled {
+		encryptionRequest := EncryptionRequest{
+			Enabled: request.Encryption.Enabled,
+		}
+
+		encryptionKeySource, err := domain.ParseKeySource(request.Encryption.KeySource)
+		if err != nil {
+			return nil, err
+		}
+		encryptionRequest.KeySource = encryptionKeySource
+
+		switch encryptionKeySource {
+		case domain.LOCAL_KEY:
+			kty, err := domain.ValidateKeyType(config.Configuration.Encryption.KeyConfig.KeyType)
+			if err != nil {
+				return nil, err
+			}
+
+			encryptionRequest.LocalKey = &LocalKeyRequest{
+				KeyType:    kty,
+				PrivateKey: config.Configuration.Encryption.KeyConfig.PrivateKey,
+				PublicKey:  config.Configuration.Encryption.KeyConfig.PublicKey,
+			}
+		case domain.MANAGED_KEY:
+			keyID, err := uuid.Parse(request.Encryption.Key)
+			if err != nil {
+				return nil, err
+			}
+			encryptionRequest.ManagedKey = &ManagedKeyRequest{
+				Uuid: keyID,
+			}
+		case domain.LOCAL_CERTIFICATE:
+			pkcs12, err := os.ReadFile(config.Configuration.Encryption.CertificateConfig.Pkcs12Path)
+			if err != nil {
+				return nil, err
+			}
+			encryptionRequest.LocalCertificate = &LocalCertificateRequest{
+				Pkcs12:        pkcs12,
+				Pkcs12Pasword: config.Configuration.Encryption.CertificateConfig.Pkcs12Password,
+			}
+		case domain.MANAGED_CERTIFICATE:
+			keyID, err := uuid.Parse(request.Encryption.Key)
+			if err != nil {
+				return nil, err
+			}
+			encryptionRequest.ManagedCertificate = &ManagedCertificateRequest{
+				Uuid: keyID,
+			}
+		}
+
+		processRequestInstance.Encryption = encryptionRequest
 	}
-	processRequestInstance.hostingType = hostingType
+
+	if request.Availability.Enabled {
+		hostingType, err := domain.ParseHostingType(request.Availability.Type)
+		if err != nil {
+			return nil, err
+		}
+		processRequestInstance.Availability = AvailabilityRequest{
+			Enabled:     request.Availability.Enabled,
+			Hostingtype: hostingType,
+		}
+	}
 
 	return processRequestInstance, nil
-}
-
-func (s ProcessRequest) File() []byte {
-	return s.file
-}
-
-func (s ProcessRequest) Filename() string {
-	return s.filename
-}
-
-func (s ProcessRequest) ContentType() string {
-	return s.contentType
-}
-
-func (s ProcessRequest) SetContentType(c string) ProcessRequest {
-	s.contentType = c
-	return s
-}
-
-func (s ProcessRequest) FileExtension() string {
-	if s.extension != "" {
-		return s.extension
-	}
-
-	ext := ""
-	exts, err := mime.ExtensionsByType(s.ContentType())
-	if err == nil {
-		ext = exts[0]
-	}
-	return ext
-}
-
-func (s ProcessRequest) URL() string {
-	return s.url
-}
-
-func (s *ProcessRequest) ReplaceDataWith(newData []byte) {
-	s.file = newData
-}
-
-func (s ProcessRequest) IsIntegrityEnabled() bool {
-	return s.integrityEnabled
-}
-
-func (s ProcessRequest) IsAuthenticityEnabled() bool {
-	return s.authenticityEnabled
-}
-
-func (s ProcessRequest) AuthenticityKeySource() domain.KeyType {
-	return s.authenticityKeySource
-}
-
-func (s ProcessRequest) AuthenticityKeyType() key.KeyType {
-	return s.authenticityKeyType
-}
-
-func (s ProcessRequest) AuthenticityKeyID() uuid.UUID {
-	return s.authenticityKeyID
-}
-
-func (s ProcessRequest) AuthenticityUseEnsResolution() bool {
-	return s.authenticityUseEnsResolution
-}
-
-func (s ProcessRequest) IsEncryptionEnabled() bool {
-	return s.encryptionEnabled
-}
-
-func (s ProcessRequest) EncryptionKeySource() domain.KeyType {
-	return s.encryptionKeySource
-}
-
-func (s ProcessRequest) EncryptionKeyType() key.KeyType {
-	return s.encryptionKeyType
-}
-
-func (s ProcessRequest) EncryptionKeyID() uuid.UUID {
-	return s.encryptionKeyID
-}
-
-func (s ProcessRequest) HostingType() domain.HostingType {
-	return s.hostingType
 }

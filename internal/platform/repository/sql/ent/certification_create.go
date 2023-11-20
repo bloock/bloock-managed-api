@@ -3,10 +3,10 @@
 package ent
 
 import (
-	"bloock-managed-api/internal/platform/repository/sql/ent/certification"
 	"context"
 	"errors"
 	"fmt"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/certification"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"

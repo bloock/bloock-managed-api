@@ -3,6 +3,8 @@ package repository
 import (
 	"context"
 
+	"github.com/bloock/bloock-managed-api/internal/domain/repository"
+	"github.com/bloock/bloock-managed-api/internal/pkg"
 	"github.com/bloock/bloock-sdk-go/v2/client"
 	"github.com/bloock/bloock-sdk-go/v2/entity/authenticity"
 	"github.com/bloock/bloock-sdk-go/v2/entity/key"
@@ -11,38 +13,33 @@ import (
 )
 
 type BloockAuthenticityRepository struct {
-	keyClient          client.KeyClient
-	authenticityClient client.AuthenticityClient
-	recordClient       client.RecordClient
-	logger             zerolog.Logger
+	client client.BloockClient
+	logger zerolog.Logger
 }
 
-func NewBloockAuthenticityRepository(logger zerolog.Logger) *BloockAuthenticityRepository {
+func NewBloockAuthenticityRepository(ctx context.Context, logger zerolog.Logger) repository.AuthenticityRepository {
 	logger.With().Caller().Str("component", "authenticity-repository").Logger()
 
+	c := client.NewBloockClient(pkg.GetApiKeyFromContext(ctx), "", pkg.GetEnvFromContext(ctx))
+
 	return &BloockAuthenticityRepository{
-		keyClient:          client.NewKeyClient(),
-		authenticityClient: client.NewAuthenticityClient(),
-		recordClient:       client.NewRecordClient(),
-		logger:             logger,
+		client: c,
+		logger: logger,
 	}
 }
 
-func (b BloockAuthenticityRepository) SignECWithLocalKey(ctx context.Context, data []byte, kty key.KeyType, publicKey string, privateKey *string) (string, *record.Record, error) {
-	signerArgs := authenticity.SignerArgs{}
-	localKey, err := b.keyClient.LoadLocalKey(kty, publicKey, privateKey)
+func (b BloockAuthenticityRepository) SignWithLocalKey(ctx context.Context, data []byte, localKey *key.LocalKey) (string, *record.Record, error) {
+	signerArgs := authenticity.SignerArgs{
+		LocalKey: localKey,
+	}
+
+	signer := authenticity.NewSigner(signerArgs)
+	rec, err := b.client.RecordClient.FromBytes(data).WithSigner(signer).Build()
 	if err != nil {
 		b.logger.Error().Err(err).Msg("")
 		return "", nil, err
 	}
-	signerArgs.LocalKey = &localKey
-	signer := authenticity.NewEcdsaSigner(signerArgs)
-	rec, err := b.recordClient.FromBytes(data).WithSigner(signer).Build()
-	if err != nil {
-		b.logger.Error().Err(err).Msg("")
-		return "", nil, err
-	}
-	signatures, err := b.authenticityClient.GetSignatures(rec)
+	signatures, err := b.client.AuthenticityClient.GetSignatures(rec)
 	if err != nil {
 		b.logger.Error().Err(err).Msg("")
 		return "", nil, err
@@ -51,47 +48,18 @@ func (b BloockAuthenticityRepository) SignECWithLocalKey(ctx context.Context, da
 	return signatures[0].Signature, &rec, nil
 }
 
-func (b BloockAuthenticityRepository) SignECWithLocalKeyEns(ctx context.Context, data []byte, kty key.KeyType, publicKey string, privateKey *string) (string, *record.Record, error) {
-	signerArgs := authenticity.SignerArgs{}
-	signer := authenticity.NewEnsSigner(signerArgs)
+func (b BloockAuthenticityRepository) SignWithManagedKey(ctx context.Context, data []byte, managedKey *key.ManagedKey) (string, *record.Record, error) {
+	signerArgs := authenticity.SignerArgs{
+		ManagedKey: managedKey,
+	}
 
-	localKey, err := b.keyClient.LoadLocalKey(kty, publicKey, privateKey)
+	signer := authenticity.NewSigner(signerArgs)
+	rec, err := b.client.RecordClient.FromBytes(data).WithSigner(signer).Build()
 	if err != nil {
 		b.logger.Error().Err(err).Msg("")
 		return "", nil, err
 	}
-	signerArgs.LocalKey = &localKey
-	rec, err := b.recordClient.FromBytes(data).WithSigner(signer).Build()
-	if err != nil {
-		b.logger.Error().Err(err).Msg("")
-		return "", nil, err
-	}
-	signatures, err := b.authenticityClient.GetSignatures(rec)
-	if err != nil {
-		b.logger.Error().Err(err).Msg("")
-		return "", nil, err
-	}
-
-	return signatures[0].Signature, &rec, nil
-}
-
-func (b BloockAuthenticityRepository) SignECWithManagedKey(ctx context.Context, data []byte, kid string) (string, *record.Record, error) {
-	signerArgs := authenticity.SignerArgs{}
-
-	managedKey, err := b.keyClient.LoadManagedKey(kid)
-	if err != nil {
-		b.logger.Error().Err(err).Msg("")
-		return "", nil, err
-	}
-	signerArgs.ManagedKey = &managedKey
-
-	signer := authenticity.NewEcdsaSigner(signerArgs)
-	rec, err := b.recordClient.FromBytes(data).WithSigner(signer).Build()
-	if err != nil {
-		b.logger.Error().Err(err).Msg("")
-		return "", nil, err
-	}
-	signatures, err := b.authenticityClient.GetSignatures(rec)
+	signatures, err := b.client.AuthenticityClient.GetSignatures(rec)
 	if err != nil {
 		b.logger.Error().Err(err).Msg("")
 		return "", nil, err
@@ -100,23 +68,38 @@ func (b BloockAuthenticityRepository) SignECWithManagedKey(ctx context.Context, 
 	return signatures[0].Signature, &rec, nil
 }
 
-func (b BloockAuthenticityRepository) SignECWithManagedKeyEns(ctx context.Context, data []byte, kid string) (string, *record.Record, error) {
-	signerArgs := authenticity.SignerArgs{}
+func (b BloockAuthenticityRepository) SignWithLocalCertificate(ctx context.Context, data []byte, localCertificate *key.LocalCertificate) (string, *record.Record, error) {
+	signerArgs := authenticity.SignerArgs{
+		LocalCertificate: localCertificate,
+	}
 
-	managedKey, err := b.keyClient.LoadManagedKey(kid)
+	signer := authenticity.NewSigner(signerArgs)
+	rec, err := b.client.RecordClient.FromBytes(data).WithSigner(signer).Build()
 	if err != nil {
 		b.logger.Error().Err(err).Msg("")
 		return "", nil, err
 	}
-	signerArgs.ManagedKey = &managedKey
-
-	signer := authenticity.NewEnsSigner(signerArgs)
-	rec, err := b.recordClient.FromBytes(data).WithSigner(signer).Build()
+	signatures, err := b.client.AuthenticityClient.GetSignatures(rec)
 	if err != nil {
 		b.logger.Error().Err(err).Msg("")
 		return "", nil, err
 	}
-	signatures, err := b.authenticityClient.GetSignatures(rec)
+
+	return signatures[0].Signature, &rec, nil
+}
+
+func (b BloockAuthenticityRepository) SignWithManagedCertificate(ctx context.Context, data []byte, managedCertificate *key.ManagedCertificate) (string, *record.Record, error) {
+	signerArgs := authenticity.SignerArgs{
+		ManagedCertificate: managedCertificate,
+	}
+
+	signer := authenticity.NewSigner(signerArgs)
+	rec, err := b.client.RecordClient.FromBytes(data).WithSigner(signer).Build()
+	if err != nil {
+		b.logger.Error().Err(err).Msg("")
+		return "", nil, err
+	}
+	signatures, err := b.client.AuthenticityClient.GetSignatures(rec)
 	if err != nil {
 		b.logger.Error().Err(err).Msg("")
 		return "", nil, err

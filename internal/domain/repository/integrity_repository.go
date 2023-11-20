@@ -1,8 +1,9 @@
 package repository
 
 import (
-	"bloock-managed-api/internal/domain"
 	"context"
+
+	"github.com/bloock/bloock-managed-api/internal/domain"
 )
 
 type IntegrityRepository interface {

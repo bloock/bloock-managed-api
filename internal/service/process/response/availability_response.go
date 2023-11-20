@@ -1,8 +1,9 @@
 package response
 
 import (
-	"bloock-managed-api/internal/domain"
 	"fmt"
+
+	"github.com/bloock/bloock-managed-api/internal/domain"
 )
 
 type AvailabilityResponse struct {

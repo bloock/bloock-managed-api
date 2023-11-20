@@ -3,6 +3,8 @@ package repository
 import (
 	"context"
 
+	"github.com/bloock/bloock-managed-api/internal/domain/repository"
+	"github.com/bloock/bloock-managed-api/internal/pkg"
 	"github.com/bloock/bloock-sdk-go/v2/client"
 	"github.com/bloock/bloock-sdk-go/v2/entity/encryption"
 	"github.com/bloock/bloock-sdk-go/v2/entity/key"
@@ -11,70 +13,27 @@ import (
 )
 
 type BloockEncryptionRepository struct {
-	keyClient        client.KeyClient
-	encryptionClient client.EncryptionClient
-	recordClient     client.RecordClient
-	logger           zerolog.Logger
+	client client.BloockClient
+	logger zerolog.Logger
 }
 
-func NewBloockEncryptionRepository(logger zerolog.Logger) *BloockEncryptionRepository {
+func NewBloockEncryptionRepository(ctx context.Context, logger zerolog.Logger) repository.EncryptionRepository {
 	logger.With().Caller().Str("component", "encryption-repository").Logger()
 
+	c := client.NewBloockClient(pkg.GetApiKeyFromContext(ctx), "", pkg.GetEnvFromContext(ctx))
+
 	return &BloockEncryptionRepository{
-		keyClient:        client.NewKeyClient(),
-		encryptionClient: client.NewEncryptionClient(),
-		recordClient:     client.NewRecordClient(),
-		logger:           logger,
+		client: c,
+		logger: logger,
 	}
 }
 
-func (b BloockEncryptionRepository) EncryptRSAWithLocalKey(ctx context.Context, data []byte, kty key.KeyType, publicKey string, privateKey *string) (*record.Record, error) {
-	encrypterArgs := encryption.EncrypterArgs{}
-	localKey, err := b.keyClient.LoadLocalKey(kty, publicKey, privateKey)
-	if err != nil {
-		b.logger.Error().Err(err).Msg("")
-		return nil, err
+func (b BloockEncryptionRepository) EncryptWithLocalKey(ctx context.Context, data []byte, localKey *key.LocalKey) (*record.Record, error) {
+	encrypterArgs := encryption.EncrypterArgs{
+		LocalKey: localKey,
 	}
-	encrypterArgs.LocalKey = &localKey
-	encrypter := encryption.NewRsaEncrypter(encrypterArgs)
-	rec, err := b.recordClient.FromBytes(data).WithEncrypter(encrypter).Build()
-	if err != nil {
-		b.logger.Error().Err(err).Msg("")
-		return nil, err
-	}
-
-	return &rec, nil
-}
-
-func (b BloockEncryptionRepository) EncryptRSAWithManagedKey(ctx context.Context, data []byte, kid string) (*record.Record, error) {
-	encrypterArgs := encryption.EncrypterArgs{}
-	managedKey, err := b.keyClient.LoadManagedKey(kid)
-	if err != nil {
-		b.logger.Error().Err(err).Msg("")
-		return nil, err
-	}
-	encrypterArgs.ManagedKey = &managedKey
-
-	encrypter := encryption.NewRsaEncrypter(encrypterArgs)
-	rec, err := b.recordClient.FromBytes(data).WithEncrypter(encrypter).Build()
-	if err != nil {
-		b.logger.Error().Err(err).Msg("")
-		return nil, err
-	}
-
-	return &rec, nil
-}
-
-func (b BloockEncryptionRepository) EncryptAESWithLocalKey(ctx context.Context, data []byte, kty key.KeyType, key string) (*record.Record, error) {
-	encrypterArgs := encryption.EncrypterArgs{}
-	localKey, err := b.keyClient.LoadLocalKey(kty, key, nil)
-	if err != nil {
-		b.logger.Error().Err(err).Msg("")
-		return nil, err
-	}
-	encrypterArgs.LocalKey = &localKey
 	encrypter := encryption.NewAesEncrypter(encrypterArgs)
-	rec, err := b.recordClient.FromBytes(data).WithEncrypter(encrypter).Build()
+	rec, err := b.client.RecordClient.FromBytes(data).WithEncrypter(encrypter).Build()
 	if err != nil {
 		b.logger.Error().Err(err).Msg("")
 		return nil, err
@@ -83,17 +42,12 @@ func (b BloockEncryptionRepository) EncryptAESWithLocalKey(ctx context.Context, 
 	return &rec, nil
 }
 
-func (b BloockEncryptionRepository) EncryptAESWithManagedKey(ctx context.Context, data []byte, kid string) (*record.Record, error) {
-	encrypterArgs := encryption.EncrypterArgs{}
-	managedKey, err := b.keyClient.LoadManagedKey(kid)
-	if err != nil {
-		b.logger.Error().Err(err).Msg("")
-		return nil, err
+func (b BloockEncryptionRepository) EncryptWithManagedKey(ctx context.Context, data []byte, managedKey *key.ManagedKey) (*record.Record, error) {
+	encrypterArgs := encryption.EncrypterArgs{
+		ManagedKey: managedKey,
 	}
-	encrypterArgs.ManagedKey = &managedKey
-
-	encrypter := encryption.NewAesEncrypter(encrypterArgs)
-	rec, err := b.recordClient.FromBytes(data).WithEncrypter(encrypter).Build()
+	encrypter := encryption.NewRsaEncrypter(encrypterArgs)
+	rec, err := b.client.RecordClient.FromBytes(data).WithEncrypter(encrypter).Build()
 	if err != nil {
 		b.logger.Error().Err(err).Msg("")
 		return nil, err

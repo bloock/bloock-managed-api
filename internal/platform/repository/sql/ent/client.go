@@ -9,10 +9,10 @@ import (
 	"log"
 	"reflect"
 
-	"bloock-managed-api/internal/platform/repository/sql/ent/migrate"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/migrate"
 
-	"bloock-managed-api/internal/platform/repository/sql/ent/certification"
-	"bloock-managed-api/internal/platform/repository/sql/ent/localkey"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/certification"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/localkey"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"

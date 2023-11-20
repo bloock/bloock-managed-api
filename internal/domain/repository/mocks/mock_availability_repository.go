@@ -51,18 +51,18 @@ func (mr *MockAvailabilityRepositoryMockRecorder) FindFile(ctx, dataID interface
 }
 
 // RetrieveTmp mocks base method.
-func (m *MockAvailabilityRepository) RetrieveTmp(ctx context.Context, directory, filename string) ([]byte, error) {
+func (m *MockAvailabilityRepository) RetrieveTmp(ctx context.Context, filename string) ([]byte, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RetrieveTmp", ctx, directory, filename)
+	ret := m.ctrl.Call(m, "RetrieveTmp", ctx, filename)
 	ret0, _ := ret[0].([]byte)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // RetrieveTmp indicates an expected call of RetrieveTmp.
-func (mr *MockAvailabilityRepositoryMockRecorder) RetrieveTmp(ctx, directory, filename interface{}) *gomock.Call {
+func (mr *MockAvailabilityRepositoryMockRecorder) RetrieveTmp(ctx, filename interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RetrieveTmp", reflect.TypeOf((*MockAvailabilityRepository)(nil).RetrieveTmp), ctx, directory, filename)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RetrieveTmp", reflect.TypeOf((*MockAvailabilityRepository)(nil).RetrieveTmp), ctx, filename)
 }
 
 // UploadHosted mocks base method.
@@ -96,18 +96,18 @@ func (mr *MockAvailabilityRepositoryMockRecorder) UploadIpfs(ctx, record interfa
 }
 
 // UploadLocal mocks base method.
-func (m *MockAvailabilityRepository) UploadLocal(ctx context.Context, record *record.Record) (string, error) {
+func (m *MockAvailabilityRepository) UploadLocal(ctx context.Context, filename string, record *record.Record) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UploadLocal", ctx, record)
+	ret := m.ctrl.Call(m, "UploadLocal", ctx, filename, record)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // UploadLocal indicates an expected call of UploadLocal.
-func (mr *MockAvailabilityRepositoryMockRecorder) UploadLocal(ctx, record interface{}) *gomock.Call {
+func (mr *MockAvailabilityRepositoryMockRecorder) UploadLocal(ctx, filename, record interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UploadLocal", reflect.TypeOf((*MockAvailabilityRepository)(nil).UploadLocal), ctx, record)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UploadLocal", reflect.TypeOf((*MockAvailabilityRepository)(nil).UploadLocal), ctx, filename, record)
 }
 
 // UploadTmp mocks base method.

@@ -5,9 +5,9 @@
 package mock_connection
 
 import (
-	ent "bloock-managed-api/internal/platform/repository/sql/ent"
 	reflect "reflect"
 
+	ent "github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent"
 	gomock "github.com/golang/mock/gomock"
 )
 

@@ -11,7 +11,6 @@ const (
 	IPFS   HostingType = iota
 	HOSTED HostingType = iota
 	LOCAL  HostingType = iota
-	NONE   HostingType = iota
 )
 
 func ParseHostingType(value string) (HostingType, error) {
@@ -22,8 +21,6 @@ func ParseHostingType(value string) (HostingType, error) {
 		return HOSTED, nil
 	case "local":
 		return LOCAL, nil
-	case "none":
-		return NONE, nil
 	}
 	return 0, errors.New("unsupported hosting")
 }
@@ -35,8 +32,6 @@ func (h HostingType) String() string {
 		return "hosted"
 	case LOCAL:
 		return "local"
-	case NONE:
-		return "none"
 	}
 	return ""
 }

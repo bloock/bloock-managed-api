@@ -1,11 +1,14 @@
-package http
+package repository
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"mime/multipart"
 	"net/http"
 
+	"github.com/bloock/bloock-managed-api/internal/config"
+	"github.com/bloock/bloock-managed-api/internal/domain/repository"
 	"github.com/rs/zerolog"
 )
 
@@ -17,8 +20,10 @@ type HttpNotificationRepository struct {
 	logger            zerolog.Logger
 }
 
-func NewHttpNotificationRepository(httpClient http.Client, clientEndpointURL string, logger zerolog.Logger) *HttpNotificationRepository {
-	return &HttpNotificationRepository{httpClient: httpClient, clientEndpointURL: clientEndpointURL, logger: logger}
+func NewHttpNotificationRepository(ctx context.Context, logger zerolog.Logger) repository.NotificationRepository {
+	logger.With().Caller().Str("component", "notification-repository").Logger()
+
+	return &HttpNotificationRepository{httpClient: http.Client{}, clientEndpointURL: config.Configuration.Webhook.ClientEndpointUrl, logger: logger}
 }
 
 func (h HttpNotificationRepository) NotifyCertification(hash string, file []byte) error {

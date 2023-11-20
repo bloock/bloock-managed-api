@@ -1,12 +1,14 @@
 package repository
 
 import (
-	"bloock-managed-api/internal/domain"
-	"bloock-managed-api/internal/domain/repository"
-	"bloock-managed-api/internal/platform/repository/sql/connection"
-	"bloock-managed-api/internal/platform/repository/sql/ent/certification"
 	"context"
 	"time"
+
+	"github.com/bloock/bloock-managed-api/internal/config"
+	"github.com/bloock/bloock-managed-api/internal/domain"
+	"github.com/bloock/bloock-managed-api/internal/domain/repository"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/connection"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/certification"
 
 	"github.com/bloock/bloock-sdk-go/v2/client"
 	"github.com/bloock/bloock-sdk-go/v2/entity/record"
@@ -15,17 +17,28 @@ import (
 
 type BloockMetadataRepository struct {
 	recordClient client.RecordClient
-	connection   connection.EntConnection
+	connection   *connection.EntConnection
 	dbTimeout    time.Duration
 	logger       zerolog.Logger
 }
 
-func NewBloockMetadataRepository(connection connection.EntConnection, dbTimeout time.Duration, logger zerolog.Logger) repository.MetadataRepository {
-	logger.With().Caller().Str("component", "availability-repository").Logger()
+func NewBloockMetadataRepository(ctx context.Context, logger zerolog.Logger) repository.MetadataRepository {
+	logger.With().Caller().Str("component", "metadata-repository").Logger()
+
+	entConnector := connection.NewEntConnector(logger)
+	conn, err := connection.NewEntConnection(config.Configuration.Db.ConnectionString, entConnector, logger)
+	if err != nil {
+		panic(err)
+	}
+	err = conn.Migrate()
+	if err != nil {
+		panic(err)
+	}
+
 	return &BloockMetadataRepository{
 		recordClient: client.NewRecordClient(),
-		connection:   connection,
-		dbTimeout:    dbTimeout,
+		connection:   conn,
+		dbTimeout:    5 * time.Second,
 		logger:       logger,
 	}
 }

@@ -1,14 +1,15 @@
 package connection
 
 import (
-	"bloock-managed-api/internal/platform/repository/sql/ent"
 	"context"
 	"errors"
+	"strings"
+
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent"
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/rs/zerolog"
-	"strings"
 )
 
 const (

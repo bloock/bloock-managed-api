@@ -1,4 +1,4 @@
-package handler
+package api_error
 
 import "net/http"
 
@@ -16,6 +16,9 @@ func NewAPIError(status int, message string) *APIError {
 }
 func NewBadRequestAPIError(message string) *APIError {
 	return &APIError{Status: http.StatusBadRequest, Message: message}
+}
+func NewUnauthorizedAPIError(message string) *APIError {
+	return &APIError{Status: http.StatusUnauthorized, Message: message}
 }
 func NewInternalServerAPIError(message string) *APIError {
 	return &APIError{Status: http.StatusInternalServerError, Message: message}
