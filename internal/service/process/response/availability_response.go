@@ -7,6 +7,7 @@ import (
 )
 
 type AvailabilityResponse struct {
+	ty  string
 	id  string
 	url string
 }
@@ -22,9 +23,14 @@ func NewAvailabilityResponse(id string, hostingType domain.HostingType) *Availab
 		url = ""
 	}
 	return &AvailabilityResponse{
+		ty:  hostingType.String(),
 		id:  id,
 		url: url,
 	}
+}
+
+func (s AvailabilityResponse) Type() string {
+	return s.ty
 }
 
 func (s AvailabilityResponse) Id() string {

@@ -112,6 +112,7 @@ func TestProcessService(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, status)
 		assert.Equal(t, res.Hash, "c5a2180e2f97506550f1bba5d863bc6ed05ad8b51daf6fca1ac7d396ef3183c5")
+		assert.True(t, res.Integrity.Enabled)
 		assert.NotEmpty(t, res.Integrity.AnchorId)
 	})
 
@@ -133,6 +134,7 @@ func TestProcessService(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, status)
 		assert.Equal(t, res.Hash, "c5a2180e2f97506550f1bba5d863bc6ed05ad8b51daf6fca1ac7d396ef3183c5")
+		assert.True(t, res.Integrity.Enabled)
 		assert.NotEmpty(t, res.Integrity.AnchorId)
 		liveAnchorID = res.Integrity.AnchorId
 
@@ -152,6 +154,7 @@ func TestProcessService(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, status)
 		assert.Equal(t, res.Hash, "c5a2180e2f97506550f1bba5d863bc6ed05ad8b51daf6fca1ac7d396ef3183c5")
+		assert.True(t, res.Integrity.Enabled)
 		assert.NotEmpty(t, res.Integrity.AnchorId)
 		assert.Equal(t, liveAnchorID, res.Integrity.AnchorId)
 
@@ -171,6 +174,7 @@ func TestProcessService(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, status)
 		assert.Equal(t, res.Hash, "c5a2180e2f97506550f1bba5d863bc6ed05ad8b51daf6fca1ac7d396ef3183c5")
+		assert.True(t, res.Integrity.Enabled)
 		assert.NotEmpty(t, res.Integrity.AnchorId)
 		assert.NotEqual(t, liveAnchorID, res.Integrity.AnchorId)
 	})
@@ -201,6 +205,7 @@ func TestProcessService(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, status)
 		assert.NotEqual(t, res.Hash, "c5a2180e2f97506550f1bba5d863bc6ed05ad8b51daf6fca1ac7d396ef3183c5")
+		assert.True(t, res.Authenticity.Enabled)
 		assert.Equal(t, authenticityKey.Key, res.Authenticity.Key)
 		assert.NotEmpty(t, res.Authenticity.Signature)
 	})
@@ -220,6 +225,7 @@ func TestProcessService(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, status)
 		assert.NotEqual(t, res.Hash, "c5a2180e2f97506550f1bba5d863bc6ed05ad8b51daf6fca1ac7d396ef3183c5")
+		assert.True(t, res.Authenticity.Enabled)
 		assert.Equal(t, ManagedKey, res.Authenticity.Key)
 		assert.NotEmpty(t, res.Authenticity.Signature)
 	})
@@ -266,6 +272,7 @@ func TestProcessService(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, status)
 		assert.NotEqual(t, res.Hash, "c5a2180e2f97506550f1bba5d863bc6ed05ad8b51daf6fca1ac7d396ef3183c5")
+		assert.True(t, res.Authenticity.Enabled)
 		assert.Equal(t, "certificate_id", res.Authenticity.Key)
 		assert.NotEmpty(t, res.Authenticity.Signature)
 	})
@@ -285,6 +292,7 @@ func TestProcessService(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, status)
 		assert.NotEqual(t, res.Hash, "c5a2180e2f97506550f1bba5d863bc6ed05ad8b51daf6fca1ac7d396ef3183c5")
+		assert.True(t, res.Authenticity.Enabled)
 		assert.Equal(t, ManagedCertificate, res.Authenticity.Key)
 		assert.NotEmpty(t, res.Authenticity.Signature)
 	})
@@ -314,6 +322,7 @@ func TestProcessService(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, status)
 		assert.Equal(t, res.Hash, "c5a2180e2f97506550f1bba5d863bc6ed05ad8b51daf6fca1ac7d396ef3183c5")
+		assert.True(t, res.Encryption.Enabled)
 		assert.Equal(t, encryptionKey.Key, res.Encryption.Key)
 	})
 
@@ -410,6 +419,8 @@ func TestProcessService(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, status)
 		assert.Equal(t, res.Hash, "c5a2180e2f97506550f1bba5d863bc6ed05ad8b51daf6fca1ac7d396ef3183c5")
+		assert.True(t, res.Availability.Enabled)
+		assert.Equal(t, domain.HOSTED.String(), res.Availability.Type)
 		assert.NotEmpty(t, res.Availability.ID)
 		assert.NotEmpty(t, res.Availability.Url)
 	})
@@ -428,6 +439,8 @@ func TestProcessService(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, status)
 		assert.Equal(t, res.Hash, "c5a2180e2f97506550f1bba5d863bc6ed05ad8b51daf6fca1ac7d396ef3183c5")
+		assert.True(t, res.Availability.Enabled)
+		assert.Equal(t, domain.IPFS.String(), res.Availability.Type)
 		assert.NotEmpty(t, res.Availability.ID)
 		assert.NotEmpty(t, res.Availability.Url)
 	})
@@ -451,6 +464,8 @@ func TestProcessService(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, status)
 		assert.Equal(t, res.Hash, "c5a2180e2f97506550f1bba5d863bc6ed05ad8b51daf6fca1ac7d396ef3183c5")
+		assert.True(t, res.Availability.Enabled)
+		assert.Equal(t, domain.LOCAL.String(), res.Availability.Type)
 		assert.Equal(t, res.Availability.ID, "./tmp/c5a2180e2f97506550f1bba5d863bc6ed05ad8b51daf6fca1ac7d396ef3183c5")
 		assert.Empty(t, res.Availability.Url)
 	})
@@ -474,6 +489,8 @@ func TestProcessService(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, status)
 		assert.Equal(t, res.Hash, "c5a2180e2f97506550f1bba5d863bc6ed05ad8b51daf6fca1ac7d396ef3183c5")
+		assert.True(t, res.Availability.Enabled)
+		assert.Equal(t, domain.LOCAL.String(), res.Availability.Type)
 		assert.Equal(t, res.Availability.ID, "./tmp/dummy.pdf")
 		assert.Empty(t, res.Availability.Url)
 	})

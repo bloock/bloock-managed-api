@@ -10,20 +10,24 @@ type ProcessResponse struct {
 }
 
 type IntegrityJSONResponse struct {
-	AnchorId int `json:"anchor_id"`
+	Enabled  bool `json:"enabled"`
+	AnchorId int  `json:"anchor_id"`
 }
 
 type AuthenticityJSONResponse struct {
+	Enabled   bool   `json:"enabled"`
 	Key       string `json:"key"`
 	Signature string `json:"signature"`
 }
 
 type EncryptionJSONResponse struct {
-	Key       string `json:"key"`
-	Signature string `json:"signature"`
+	Enabled bool   `json:"enabled"`
+	Key     string `json:"key"`
 }
 
 type AvailabilityJSONResponse struct {
-	ID  string `json:"id"`
-	Url string `json:"url,omitempty"`
+	Enabled bool   `json:"enabled"`
+	Type    string `json:"type"`
+	ID      string `json:"id"`
+	Url     string `json:"url,omitempty"`
 }
