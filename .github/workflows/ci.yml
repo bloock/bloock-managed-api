@@ -39,3 +39,7 @@ jobs:
         make mocks
     - name: Run tests
       run: make test
+      env:
+        API_HOST: ${{ secrets.API_HOST }}
+        API_KEY: ${{ secrets.API_KEY }}
+        SESSION_TOKEN: ${{ secrets.SESSION_TOKEN }}
