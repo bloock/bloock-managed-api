@@ -49,7 +49,7 @@ func NewServer(l zerolog.Logger) (*Server, error) {
 	v1.POST("process", middleware.AuthMiddleware(), process.PostProcess(l))
 	v1.POST("webhook", webhook.PostReceiveWebhook(l))
 	if config.Configuration.Api.DebugMode {
-		v1.POST("certification", handler.Debug())
+		v1.POST("debug", handler.Debug())
 	}
 
 	return &Server{host: config.Configuration.Api.Host, port: config.Configuration.Api.Port, engine: router, logger: l}, nil

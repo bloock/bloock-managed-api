@@ -34,6 +34,7 @@ type BloockConfig struct {
 
 type WebhookConfig struct {
 	ClientEndpointUrl string `mapstructure:"client_endpoint_url"`
+	MaxRetries        uint64 `mapstructure:"max_retries"`
 }
 
 type KeyConfig struct {

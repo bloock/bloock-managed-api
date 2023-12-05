@@ -136,9 +136,6 @@ func (s ProcessService) Process(ctx context.Context, req request.ProcessRequest)
 			return nil, err
 		}
 		certification.DataID = dataID
-		if err = s.metadataRepository.UpdateCertification(ctx, certification); err != nil {
-			return nil, err
-		}
 
 		responseBuilder.AvailabilityResponse(*response.NewAvailabilityResponse(certification.DataID, req.Availability.Hostingtype))
 	} else {
@@ -147,6 +144,10 @@ func (s ProcessService) Process(ctx context.Context, req request.ProcessRequest)
 				return nil, err
 			}
 		}
+	}
+
+	if err = s.metadataRepository.UpdateCertification(ctx, certification); err != nil {
+		return nil, err
 	}
 
 	responseBuilder.HashResponse(certification.Hash)

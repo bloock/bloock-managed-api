@@ -9,6 +9,7 @@ import (
 
 	"github.com/bloock/bloock-managed-api/internal/config"
 	"github.com/bloock/bloock-managed-api/internal/domain/repository"
+	"github.com/cenkalti/backoff/v4"
 	"github.com/rs/zerolog"
 )
 
@@ -17,13 +18,19 @@ var ErrNotification = errors.New("notification couldn't send")
 type HttpNotificationRepository struct {
 	httpClient        http.Client
 	clientEndpointURL string
+	maxRetries        uint64
 	logger            zerolog.Logger
 }
 
 func NewHttpNotificationRepository(ctx context.Context, logger zerolog.Logger) repository.NotificationRepository {
 	logger.With().Caller().Str("component", "notification-repository").Logger()
 
-	return &HttpNotificationRepository{httpClient: http.Client{}, clientEndpointURL: config.Configuration.Webhook.ClientEndpointUrl, logger: logger}
+	return &HttpNotificationRepository{
+		httpClient:        http.Client{},
+		clientEndpointURL: config.Configuration.Webhook.ClientEndpointUrl,
+		maxRetries:        config.Configuration.Webhook.MaxRetries,
+		logger:            logger,
+	}
 }
 
 func (h HttpNotificationRepository) NotifyCertification(hash string, file []byte) error {
@@ -31,6 +38,19 @@ func (h HttpNotificationRepository) NotifyCertification(hash string, file []byte
 		return nil
 	}
 
+	operation := func() error {
+		return h.sendWebhook(hash, file)
+	}
+
+	err := backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), h.maxRetries))
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (h HttpNotificationRepository) sendWebhook(hash string, file []byte) error {
 	buf := new(bytes.Buffer)
 	writer := multipart.NewWriter(buf)
 
