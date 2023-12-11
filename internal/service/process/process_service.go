@@ -85,7 +85,7 @@ func (s ProcessService) Process(ctx context.Context, req request.ProcessRequest)
 	responseBuilder := response.NewProcessResponseBuilder()
 
 	if req.Authenticity.Enabled {
-		key, signature, record, err := s.sign(ctx, &req.File, &req.Authenticity)
+		_, _, record, err := s.sign(ctx, &req.File, &req.Authenticity)
 		if err != nil {
 			return nil, err
 		}
@@ -100,7 +100,15 @@ func (s ProcessService) Process(ctx context.Context, req request.ProcessRequest)
 		certification.Data = record.Retrieve()
 		certification.Record = record
 		certification.Hash = newHash
-		responseBuilder.SignResponse(*response.NewSignResponse(key, signature))
+
+		rd, err := s.metadataRepository.GetRecordDetails(ctx, certification.Data)
+		signatures := make([]response.Signature, 0)
+		if rd.AuthenticityDetails != nil {
+			for _, sig := range rd.AuthenticityDetails.Signatures {
+				signatures = append(signatures, response.NewSignature(sig.Signature, sig.Alg, sig.Kid, sig.MessageHash, sig.Subject))
+			}
+		}
+		responseBuilder.SignResponse(*response.NewSignResponse(signatures))
 	}
 
 	if req.Integrity.Enabled {
@@ -109,11 +117,12 @@ func (s ProcessService) Process(ctx context.Context, req request.ProcessRequest)
 			return nil, err
 		}
 		certification = newCertification
+
 		responseBuilder.CertificationResponse(*response.NewIntegrityResponse(certification.Hash, certification.AnchorID))
 	}
 
 	if req.Encryption.Enabled {
-		key, encryptedRecord, err := s.encrypt(ctx, &req.File, &req.Encryption)
+		_, encryptedRecord, err := s.encrypt(ctx, &req.File, &req.Encryption)
 		if err != nil {
 			return nil, err
 		}
@@ -127,7 +136,10 @@ func (s ProcessService) Process(ctx context.Context, req request.ProcessRequest)
 		certification.Record = encryptedRecord
 		certification.Hash = newHash
 
-		responseBuilder.EncryptResponse(*response.NewEncryptResponse(key))
+		rd, err := s.metadataRepository.GetRecordDetails(ctx, certification.Data)
+		if rd.EncryptionDetails != nil {
+			responseBuilder.EncryptResponse(*response.NewEncryptResponse(rd.EncryptionDetails.Key, rd.EncryptionDetails.Alg, rd.EncryptionDetails.Subject))
+		}
 	}
 
 	if req.Availability.Enabled {
@@ -137,7 +149,13 @@ func (s ProcessService) Process(ctx context.Context, req request.ProcessRequest)
 		}
 		certification.DataID = dataID
 
-		responseBuilder.AvailabilityResponse(*response.NewAvailabilityResponse(certification.DataID, req.Availability.Hostingtype))
+		rd, err := s.metadataRepository.GetRecordDetails(ctx, certification.Data)
+		var contentType string
+		if rd.AvailabilityDetails.ContentType != nil {
+			contentType = *rd.AvailabilityDetails.ContentType
+		}
+
+		responseBuilder.AvailabilityResponse(*response.NewAvailabilityResponse(certification.DataID, req.Availability.Hostingtype, contentType, rd.AvailabilityDetails.Size))
 	} else {
 		if req.Integrity.Enabled {
 			if _, err = s.availabilityRepository.UploadTmp(ctx, &req.File); err != nil {
@@ -183,7 +201,7 @@ func (s ProcessService) sign(ctx context.Context, file *domain.File, request *re
 		}
 
 		signature, record, err := s.authenticityRepository.
-			SignWithLocalKey(ctx, file.Bytes(), localKey)
+			SignWithLocalKey(ctx, file.Bytes(), *localKey)
 		if err != nil {
 			return request.LocalKey.PublicKey, "", nil, err
 		}
@@ -196,7 +214,7 @@ func (s ProcessService) sign(ctx context.Context, file *domain.File, request *re
 		}
 
 		signature, record, err := s.authenticityRepository.
-			SignWithManagedKey(ctx, file.Bytes(), managedKey)
+			SignWithManagedKey(ctx, file.Bytes(), *managedKey)
 		if err != nil {
 			return request.ManagedKey.Uuid.String(), "", nil, err
 		}
@@ -209,7 +227,7 @@ func (s ProcessService) sign(ctx context.Context, file *domain.File, request *re
 		}
 
 		signature, record, err := s.authenticityRepository.
-			SignWithLocalCertificate(ctx, file.Bytes(), localCertificate)
+			SignWithLocalCertificate(ctx, file.Bytes(), *localCertificate)
 		if err != nil {
 			return "", "", nil, err
 		}
@@ -222,7 +240,7 @@ func (s ProcessService) sign(ctx context.Context, file *domain.File, request *re
 		}
 
 		signature, record, err := s.authenticityRepository.
-			SignWithManagedCertificate(ctx, file.Bytes(), managedCertificate)
+			SignWithManagedCertificate(ctx, file.Bytes(), *managedCertificate)
 		if err != nil {
 			return request.ManagedCertificate.Uuid.String(), "", nil, err
 		}
@@ -240,7 +258,7 @@ func (s ProcessService) encrypt(ctx context.Context, file *domain.File, request 
 			return request.LocalKey.PublicKey, nil, err
 		}
 
-		record, err := s.encryptionRepository.EncryptWithLocalKey(ctx, file.Bytes(), localKey)
+		record, err := s.encryptionRepository.EncryptWithLocalKey(ctx, file.Bytes(), *localKey)
 		if err != nil {
 			return request.LocalKey.PublicKey, record, err
 		}
@@ -252,7 +270,7 @@ func (s ProcessService) encrypt(ctx context.Context, file *domain.File, request 
 			return request.ManagedKey.Uuid.String(), nil, err
 		}
 
-		record, err := s.encryptionRepository.EncryptWithManagedKey(ctx, file.Bytes(), managedKey)
+		record, err := s.encryptionRepository.EncryptWithManagedKey(ctx, file.Bytes(), *managedKey)
 		if err != nil {
 			return request.ManagedKey.Uuid.String(), record, err
 		}
@@ -266,7 +284,7 @@ func (s ProcessService) encrypt(ctx context.Context, file *domain.File, request 
 			return request.ManagedKey.Uuid.String(), nil, err
 		}
 
-		record, err := s.encryptionRepository.EncryptWithManagedKey(ctx, file.Bytes(), managedKey)
+		record, err := s.encryptionRepository.EncryptWithManagedKey(ctx, file.Bytes(), *managedKey)
 		if err != nil {
 			return request.ManagedKey.Uuid.String(), record, err
 		}

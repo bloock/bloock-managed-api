@@ -8,8 +8,8 @@ import (
 )
 
 type AuthenticityRepository interface {
-	SignWithLocalKey(ctx context.Context, data []byte, localKey *key.LocalKey) (string, *record.Record, error)
-	SignWithManagedKey(ctx context.Context, data []byte, managedKey *key.ManagedKey) (string, *record.Record, error)
-	SignWithLocalCertificate(ctx context.Context, data []byte, localCertificate *key.LocalCertificate) (string, *record.Record, error)
-	SignWithManagedCertificate(ctx context.Context, data []byte, managedCertificate *key.ManagedCertificate) (string, *record.Record, error)
+	SignWithLocalKey(ctx context.Context, data []byte, localKey key.LocalKey) (string, *record.Record, error)
+	SignWithManagedKey(ctx context.Context, data []byte, managedKey key.ManagedKey) (string, *record.Record, error)
+	SignWithLocalCertificate(ctx context.Context, data []byte, localCertificate key.LocalCertificate) (string, *record.Record, error)
+	SignWithManagedCertificate(ctx context.Context, data []byte, managedCertificate key.ManagedCertificate) (string, *record.Record, error)
 }

@@ -52,6 +52,15 @@ func (f BloockMetadataRepository) GetRecord(ctx context.Context, file []byte) (*
 	return &record, nil
 }
 
+func (f BloockMetadataRepository) GetRecordDetails(ctx context.Context, file []byte) (*record.RecordDetails, error) {
+	record, err := f.recordClient.FromFile(file).GetDetails()
+	if err != nil {
+		return nil, err
+	}
+
+	return &record, nil
+}
+
 func (f BloockMetadataRepository) GetFileHash(ctx context.Context, file []byte) (string, error) {
 	record, err := f.recordClient.FromFile(file).Build()
 	if err != nil {
