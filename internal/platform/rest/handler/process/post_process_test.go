@@ -159,7 +159,7 @@ func TestProcessService(t *testing.T) {
 		assert.Equal(t, liveAnchorID, res.Integrity.AnchorId)
 
 		// with valid JWT Token and test environment
-		/*req = request.ProcessFormRequest{
+		req = request.ProcessFormRequest{
 			Url: UrlFile,
 			Integrity: request.ProcessFormIntegrityRequest{
 				Enabled: true,
@@ -176,7 +176,7 @@ func TestProcessService(t *testing.T) {
 		assert.Equal(t, res.Hash, "c5a2180e2f97506550f1bba5d863bc6ed05ad8b51daf6fca1ac7d396ef3183c5")
 		assert.True(t, res.Integrity.Enabled)
 		assert.NotEmpty(t, res.Integrity.AnchorId)
-		assert.NotEqual(t, liveAnchorID, res.Integrity.AnchorId)*/
+		assert.NotEqual(t, liveAnchorID, res.Integrity.AnchorId)
 	})
 
 	t.Run("with local key authenticity, should return a valid response", func(t *testing.T) {
