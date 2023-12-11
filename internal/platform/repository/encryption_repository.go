@@ -28,11 +28,8 @@ func NewBloockEncryptionRepository(ctx context.Context, logger zerolog.Logger) r
 	}
 }
 
-func (b BloockEncryptionRepository) EncryptWithLocalKey(ctx context.Context, data []byte, localKey *key.LocalKey) (*record.Record, error) {
-	encrypterArgs := encryption.EncrypterArgs{
-		LocalKey: localKey,
-	}
-	encrypter := encryption.NewAesEncrypter(encrypterArgs)
+func (b BloockEncryptionRepository) EncryptWithLocalKey(ctx context.Context, data []byte, localKey key.LocalKey) (*record.Record, error) {
+	encrypter := encryption.NewEncrypterWithLocalKey(localKey)
 	rec, err := b.client.RecordClient.FromBytes(data).WithEncrypter(encrypter).Build()
 	if err != nil {
 		b.logger.Error().Err(err).Msg("")
@@ -42,11 +39,8 @@ func (b BloockEncryptionRepository) EncryptWithLocalKey(ctx context.Context, dat
 	return &rec, nil
 }
 
-func (b BloockEncryptionRepository) EncryptWithManagedKey(ctx context.Context, data []byte, managedKey *key.ManagedKey) (*record.Record, error) {
-	encrypterArgs := encryption.EncrypterArgs{
-		ManagedKey: managedKey,
-	}
-	encrypter := encryption.NewRsaEncrypter(encrypterArgs)
+func (b BloockEncryptionRepository) EncryptWithManagedKey(ctx context.Context, data []byte, managedKey key.ManagedKey) (*record.Record, error) {
+	encrypter := encryption.NewEncrypterWithManagedKey(managedKey)
 	rec, err := b.client.RecordClient.FromBytes(data).WithEncrypter(encrypter).Build()
 	if err != nil {
 		b.logger.Error().Err(err).Msg("")

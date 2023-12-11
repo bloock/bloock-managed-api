@@ -1,18 +1,35 @@
 package response
 
 type SignResponse struct {
-	key       string
-	signature string
+	signatures []Signature
 }
 
-func NewSignResponse(key, signature string) *SignResponse {
-	return &SignResponse{key: key, signature: signature}
+type Signature struct {
+	Signature   string `json:"signature"`
+	Alg         string `json:"alg"`
+	Kid         string `json:"kid"`
+	MessageHash string `json:"message_hash"`
+	Subject     string `json:"subject,omitempty"`
 }
 
-func (s SignResponse) Signature() string {
-	return s.signature
+func NewSignature(signature string, alg string, kid string, messageHash string, subj *string) Signature {
+	var subject string
+	if subj != nil {
+		subject = *subj
+	}
+	return Signature{
+		Signature:   signature,
+		Alg:         alg,
+		Kid:         kid,
+		MessageHash: messageHash,
+		Subject:     subject,
+	}
 }
 
-func (s SignResponse) Key() string {
-	return s.key
+func NewSignResponse(signatures []Signature) *SignResponse {
+	return &SignResponse{signatures: signatures}
+}
+
+func (s SignResponse) Signatures() []Signature {
+	return s.signatures
 }

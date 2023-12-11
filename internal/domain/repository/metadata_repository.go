@@ -16,5 +16,6 @@ type MetadataRepository interface {
 	UpdateCertification(ctx context.Context, certification domain.Certification) error
 
 	GetRecord(ctx context.Context, file []byte) (*record.Record, error)
+	GetRecordDetails(ctx context.Context, file []byte) (*record.RecordDetails, error)
 	GetFileHash(ctx context.Context, file []byte) (string, error)
 }

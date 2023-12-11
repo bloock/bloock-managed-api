@@ -28,12 +28,8 @@ func NewBloockAuthenticityRepository(ctx context.Context, logger zerolog.Logger)
 	}
 }
 
-func (b BloockAuthenticityRepository) SignWithLocalKey(ctx context.Context, data []byte, localKey *key.LocalKey) (string, *record.Record, error) {
-	signerArgs := authenticity.SignerArgs{
-		LocalKey: localKey,
-	}
-
-	signer := authenticity.NewSigner(signerArgs)
+func (b BloockAuthenticityRepository) SignWithLocalKey(ctx context.Context, data []byte, localKey key.LocalKey) (string, *record.Record, error) {
+	signer := authenticity.NewSignerWithLocalKey(localKey)
 	rec, err := b.client.RecordClient.FromBytes(data).WithSigner(signer).Build()
 	if err != nil {
 		b.logger.Error().Err(err).Msg("")
@@ -48,12 +44,8 @@ func (b BloockAuthenticityRepository) SignWithLocalKey(ctx context.Context, data
 	return signatures[0].Signature, &rec, nil
 }
 
-func (b BloockAuthenticityRepository) SignWithManagedKey(ctx context.Context, data []byte, managedKey *key.ManagedKey) (string, *record.Record, error) {
-	signerArgs := authenticity.SignerArgs{
-		ManagedKey: managedKey,
-	}
-
-	signer := authenticity.NewSigner(signerArgs)
+func (b BloockAuthenticityRepository) SignWithManagedKey(ctx context.Context, data []byte, managedKey key.ManagedKey) (string, *record.Record, error) {
+	signer := authenticity.NewSignerWithManagedKey(managedKey)
 	rec, err := b.client.RecordClient.FromBytes(data).WithSigner(signer).Build()
 	if err != nil {
 		b.logger.Error().Err(err).Msg("")
@@ -68,12 +60,8 @@ func (b BloockAuthenticityRepository) SignWithManagedKey(ctx context.Context, da
 	return signatures[0].Signature, &rec, nil
 }
 
-func (b BloockAuthenticityRepository) SignWithLocalCertificate(ctx context.Context, data []byte, localCertificate *key.LocalCertificate) (string, *record.Record, error) {
-	signerArgs := authenticity.SignerArgs{
-		LocalCertificate: localCertificate,
-	}
-
-	signer := authenticity.NewSigner(signerArgs)
+func (b BloockAuthenticityRepository) SignWithLocalCertificate(ctx context.Context, data []byte, localCertificate key.LocalCertificate) (string, *record.Record, error) {
+	signer := authenticity.NewSignerWithLocalCertificate(localCertificate)
 	rec, err := b.client.RecordClient.FromBytes(data).WithSigner(signer).Build()
 	if err != nil {
 		b.logger.Error().Err(err).Msg("")
@@ -88,12 +76,8 @@ func (b BloockAuthenticityRepository) SignWithLocalCertificate(ctx context.Conte
 	return signatures[0].Signature, &rec, nil
 }
 
-func (b BloockAuthenticityRepository) SignWithManagedCertificate(ctx context.Context, data []byte, managedCertificate *key.ManagedCertificate) (string, *record.Record, error) {
-	signerArgs := authenticity.SignerArgs{
-		ManagedCertificate: managedCertificate,
-	}
-
-	signer := authenticity.NewSigner(signerArgs)
+func (b BloockAuthenticityRepository) SignWithManagedCertificate(ctx context.Context, data []byte, managedCertificate key.ManagedCertificate) (string, *record.Record, error) {
+	signer := authenticity.NewSignerWithManagedCertificate(managedCertificate)
 	rec, err := b.client.RecordClient.FromBytes(data).WithSigner(signer).Build()
 	if err != nil {
 		b.logger.Error().Err(err).Msg("")

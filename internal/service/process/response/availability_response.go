@@ -7,12 +7,14 @@ import (
 )
 
 type AvailabilityResponse struct {
-	ty  string
-	id  string
-	url string
+	ty          string
+	id          string
+	url         string
+	contentType string
+	size        int64
 }
 
-func NewAvailabilityResponse(id string, hostingType domain.HostingType) *AvailabilityResponse {
+func NewAvailabilityResponse(id string, hostingType domain.HostingType, contentType string, size int64) *AvailabilityResponse {
 	var url string
 	switch hostingType {
 	case domain.IPFS:
@@ -23,9 +25,11 @@ func NewAvailabilityResponse(id string, hostingType domain.HostingType) *Availab
 		url = ""
 	}
 	return &AvailabilityResponse{
-		ty:  hostingType.String(),
-		id:  id,
-		url: url,
+		ty:          hostingType.String(),
+		id:          id,
+		url:         url,
+		contentType: contentType,
+		size:        size,
 	}
 }
 
@@ -39,4 +43,12 @@ func (s AvailabilityResponse) Id() string {
 
 func (s AvailabilityResponse) Url() string {
 	return s.url
+}
+
+func (s AvailabilityResponse) ContentType() string {
+	return s.contentType
+}
+
+func (s AvailabilityResponse) Size() int64 {
+	return s.size
 }

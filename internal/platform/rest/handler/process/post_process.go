@@ -91,9 +91,8 @@ func toProcessJsonResponse(processResponse *response.ProcessResponse) http_respo
 
 	if processResponse.SignResponse() != nil {
 		resp.Authenticity = &http_response.AuthenticityJSONResponse{
-			Enabled:   true,
-			Key:       processResponse.SignResponse().Key(),
-			Signature: processResponse.SignResponse().Signature(),
+			Enabled:    true,
+			Signatures: processResponse.SignResponse().Signatures(),
 		}
 	}
 
@@ -101,15 +100,19 @@ func toProcessJsonResponse(processResponse *response.ProcessResponse) http_respo
 		resp.Encryption = &http_response.EncryptionJSONResponse{
 			Enabled: true,
 			Key:     processResponse.EncryptResponse().Key(),
+			Alg:     processResponse.EncryptResponse().Alg(),
+			Subject: processResponse.EncryptResponse().Subject(),
 		}
 	}
 
 	if processResponse.AvailabilityResponse() != nil {
 		resp.Availability = &http_response.AvailabilityJSONResponse{
-			Enabled: true,
-			Type:    processResponse.AvailabilityResponse().Type(),
-			ID:      processResponse.AvailabilityResponse().Id(),
-			Url:     processResponse.AvailabilityResponse().Url(),
+			Enabled:     true,
+			Type:        processResponse.AvailabilityResponse().Type(),
+			ID:          processResponse.AvailabilityResponse().Id(),
+			Url:         processResponse.AvailabilityResponse().Url(),
+			ContentType: processResponse.AvailabilityResponse().ContentType(),
+			Size:        processResponse.AvailabilityResponse().Size(),
 		}
 	}
 

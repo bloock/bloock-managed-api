@@ -8,6 +8,6 @@ import (
 )
 
 type EncryptionRepository interface {
-	EncryptWithLocalKey(ctx context.Context, data []byte, localKey *key.LocalKey) (*record.Record, error)
-	EncryptWithManagedKey(ctx context.Context, data []byte, managedKey *key.ManagedKey) (*record.Record, error)
+	EncryptWithLocalKey(ctx context.Context, data []byte, localKey key.LocalKey) (*record.Record, error)
+	EncryptWithManagedKey(ctx context.Context, data []byte, managedKey key.ManagedKey) (*record.Record, error)
 }

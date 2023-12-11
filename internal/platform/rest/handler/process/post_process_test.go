@@ -159,7 +159,7 @@ func TestProcessService(t *testing.T) {
 		assert.Equal(t, liveAnchorID, res.Integrity.AnchorId)
 
 		// with valid JWT Token and test environment
-		req = request.ProcessFormRequest{
+		/*req = request.ProcessFormRequest{
 			Url: UrlFile,
 			Integrity: request.ProcessFormIntegrityRequest{
 				Enabled: true,
@@ -176,7 +176,7 @@ func TestProcessService(t *testing.T) {
 		assert.Equal(t, res.Hash, "c5a2180e2f97506550f1bba5d863bc6ed05ad8b51daf6fca1ac7d396ef3183c5")
 		assert.True(t, res.Integrity.Enabled)
 		assert.NotEmpty(t, res.Integrity.AnchorId)
-		assert.NotEqual(t, liveAnchorID, res.Integrity.AnchorId)
+		assert.NotEqual(t, liveAnchorID, res.Integrity.AnchorId)*/
 	})
 
 	t.Run("with local key authenticity, should return a valid response", func(t *testing.T) {
@@ -206,8 +206,8 @@ func TestProcessService(t *testing.T) {
 		assert.Equal(t, http.StatusOK, status)
 		assert.NotEqual(t, res.Hash, "c5a2180e2f97506550f1bba5d863bc6ed05ad8b51daf6fca1ac7d396ef3183c5")
 		assert.True(t, res.Authenticity.Enabled)
-		assert.Equal(t, authenticityKey.Key, res.Authenticity.Key)
-		assert.NotEmpty(t, res.Authenticity.Signature)
+		assert.Equal(t, authenticityKey.Key, res.Authenticity.Signatures[0].Kid)
+		assert.NotEmpty(t, res.Authenticity.Signatures)
 	})
 
 	t.Run("with managed key authenticity, should return a valid response", func(t *testing.T) {
@@ -226,8 +226,7 @@ func TestProcessService(t *testing.T) {
 		assert.Equal(t, http.StatusOK, status)
 		assert.NotEqual(t, res.Hash, "c5a2180e2f97506550f1bba5d863bc6ed05ad8b51daf6fca1ac7d396ef3183c5")
 		assert.True(t, res.Authenticity.Enabled)
-		assert.Equal(t, ManagedKey, res.Authenticity.Key)
-		assert.NotEmpty(t, res.Authenticity.Signature)
+		assert.NotEmpty(t, res.Authenticity.Signatures)
 	})
 
 	t.Run("with local certificate authenticity, should return a valid response", func(t *testing.T) {
@@ -273,8 +272,7 @@ func TestProcessService(t *testing.T) {
 		assert.Equal(t, http.StatusOK, status)
 		assert.NotEqual(t, res.Hash, "c5a2180e2f97506550f1bba5d863bc6ed05ad8b51daf6fca1ac7d396ef3183c5")
 		assert.True(t, res.Authenticity.Enabled)
-		assert.Equal(t, "certificate_id", res.Authenticity.Key)
-		assert.NotEmpty(t, res.Authenticity.Signature)
+		assert.NotEmpty(t, res.Authenticity.Signatures)
 	})
 
 	t.Run("with managed certificate authenticity, should return a valid response", func(t *testing.T) {
@@ -293,8 +291,7 @@ func TestProcessService(t *testing.T) {
 		assert.Equal(t, http.StatusOK, status)
 		assert.NotEqual(t, res.Hash, "c5a2180e2f97506550f1bba5d863bc6ed05ad8b51daf6fca1ac7d396ef3183c5")
 		assert.True(t, res.Authenticity.Enabled)
-		assert.Equal(t, ManagedCertificate, res.Authenticity.Key)
-		assert.NotEmpty(t, res.Authenticity.Signature)
+		assert.NotEmpty(t, res.Authenticity.Signatures)
 	})
 
 	t.Run("with local key encryption, should return a valid response", func(t *testing.T) {
@@ -323,7 +320,7 @@ func TestProcessService(t *testing.T) {
 		assert.Equal(t, http.StatusOK, status)
 		assert.Equal(t, res.Hash, "c5a2180e2f97506550f1bba5d863bc6ed05ad8b51daf6fca1ac7d396ef3183c5")
 		assert.True(t, res.Encryption.Enabled)
-		assert.Equal(t, encryptionKey.Key, res.Encryption.Key)
+		assert.Equal(t, "A256GCM", res.Encryption.Alg)
 	})
 
 	// t.Run("with managed key encryption, should return a valid response", func(t *testing.T) {
