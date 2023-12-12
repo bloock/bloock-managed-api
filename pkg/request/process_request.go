@@ -26,7 +26,7 @@ type ProcessFormAvailabilityRequest struct {
 }
 
 type AuthenticityMetadataRequest struct {
-	Enabled    bool                 `form:"authenticity_metadata.enabled,omitempty,default=false"`
+	Enabled    bool `form:"authenticity_metadata.enabled,omitempty,default=false"`
 	Signatures SignatureMetadataRequest
 }
 

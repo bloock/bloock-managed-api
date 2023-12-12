@@ -5,11 +5,11 @@ type SignResponse struct {
 }
 
 type Signature struct {
-	Signature   string `json:"signature"`
-	Alg         string `json:"alg"`
-	Kid         string `json:"kid"`
-	MessageHash string `json:"message_hash"`
-	Subject     string `json:"subject,omitempty"`
+	Signature   string
+	Alg         string
+	Kid         string
+	MessageHash string
+	Subject     string
 }
 
 func NewSignature(signature string, alg string, kid string, messageHash string, subj *string) Signature {

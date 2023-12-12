@@ -1,7 +1,5 @@
 package response
 
-import "github.com/bloock/bloock-managed-api/internal/service/process/response"
-
 type ProcessResponse struct {
 	Success      bool                      `json:"success"`
 	Hash         string                    `json:"hash"`
@@ -17,8 +15,16 @@ type IntegrityJSONResponse struct {
 }
 
 type AuthenticityJSONResponse struct {
-	Enabled    bool                 `json:"enabled"`
-	Signatures []response.Signature `json:"signatures"`
+	Enabled    bool                                `json:"enabled"`
+	Signatures []AuthenticitySignatureJSONResponse `json:"signatures"`
+}
+
+type AuthenticitySignatureJSONResponse struct {
+	Signature   string `json:"signature"`
+	Alg         string `json:"alg"`
+	Kid         string `json:"kid"`
+	MessageHash string `json:"message_hash"`
+	Subject     string `json:"subject,omitempty"`
 }
 
 type EncryptionJSONResponse struct {

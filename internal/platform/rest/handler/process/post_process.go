@@ -90,9 +90,19 @@ func toProcessJsonResponse(processResponse *response.ProcessResponse) http_respo
 	}
 
 	if processResponse.SignResponse() != nil {
+		signaturesResponse := make([]http_response.AuthenticitySignatureJSONResponse, 0)
+		for _, sig := range processResponse.SignResponse().Signatures() {
+			signaturesResponse = append(signaturesResponse, http_response.AuthenticitySignatureJSONResponse{
+				Signature:   sig.Signature,
+				Alg:         sig.Alg,
+				Kid:         sig.Kid,
+				MessageHash: sig.MessageHash,
+				Subject:     sig.Subject,
+			})
+		}
 		resp.Authenticity = &http_response.AuthenticityJSONResponse{
 			Enabled:    true,
-			Signatures: processResponse.SignResponse().Signatures(),
+			Signatures: signaturesResponse,
 		}
 	}
 
