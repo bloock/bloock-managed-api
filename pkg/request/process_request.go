@@ -25,11 +25,33 @@ type ProcessFormAvailabilityRequest struct {
 	Type    string `form:"availability.type"`
 }
 
+type AuthenticityMetadataRequest struct {
+	Enabled    bool                 `form:"authenticity_metadata.enabled,omitempty,default=false"`
+	Signatures SignatureMetadataRequest
+}
+
+type EncryptionMetadataRequest struct {
+	Enabled bool   `form:"encryption_metadata.enabled,omitempty,default=false"`
+	Key     string `form:"encryption_metadata.key,omitempty"`
+	Alg     string `form:"encryption_metadata.alg,omitempty"`
+	Subject string `form:"encryption_metadata.subject,omitempty"`
+}
+
+type SignatureMetadataRequest struct {
+	Signature   string `form:"authenticity_metadata.signature.signature,omitempty"`
+	Alg         string `form:"authenticity_metadata.signature.alg,omitempty"`
+	Kid         string `form:"authenticity_metadata.signature.kid,omitempty"`
+	MessageHash string `form:"authenticity_metadata.signature.message_hash,omitempty"`
+	Subject     string `form:"authenticity_metadata.signature.subject,omitempty"`
+}
+
 type ProcessFormRequest struct {
-	File         *multipart.FileHeader `form:"file"`
-	Url          string                `form:"url"`
-	Integrity    ProcessFormIntegrityRequest
-	Authenticity ProcessFormAuthenticityRequest
-	Encryption   ProcessFormEncryptionRequest
-	Availability ProcessFormAvailabilityRequest
+	File                 *multipart.FileHeader `form:"file"`
+	Url                  string                `form:"url"`
+	Integrity            ProcessFormIntegrityRequest
+	Authenticity         ProcessFormAuthenticityRequest
+	Encryption           ProcessFormEncryptionRequest
+	Availability         ProcessFormAvailabilityRequest
+	AuthenticityMetadata *AuthenticityMetadataRequest
+	EncryptionMetadata   *EncryptionMetadataRequest
 }
