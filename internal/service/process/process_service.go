@@ -132,6 +132,7 @@ func (s ProcessService) Process(ctx context.Context, req request.ProcessRequest)
 			return nil, err
 		}
 
+		req.File.File = encryptedRecord.Retrieve()
 		certification.Data = encryptedRecord.Retrieve()
 		certification.Record = encryptedRecord
 		certification.Hash = newHash
@@ -143,7 +144,7 @@ func (s ProcessService) Process(ctx context.Context, req request.ProcessRequest)
 	}
 
 	if req.Availability.Enabled {
-		dataID, err := s.upload(ctx, &req.File, &req.Availability)
+		dataID, err := s.upload(ctx, &req.File, *certification.Record, &req.Availability)
 		if err != nil {
 			return nil, err
 		}
@@ -294,16 +295,16 @@ func (s ProcessService) encrypt(ctx context.Context, file *domain.File, request 
 	return "", nil, ErrEncryptKeyNotSupported
 }
 
-func (a ProcessService) upload(ctx context.Context, file *domain.File, request *request.AvailabilityRequest) (string, error) {
+func (a ProcessService) upload(ctx context.Context, file *domain.File, record record.Record, request *request.AvailabilityRequest) (string, error) {
 	switch request.Hostingtype {
 	case domain.HOSTED:
-		hostedID, err := a.availabilityRepository.UploadHosted(ctx, file)
+		hostedID, err := a.availabilityRepository.UploadHosted(ctx, file, record)
 		if err != nil {
 			return "", err
 		}
 		return hostedID, err
 	case domain.IPFS:
-		ipfsID, err := a.availabilityRepository.UploadIpfs(ctx, file)
+		ipfsID, err := a.availabilityRepository.UploadIpfs(ctx, file, record)
 		if err != nil {
 			return "", err
 		}

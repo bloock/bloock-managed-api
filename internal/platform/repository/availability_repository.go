@@ -42,23 +42,11 @@ func NewBloockAvailabilityRepository(ctx context.Context, logger zerolog.Logger)
 	}
 }
 
-func (b BloockAvailabilityRepository) UploadHosted(ctx context.Context, file *domain.File) (string, error) {
-	record, err := b.client.RecordClient.FromBytes(file.Bytes()).Build()
-	if err != nil {
-		b.logger.Error().Err(err).Msg("")
-		return "", err
-	}
-
+func (b BloockAvailabilityRepository) UploadHosted(ctx context.Context, file *domain.File, record record.Record) (string, error) {
 	return b.client.AvailabilityClient.Publish(record, availability.NewHostedPublisher())
 }
 
-func (b BloockAvailabilityRepository) UploadIpfs(ctx context.Context, file *domain.File) (string, error) {
-	record, err := b.client.RecordClient.FromBytes(file.Bytes()).Build()
-	if err != nil {
-		b.logger.Error().Err(err).Msg("")
-		return "", err
-	}
-
+func (b BloockAvailabilityRepository) UploadIpfs(ctx context.Context, file *domain.File, record record.Record) (string, error) {
 	return b.client.AvailabilityClient.Publish(record, availability.NewIpfsPublisher())
 }
 
