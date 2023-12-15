@@ -159,7 +159,7 @@ func (s ProcessService) Process(ctx context.Context, req request.ProcessRequest)
 		responseBuilder.AvailabilityResponse(*response.NewAvailabilityResponse(certification.DataID, req.Availability.Hostingtype, contentType, rd.AvailabilityDetails.Size))
 	} else {
 		if req.Integrity.Enabled {
-			if _, err = s.availabilityRepository.UploadTmp(ctx, &req.File); err != nil {
+			if _, err = s.availabilityRepository.UploadTmp(ctx, &req.File, *certification.Record); err != nil {
 				return nil, err
 			}
 		}
@@ -280,16 +280,16 @@ func (s ProcessService) encrypt(ctx context.Context, file *domain.File, request 
 	case domain.LOCAL_CERTIFICATE:
 		return "", nil, ErrEncryptKeyNotSupported
 	case domain.MANAGED_CERTIFICATE:
-		managedKey, err := s.keyRepository.LoadManagedKey(ctx, request.ManagedCertificate.Uuid.String())
+		managedCertificate, err := s.keyRepository.LoadManagedCertificate(ctx, request.ManagedCertificate.Uuid.String())
 		if err != nil {
-			return request.ManagedKey.Uuid.String(), nil, err
+			return request.ManagedCertificate.Uuid.String(), nil, err
 		}
 
-		record, err := s.encryptionRepository.EncryptWithManagedKey(ctx, file.Bytes(), *managedKey)
+		record, err := s.encryptionRepository.EncryptWithManagedCertificate(ctx, file.Bytes(), *managedCertificate)
 		if err != nil {
-			return request.ManagedKey.Uuid.String(), record, err
+			return request.ManagedCertificate.Uuid.String(), record, err
 		}
-		return request.ManagedKey.Uuid.String(), record, nil
+		return request.ManagedCertificate.Uuid.String(), record, nil
 	}
 
 	return "", nil, ErrEncryptKeyNotSupported

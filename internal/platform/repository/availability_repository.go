@@ -78,13 +78,7 @@ func (b BloockAvailabilityRepository) UploadLocal(ctx context.Context, file *dom
 	return b.saveLocalFile(ctx, b.localStoragePath, name, record)
 }
 
-func (b BloockAvailabilityRepository) UploadTmp(ctx context.Context, file *domain.File) (string, error) {
-	record, err := b.client.RecordClient.FromBytes(file.Bytes()).Build()
-	if err != nil {
-		b.logger.Error().Err(err).Msg("")
-		return "", err
-	}
-
+func (b BloockAvailabilityRepository) UploadTmp(ctx context.Context, file *domain.File, record record.Record) (string, error) {
 	hash, err := record.GetHash()
 	if err != nil {
 		if !errors.Is(err, os.ErrExist) {

@@ -49,3 +49,14 @@ func (b BloockEncryptionRepository) EncryptWithManagedKey(ctx context.Context, d
 
 	return &rec, nil
 }
+
+func (b BloockEncryptionRepository) EncryptWithManagedCertificate(ctx context.Context, data []byte, managedCertificate key.ManagedCertificate) (*record.Record, error) {
+	encrypter := encryption.NewEncrypterWithManagedCertificate(managedCertificate)
+	rec, err := b.client.RecordClient.FromBytes(data).WithEncrypter(encrypter).Build()
+	if err != nil {
+		b.logger.Error().Err(err).Msg("")
+		return nil, err
+	}
+
+	return &rec, nil
+}
