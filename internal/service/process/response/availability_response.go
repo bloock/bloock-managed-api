@@ -3,6 +3,7 @@ package response
 import (
 	"fmt"
 
+	"github.com/bloock/bloock-managed-api/internal/config"
 	"github.com/bloock/bloock-managed-api/internal/domain"
 )
 
@@ -18,9 +19,9 @@ func NewAvailabilityResponse(id string, hostingType domain.HostingType, contentT
 	var url string
 	switch hostingType {
 	case domain.IPFS:
-		url = fmt.Sprintf("https://cdn.bloock.com/hosting/v1/ipfs/%s", id)
+		url = fmt.Sprintf("%s/hosting/v1/ipfs/%s", config.Configuration.Bloock.CdnHost, id)
 	case domain.HOSTED:
-		url = fmt.Sprintf("https://cdn.bloock.com/hosting/v1/hosted/%s", id)
+		url = fmt.Sprintf("%s/hosting/v1/hosted/%s", config.Configuration.Bloock.CdnHost, id)
 	default:
 		url = ""
 	}

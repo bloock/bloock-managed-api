@@ -3,15 +3,13 @@ api:
   port: 8080
   debug_mode: false
 
-auth:
-  secret: secret
-
 db:
   connection_string: "file:bloock?mode=memory&cache=shared&_fk=1"
 
 bloock:
   api_host: "https://api.bloock.dev"
   api_key: "ygTYw85v26j1Zazm61CpJdhMaOB53kZTJvDTaS0Qlw9-LPJS1LSbQAS91ZvZiq45"
+  cdn_host: "https://cdn.bloock.dev"
   webhook_secret_key: ""
 
 webhook:
@@ -20,8 +18,7 @@ webhook:
 authenticity:
   key:
     key_type: ""
-    private_key: ""
-    public_key: ""
+    key: ""
   certificate:
     pkcs12_path: "./"
     pkcs12_password: ""
@@ -29,8 +26,7 @@ authenticity:
 encryption:
   key:
     key_type: ""
-    private_key: ""
-    public_key: ""
+    key: ""
   certificate:
     pkcs12_path: "./"
     pkcs12_password: ""

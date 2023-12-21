@@ -26,8 +26,8 @@ func NewBloockKeyRepository(ctx context.Context, logger zerolog.Logger) reposito
 	}
 }
 
-func (b BloockEncryptionRepository) LoadLocalKey(ctx context.Context, kty key.KeyType, publicKey string, privateKey *string) (*key.LocalKey, error) {
-	localKey, err := b.client.KeyClient.LoadLocalKey(kty, publicKey, privateKey)
+func (b BloockEncryptionRepository) LoadLocalKey(ctx context.Context, kty key.KeyType, key string) (*key.LocalKey, error) {
+	localKey, err := b.client.KeyClient.LoadLocalKey(kty, key)
 	if err != nil {
 		b.logger.Error().Err(err).Msg("")
 		return nil, err

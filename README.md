@@ -270,18 +270,12 @@ Here are the configuration variables used by the Bloock Managed API:
 - **BLOOCK_CLIENT_ENDPOINT_URL** (**_OPTIONAL_**)
   - **Description**: An endpoint URL where you want to send processed files.
   - **Purpose**: This URL specifies the destination where processed files will be sent after successful verification. It can be configured to integrate with other systems or services that require the processed data.
-- **BLOOCK_AUTHENTICITY_PRIVATE_KEY** (**_OPTIONAL_**)
+- **BLOOCK_AUTHENTICITY_KEY** (**_OPTIONAL_**)
   - **Description**: Private key for signing data.
   - **Purpose**: If you want to sign data using your own local private key, you can specify it here. This private key is used for cryptographic operations to ensure data integrity and authenticity.
-- **BLOOCK_AUTHENTICITY_PUBLIC_KEY** (**_OPTIONAL_**)
-  - **Description**: Public key for verifying signed data.
-  - **Purpose**: If you're using your own local private key for signing, you should provide the corresponding public key here. The public key is used by others to verify the authenticity of data signed with the private key.
-- **BLOOCK_ENCRYPTION_PRIVATE_KEY** (**_OPTIONAL_**)
+- **BLOOCK_ENCRYPTION_KEY** (**_OPTIONAL_**)
   - **Description**: Private key for encrypting data.
   - **Purpose**: If you want to encrypt data using your own local key, you can specify it here.
-- **BLOOCK_ENCRYPTION_PUBLIC_KEY** (**_OPTIONAL_**)
-  - **Description**: Public key for encrypting data.
-  - **Purpose**: If you're using your own local private key for signing, you should provide the corresponding public key here. If you are using a symetric key such as Aes, you only need to populate this field.
 - **BLOOCK_API_HOST** (**_OPTIONAL_**)
   - **Description**: The API host IP address.
   - **Default**: 0.0.0.0
@@ -326,11 +320,9 @@ BLOOCK_API_KEY: ""
 BLOOCK_WEBHOOK_SECRET_KEY: ""
 BLOOCK_CLIENT_ENDPOINT_URL: ""
 
-BLOOCK_AUTHENTICITY_PRIVATE_KEY: ""
-BLOOCK_AUTHENTICITY_PUBLIC_KEY: ""
+BLOOCK_AUTHENTICITY_KEY: ""
 
-BLOOCK_ENCRYPTION_PRIVATE_KEY: ""
-BLOOCK_ENCRYPTION_PUBLIC_KEY: ""
+BLOOCK_ENCRYPTION_KEY: ""
 
 BLOOCK_TMP_DIR: "./tmp"
 BLOOCK_STORAGE_LOCAL_PATH: "./data"

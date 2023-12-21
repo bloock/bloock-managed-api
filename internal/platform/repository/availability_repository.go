@@ -104,9 +104,9 @@ func (b BloockAvailabilityRepository) FindFile(ctx context.Context, id string) (
 	if _, err := url.ParseRequestURI(id); err != nil {
 		// is not a url
 
-		file, err := b.downloadUrl(ctx, fmt.Sprintf("https://cdn.bloock.com/hosting/v1/hosted/%s", id))
+		file, err := b.downloadUrl(ctx, fmt.Sprintf("%s/hosting/v1/hosted/%s", config.Configuration.Bloock.CdnHost, id))
 		if err != nil {
-			file, err := b.downloadUrl(ctx, fmt.Sprintf("https://cdn.bloock.com/hosting/v1/ipfs/%s", id))
+			file, err := b.downloadUrl(ctx, fmt.Sprintf("%s/hosting/v1/ipfs/%s", config.Configuration.Bloock.CdnHost, id))
 			if err != nil {
 				return nil, err
 			}

@@ -16,9 +16,8 @@ type IntegrityRequest struct {
 }
 
 type LocalKeyRequest struct {
-	KeyType    key.KeyType
-	PrivateKey string
-	PublicKey  string
+	KeyType key.KeyType
+	Key     string
 }
 
 type LocalCertificateRequest struct {
@@ -96,9 +95,8 @@ func NewProcessRequest(file domain.File, request *request.ProcessFormRequest) (*
 			}
 
 			authenticityRequest.LocalKey = &LocalKeyRequest{
-				KeyType:    kty,
-				PrivateKey: config.Configuration.Authenticity.KeyConfig.PrivateKey,
-				PublicKey:  config.Configuration.Authenticity.KeyConfig.PublicKey,
+				KeyType: kty,
+				Key:     config.Configuration.Authenticity.KeyConfig.Key,
 			}
 		case domain.MANAGED_KEY:
 			keyID, err := uuid.Parse(request.Authenticity.Key)
@@ -149,9 +147,8 @@ func NewProcessRequest(file domain.File, request *request.ProcessFormRequest) (*
 			}
 
 			encryptionRequest.LocalKey = &LocalKeyRequest{
-				KeyType:    kty,
-				PrivateKey: config.Configuration.Encryption.KeyConfig.PrivateKey,
-				PublicKey:  config.Configuration.Encryption.KeyConfig.PublicKey,
+				KeyType: kty,
+				Key:     config.Configuration.Encryption.KeyConfig.Key,
 			}
 		case domain.MANAGED_KEY:
 			keyID, err := uuid.Parse(request.Encryption.Key)

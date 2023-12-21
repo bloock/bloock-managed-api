@@ -29,6 +29,7 @@ type DBConfig struct {
 type BloockConfig struct {
 	ApiHost          string `mapstructure:"api_host" default:"https://api.bloock.com"`
 	ApiKey           string `mapstructure:"api_key"`
+	CdnHost          string `mapstructure:"cdn_host" default:"https://cdn.bloock.com"`
 	WebhookSecretKey string `mapstructure:"webhook_secret_key"`
 }
 
@@ -38,9 +39,8 @@ type WebhookConfig struct {
 }
 
 type KeyConfig struct {
-	KeyType    string `mapstructure:"key_type"`
-	PrivateKey string `mapstructure:"private_key"`
-	PublicKey  string `mapstructure:"public_key"`
+	KeyType string `mapstructure:"key_type"`
+	Key     string `mapstructure:"key"`
 }
 
 type CertificateConfig struct {

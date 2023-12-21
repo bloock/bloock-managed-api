@@ -193,106 +193,107 @@ func (s ProcessService) certify(ctx context.Context, data []byte) (domain.Certif
 	return certification, nil
 }
 
-func (s ProcessService) sign(ctx context.Context, file *domain.File, request *request.AuthenticityRequest) (string, string, *record.Record, error) {
+func (s ProcessService) sign(ctx context.Context, file *domain.File, request *request.AuthenticityRequest) (*string, string, *record.Record, error) {
 	switch request.KeySource {
 	case domain.LOCAL_KEY:
-		localKey, err := s.keyRepository.LoadLocalKey(ctx, request.LocalKey.KeyType, request.LocalKey.PublicKey, &request.LocalKey.PrivateKey)
+		localKey, err := s.keyRepository.LoadLocalKey(ctx, request.LocalKey.KeyType, request.LocalKey.Key)
 		if err != nil {
-			return request.LocalKey.PublicKey, "", nil, err
+			return nil, "", nil, err
 		}
 
 		signature, record, err := s.authenticityRepository.
 			SignWithLocalKey(ctx, file.Bytes(), *localKey)
 		if err != nil {
-			return request.LocalKey.PublicKey, "", nil, err
+			return nil, "", nil, err
 		}
-		return request.LocalKey.PublicKey, signature, record, nil
+		return &localKey.Key, signature, record, nil
 
 	case domain.MANAGED_KEY:
 		managedKey, err := s.keyRepository.LoadManagedKey(ctx, request.ManagedKey.Uuid.String())
 		if err != nil {
-			return request.ManagedKey.Uuid.String(), "", nil, err
+			return nil, "", nil, err
 		}
 
 		signature, record, err := s.authenticityRepository.
 			SignWithManagedKey(ctx, file.Bytes(), *managedKey)
 		if err != nil {
-			return request.ManagedKey.Uuid.String(), "", nil, err
+			return nil, "", nil, err
 		}
-		return request.ManagedKey.Uuid.String(), signature, record, nil
+		return &managedKey.ID, signature, record, nil
 
 	case domain.LOCAL_CERTIFICATE:
 		localCertificate, err := s.keyRepository.LoadLocalCertificate(ctx, request.LocalCertificate.Pkcs12, request.LocalCertificate.Pkcs12Pasword)
 		if err != nil {
-			return "", "", nil, err
+			return nil, "", nil, err
 		}
 
 		signature, record, err := s.authenticityRepository.
 			SignWithLocalCertificate(ctx, file.Bytes(), *localCertificate)
 		if err != nil {
-			return "", "", nil, err
+			return nil, "", nil, err
 		}
-		return "certificate_id", signature, record, nil
+
+		return &signature, signature, record, nil
 
 	case domain.MANAGED_CERTIFICATE:
 		managedCertificate, err := s.keyRepository.LoadManagedCertificate(ctx, request.ManagedCertificate.Uuid.String())
 		if err != nil {
-			return request.ManagedCertificate.Uuid.String(), "", nil, err
+			return nil, "", nil, err
 		}
 
 		signature, record, err := s.authenticityRepository.
 			SignWithManagedCertificate(ctx, file.Bytes(), *managedCertificate)
 		if err != nil {
-			return request.ManagedCertificate.Uuid.String(), "", nil, err
+			return nil, "", nil, err
 		}
-		return request.ManagedCertificate.Uuid.String(), signature, record, nil
+		return &managedCertificate.ID, signature, record, nil
 	}
 
-	return "", "", nil, ErrSignKeyNotSupported
+	return nil, "", nil, ErrSignKeyNotSupported
 }
 
-func (s ProcessService) encrypt(ctx context.Context, file *domain.File, request *request.EncryptionRequest) (string, *record.Record, error) {
+func (s ProcessService) encrypt(ctx context.Context, file *domain.File, request *request.EncryptionRequest) (*string, *record.Record, error) {
 	switch request.KeySource {
 	case domain.LOCAL_KEY:
-		localKey, err := s.keyRepository.LoadLocalKey(ctx, request.LocalKey.KeyType, request.LocalKey.PublicKey, &request.LocalKey.PrivateKey)
+		localKey, err := s.keyRepository.LoadLocalKey(ctx, request.LocalKey.KeyType, request.LocalKey.Key)
 		if err != nil {
-			return request.LocalKey.PublicKey, nil, err
+			return nil, nil, err
 		}
 
 		record, err := s.encryptionRepository.EncryptWithLocalKey(ctx, file.Bytes(), *localKey)
 		if err != nil {
-			return request.LocalKey.PublicKey, record, err
+			return nil, record, err
 		}
-		return request.LocalKey.PublicKey, record, nil
+		return &localKey.Key, record, nil
 
 	case domain.MANAGED_KEY:
 		managedKey, err := s.keyRepository.LoadManagedKey(ctx, request.ManagedKey.Uuid.String())
 		if err != nil {
-			return request.ManagedKey.Uuid.String(), nil, err
+			return nil, nil, err
 		}
 
 		record, err := s.encryptionRepository.EncryptWithManagedKey(ctx, file.Bytes(), *managedKey)
 		if err != nil {
-			return request.ManagedKey.Uuid.String(), record, err
+			return nil, record, err
 		}
-		return request.ManagedKey.Uuid.String(), record, nil
+		return &managedKey.ID, record, nil
 
 	case domain.LOCAL_CERTIFICATE:
-		return "", nil, ErrEncryptKeyNotSupported
+		return nil, nil, ErrEncryptKeyNotSupported
 	case domain.MANAGED_CERTIFICATE:
 		managedCertificate, err := s.keyRepository.LoadManagedCertificate(ctx, request.ManagedCertificate.Uuid.String())
 		if err != nil {
-			return request.ManagedCertificate.Uuid.String(), nil, err
+			return nil, nil, err
 		}
 
 		record, err := s.encryptionRepository.EncryptWithManagedCertificate(ctx, file.Bytes(), *managedCertificate)
 		if err != nil {
-			return request.ManagedCertificate.Uuid.String(), record, err
+			return nil, record, err
 		}
-		return request.ManagedCertificate.Uuid.String(), record, nil
+		return &managedCertificate.ID, record, nil
 	}
 
-	return "", nil, ErrEncryptKeyNotSupported
+	return nil, nil, ErrEncryptKeyNotSupported
 }
 
 func (a ProcessService) upload(ctx context.Context, file *domain.File, record record.Record, request *request.AvailabilityRequest) (string, error) {
