@@ -52,6 +52,4 @@ type ProcessFormRequest struct {
 	Authenticity         ProcessFormAuthenticityRequest
 	Encryption           ProcessFormEncryptionRequest
 	Availability         ProcessFormAvailabilityRequest
-	AuthenticityMetadata AuthenticityMetadataRequest
-	EncryptionMetadata   EncryptionMetadataRequest
 }
