@@ -29,7 +29,7 @@ func NewBloockAuthenticityRepository(ctx context.Context, logger zerolog.Logger)
 }
 
 func (b BloockAuthenticityRepository) SignWithLocalKey(ctx context.Context, data []byte, localKey key.LocalKey) (string, *record.Record, error) {
-	signer := authenticity.NewSignerWithLocalKey(localKey)
+	signer := authenticity.NewSignerWithLocalKey(localKey, nil)
 	rec, err := b.client.RecordClient.FromBytes(data).WithSigner(signer).Build()
 	if err != nil {
 		b.logger.Error().Err(err).Msg("")
@@ -45,7 +45,7 @@ func (b BloockAuthenticityRepository) SignWithLocalKey(ctx context.Context, data
 }
 
 func (b BloockAuthenticityRepository) SignWithManagedKey(ctx context.Context, data []byte, managedKey key.ManagedKey) (string, *record.Record, error) {
-	signer := authenticity.NewSignerWithManagedKey(managedKey)
+	signer := authenticity.NewSignerWithManagedKey(managedKey, nil)
 	rec, err := b.client.RecordClient.FromBytes(data).WithSigner(signer).Build()
 	if err != nil {
 		b.logger.Error().Err(err).Msg("")
@@ -61,7 +61,7 @@ func (b BloockAuthenticityRepository) SignWithManagedKey(ctx context.Context, da
 }
 
 func (b BloockAuthenticityRepository) SignWithLocalCertificate(ctx context.Context, data []byte, localCertificate key.LocalCertificate) (string, *record.Record, error) {
-	signer := authenticity.NewSignerWithLocalCertificate(localCertificate)
+	signer := authenticity.NewSignerWithLocalCertificate(localCertificate, nil)
 	rec, err := b.client.RecordClient.FromBytes(data).WithSigner(signer).Build()
 	if err != nil {
 		b.logger.Error().Err(err).Msg("")
@@ -77,7 +77,7 @@ func (b BloockAuthenticityRepository) SignWithLocalCertificate(ctx context.Conte
 }
 
 func (b BloockAuthenticityRepository) SignWithManagedCertificate(ctx context.Context, data []byte, managedCertificate key.ManagedCertificate) (string, *record.Record, error) {
-	signer := authenticity.NewSignerWithManagedCertificate(managedCertificate)
+	signer := authenticity.NewSignerWithManagedCertificate(managedCertificate, nil)
 	rec, err := b.client.RecordClient.FromBytes(data).WithSigner(signer).Build()
 	if err != nil {
 		b.logger.Error().Err(err).Msg("")
