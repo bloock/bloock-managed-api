@@ -52,6 +52,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           name: ${{ needs.push.outputs.version }}
+          prerelease: ${{ contains(needs.push.outputs.version, 'beta') }}
           generate_release_notes: true
 
   deploy-dev:
