@@ -127,15 +127,9 @@ func (s ProcessService) Process(ctx context.Context, req request.ProcessRequest)
 			return nil, err
 		}
 
-		newHash, err := record.GetHash()
-		if err != nil {
-			return nil, err
-		}
-
 		req.File.File = encryptedRecord.Retrieve()
 		certification.Data = encryptedRecord.Retrieve()
 		certification.Record = encryptedRecord
-		certification.Hash = newHash
 
 		rd, err := s.metadataRepository.GetRecordDetails(ctx, certification.Data)
 		if rd.EncryptionDetails != nil {
