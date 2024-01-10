@@ -20,7 +20,7 @@ type BloockAuthenticityRepository struct {
 func NewBloockAuthenticityRepository(ctx context.Context, logger zerolog.Logger) repository.AuthenticityRepository {
 	logger.With().Caller().Str("component", "authenticity-repository").Logger()
 
-	c := client.NewBloockClient(pkg.GetApiKeyFromContext(ctx), "", pkg.GetEnvFromContext(ctx))
+	c := client.NewBloockClient(pkg.GetApiKeyFromContext(ctx), nil, pkg.GetEnvFromContext(ctx))
 
 	return &BloockAuthenticityRepository{
 		client: c,

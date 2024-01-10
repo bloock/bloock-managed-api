@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	entgo.io/ent v0.12.4
-	github.com/bloock/bloock-sdk-go/v2 v2.7.0-beta.15
+	github.com/bloock/bloock-sdk-go/v2 v2.7.0
 	github.com/cenkalti/backoff/v4 v4.2.1
 	github.com/gin-contrib/logger v0.2.6
 	github.com/gin-gonic/gin v1.9.1
@@ -16,7 +16,7 @@ require (
 	github.com/mcuadros/go-defaults v1.2.0
 	github.com/rs/zerolog v1.29.1
 	github.com/spf13/viper v1.16.0
-	github.com/stretchr/testify v1.8.3
+	github.com/stretchr/testify v1.8.4
 
 )
 

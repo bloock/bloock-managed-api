@@ -31,7 +31,7 @@ type BloockAvailabilityRepository struct {
 func NewBloockAvailabilityRepository(ctx context.Context, logger zerolog.Logger) repository.AvailabilityRepository {
 	logger.With().Caller().Str("component", "availability-repository").Logger()
 
-	c := client.NewBloockClient(pkg.GetApiKeyFromContext(ctx), "", pkg.GetEnvFromContext(ctx))
+	c := client.NewBloockClient(pkg.GetApiKeyFromContext(ctx), nil, pkg.GetEnvFromContext(ctx))
 
 	return &BloockAvailabilityRepository{
 		client:               c,

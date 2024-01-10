@@ -20,7 +20,7 @@ type BloockIntegrityRepository struct {
 func NewBloockIntegrityRepository(ctx context.Context, logger zerolog.Logger) repository.IntegrityRepository {
 	logger.With().Caller().Str("component", "integrity-repository").Logger()
 
-	c := client.NewBloockClient(pkg.GetApiKeyFromContext(ctx), "", pkg.GetEnvFromContext(ctx))
+	c := client.NewBloockClient(pkg.GetApiKeyFromContext(ctx), nil, pkg.GetEnvFromContext(ctx))
 
 	return &BloockIntegrityRepository{
 		client: c,

@@ -46,10 +46,10 @@ type SignatureMetadataRequest struct {
 }
 
 type ProcessFormRequest struct {
-	File                 *multipart.FileHeader `form:"file"`
-	Url                  string                `form:"url"`
-	Integrity            ProcessFormIntegrityRequest
-	Authenticity         ProcessFormAuthenticityRequest
-	Encryption           ProcessFormEncryptionRequest
-	Availability         ProcessFormAvailabilityRequest
+	File         *multipart.FileHeader `form:"file"`
+	Url          string                `form:"url"`
+	Integrity    ProcessFormIntegrityRequest
+	Authenticity ProcessFormAuthenticityRequest
+	Encryption   ProcessFormEncryptionRequest
+	Availability ProcessFormAvailabilityRequest
 }
