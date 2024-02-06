@@ -338,7 +338,6 @@ If you do not want to use Bloock's managed key service and use your own keys loc
 - **BLOOCK_AUTHENTICITY_CERTIFICATE_PKCS12_PASSWORD** (**_OPTIONAL_**)
   - **Description**: Certificate password.
   - **Purpose**: If the certificate is protected by a password, you must provide it.
-
 - **BLOOCK_ENCRYPTION_KEY_KEY** (**_OPTIONAL_**)
   - **Description**: Private key for encrypting data.
   - **Purpose**: If you want to encrypt data using your own local key, you can specify it here.
