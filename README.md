@@ -309,17 +309,17 @@ Here are the configuration variables used by the Bloock Managed API:
   - **Purpose**: This URL specifies the destination where processed files will be sent after successful verification. It can be configured to integrate with other systems or services that require the processed data.
   - **Example**: https://bloock.com/endpoint/to/send/file
 - **BLOOCK_API_HOST** (**_OPTIONAL_**)
-    - **Description**: The API host IP address.
-    - **Default**: 0.0.0.0
-    - **Purpose**: This variable allows you to specify the IP address on which the Bloock Managed API should listen for incoming requests. You can customize it based on your network configuration.
+  - **Description**: The API host IP address.
+  - **Default**: 0.0.0.0
+  - **Purpose**: This variable allows you to specify the IP address on which the Bloock Managed API should listen for incoming requests. You can customize it based on your network configuration.
 - **BLOOCK_API_PORT** (**_OPTIONAL_**)
-    - **Description**: The API port number.
-    - **Default**: 8080
-    - **Purpose**: The API listens on this port for incoming HTTP requests. You can adjust it to match your preferred port configuration.
+  - **Description**: The API port number.
+  - **Default**: 8080
+  - **Purpose**: The API listens on this port for incoming HTTP requests. You can adjust it to match your preferred port configuration.
 - **BLOOCK_API_DEBUG_MODE** (**_OPTIONAL_**)
-    - **Description**: Enable or disable debug mode.
-    - **Default**: false
-    - **Purpose**: When set to true, debug mode provides more detailed log information, which can be useful for troubleshooting and debugging. Set it to false for normal operation.
+  - **Description**: Enable or disable debug mode.
+  - **Default**: false
+  - **Purpose**: When set to true, debug mode provides more detailed log information, which can be useful for troubleshooting and debugging. Set it to false for normal operation.
 
 If you do not want to use Bloock's managed key service and use your own keys locally, then you must fill in these variables in order to perform authenticity or encryption on your files:
 
@@ -328,32 +328,32 @@ If you do not want to use Bloock's managed key service and use your own keys loc
   - **Purpose**: If you want to sign data using your own local private key, you can specify it here. This private key is used for cryptographic operations to ensure data integrity and authenticity.
   - **Example**: bf5e13dd8d9f784aee781b4de7836caa3499168514553eaa3d892911ad3c115t
 - **BLOOCK_AUTHENTICITY_KEY_KEY_TYPE** (**_OPTIONAL_**)
-    - **Description**: Type of key.
-    - **Purpose**: This key type is utilized for cryptographic signing processes.
-    - **Options**: EcP256k, Rsa2048, Rsa3072, Rsa4096.
+  - **Description**: Type of key.
+  - **Purpose**: This key type is utilized for cryptographic signing processes.
+  - **Options**: EcP256k, Rsa2048, Rsa3072, Rsa4096.
 - **BLOOCK_AUTHENTICITY_CERTIFICATE_PKCS12_PATH** (**_OPTIONAL_**)
-    - **Description**: Certificate for signing data.
-    - **Purpose**: In case you want to upload a digital certificate in pkcs12 (`.pfx, .p12`) format, you can specify the url where it is to be processed.
-    - **Example**: ./my_cert.p12
+  - **Description**: Certificate for signing data.
+  - **Purpose**: In case you want to upload a digital certificate in pkcs12 (`.pfx, .p12`) format, you can specify the url where it is to be processed.
+  - **Example**: ./my_cert.p12
 - **BLOOCK_AUTHENTICITY_CERTIFICATE_PKCS12_PASSWORD** (**_OPTIONAL_**)
-    - **Description**: Certificate password.
-    - **Purpose**: If the certificate is protected by a password, you must provide it.
+  - **Description**: Certificate password.
+  - **Purpose**: If the certificate is protected by a password, you must provide it.
 
 - **BLOOCK_ENCRYPTION_KEY_KEY** (**_OPTIONAL_**)
   - **Description**: Private key for encrypting data.
   - **Purpose**: If you want to encrypt data using your own local key, you can specify it here.
   - **Example**: bf5e13dd8d9f784aee781b4de7836caa3499168514553eaa3d892911ad3c115t
 - **BLOOCK_ENCRYPTION_KEY_KEY_TYPE** (**_OPTIONAL_**)
-    - **Description**: Type of key.
-    - **Purpose**: This key type is utilized for cryptographic signing processes.
-    - **Options**: Rsa2048, Rsa3072, Rsa4096.
+  - **Description**: Type of key.
+  - **Purpose**: This key type is utilized for cryptographic signing processes.
+  - **Options**: Rsa2048, Rsa3072, Rsa4096.
 - **BLOOCK_ENCRYPTION_CERTIFICATE_PKCS12_PATH** (**_OPTIONAL_**)
-    - **Description**: Certificate for encrypting data.
-    - **Purpose**: In case you want to upload a digital certificate in pkcs12 (`.pfx, .p12`) format, you can specify the url where it is to be processed.
-    - **Example**: ./my_cert.p12
+  - **Description**: Certificate for encrypting data.
+  - **Purpose**: In case you want to upload a digital certificate in pkcs12 (`.pfx, .p12`) format, you can specify the url where it is to be processed.
+  - **Example**: ./my_cert.p12
 - **BLOOCK_ENCRYPTION_CERTIFICATE_PKCS12_PASSWORD** (**_OPTIONAL_**)
-    - **Description**: Certificate password.
-    - **Purpose**: If the certificate is protected by a password, you must provide it.
+  - **Description**: Certificate password.
+  - **Purpose**: If the certificate is protected by a password, you must provide it.
 
 Finally, in case you want to store your files locally, with these variables you can edit the configuration:
 
