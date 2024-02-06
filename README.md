@@ -14,7 +14,6 @@ The BLOOCK Managed API is a tool to integrate [BLOOCK](https://bloock.com)'s ser
     - [Option 3: Clone the GitHub Repository](#option-3-clone-the-github-repository)
 - [Configuration](#configuration)
   - [Variables](#variables)
-  - [Configuration File](#configuration-file)
 - [Database Support](#database-support)
 - [Documentation](#documentation)
 - [License](#license)
@@ -66,9 +65,9 @@ This option is straightforward and ideal if you want to get started quickly. Fol
 
      ```txt
      BLOOCK_DB_CONNECTION_STRING=file:bloock?mode=memory&cache=shared&_fk=1
-     BLOOCK_API_KEY=your_api_key
-     BLOOCK_WEBHOOK_SECRET_KEY=your_webhook_secret_key
-     BLOOCK_CLIENT_ENDPOINT_URL=https://bloock.com/endpoint/to/send/file
+     BLOOCK_BLOOCK_API_KEY=your_api_key
+     BLOOCK_BLOOCK_WEBHOOK_SECRET_KEY=your_webhook_secret_key
+     BLOOCK_WEBHOOK_CLIENT_ENDPOINT_URL=https://bloock.com/endpoint/to/send/file
      ```
 
      > **NOTE:** For the **BLOOCK_DB_CONNECTION_STRING** environment variable, you have the flexibility to specify your own MySQL or PostgreSQL infrastructure. Clients can provide their connection string for their database infrastructure. See the [Database](#database-support) section for available connections.
@@ -137,9 +136,9 @@ If you need a more complex setup, such as using a specific database like **MySQL
 
      ```yaml
      BLOOCK_DB_CONNECTION_STRING: "file:bloock?mode=memory&cache=shared&_fk=1"
-     BLOOCK_API_KEY: "your_api_key"
-     BLOOCK_WEBHOOK_SECRET_KEY: "your_webhook_secret_key"
-     BLOOCK_CLIENT_ENDPOINT_URL: "https://bloock.com/endpoint/to/send/file"
+     BLOOCK_BLOOCK_API_KEY: "your_api_key"
+     BLOOCK_BLOOCK_WEBHOOK_SECRET_KEY: "your_webhook_secret_key"
+     BLOOCK_WEBHOOK_CLIENT_ENDPOINT_URL: "https://bloock.com/endpoint/to/send/file"
      ```
 
 5. **Run Docker Compose:**
@@ -188,9 +187,9 @@ To deploy the API as a standalone application, follow these steps:
 
    1.1. **Clone the Repository:**
 
-   - Open your terminal and navigate to the directory where you want to clone the [repository](<(https://github.com/bloock/bloock-identity-managed-api)>).
+   - Open your terminal and navigate to the directory where you want to clone the [repository](https://github.com/bloock/bloock-identity-managed-api).
 
-   - Run the following command to clone the [repository](<(https://github.com/bloock/bloock-identity-managed-api)>):
+   - Run the following command to clone the [repository](https://github.com/bloock/bloock-identity-managed-api):
 
    ```bash
     git clone https://github.com/bloock/managed-api.git
@@ -208,28 +207,63 @@ To deploy the API as a standalone application, follow these steps:
 
    - Download the selected release file to your local machine.
 
-2. **Navigate to the Repository:**
+     1. **Navigate to the Repository:**
 
-   - Change your current directory to the cloned repository or downloaded the release file:
+        - Change your current directory to the cloned repository or downloaded the release file:
 
-   ```bash
-    cd managed-api
-   ```
+        ```bash
+         cd managed-api
+        ```
 
-3. **Set Up Configuration:**
+        1. **Set Up Configuration:**
 
-   - Inside the repository, you'll find a `config.yaml` file.
+           - Inside the repository, you'll find a `config.yaml` file.
 
-   - Open `config.yaml` in a text editor and configure the environment variables as needed, following the format described in the [Variables](#variables) section. For example:
+           - Open `config.yaml` in a text editor and configure the environment variables as needed, following the format described in the [Variables](#variables) section. For example:
 
-   ```yaml
-   BLOOCK_DB_CONNECTION_STRING: "file:bloock?mode=memory&cache=shared&_fk=1"
-   BLOOCK_API_KEY: "your_api_key"
-   BLOOCK_WEBHOOK_SECRET_KEY: "your_webhook_secret_key"
-   BLOOCK_CLIENT_ENDPOINT_URL: "https://bloock.com/endpoint/to/send/file"
-   ```
+           ```yaml
+           api: 
+            host: "0.0.0.0"
+            port: 8080
+            debug_mode: false
+    
+           db:
+            connection_string: "file:bloock?mode=memory&cache=shared&_fk=1"
+    
+           bloock:
+            api_host: ""
+            api_key: ""
+            cdn_host: ""
+            webhook_secret_key: ""
+    
+           webhook:
+            client_endpoint_url: ""
+    
+           authenticity:
+            key:
+             key_type: ""
+             key: ""
+            certificate:
+             pkcs12_path: "./"
+             pkcs12_password: ""
+    
+           encryption:
+             key:
+               key_type: ""
+               key: ""
+             certificate:
+               pkcs12_path: "./"
+               pkcs12_password: ""
+    
+           storage:
+             tmp_dir: "./tmp"
+             local_strategy: "FILENAME"
+             local_path: "./data"
+           ```
 
-4. **Run the Application:**
+           > **NOTE:** Here you will not have to use the `VARIABLE: value` nomenclature, but you will simply have to fill in the variables you need directly, respecting the format already established.
+
+2. **Run the Application:**
 
    - To run the application, execute the following command:
 
@@ -239,7 +273,7 @@ To deploy the API as a standalone application, follow these steps:
 
    This command will start the Bloock Managed API as a standalone application, and it will use the configuration provided in the config.yaml file.
 
-5. **Access the API:**
+3. **Access the API:**
 
    - After running the application, the Bloock Managed API will be accessible at http://localhost:8080. You can make API requests to interact with the service.
 
@@ -253,41 +287,76 @@ The Bloock Managed API leverages Viper, a powerful configuration management libr
 
 Here are the configuration variables used by the Bloock Managed API:
 
-- **BLOOCK_API_KEY** (**REQUIRED**)
+- **BLOOCK_BLOOCK_API_KEY** (**_OPTIONAL_**)
   - **Description**: Your unique [BLOOCK API key](https://docs.bloock.com/libraries/authentication/create-an-api-key).
   - **Purpose**: This [API key](https://docs.bloock.com/libraries/authentication/create-an-api-key) is required for authentication and authorization when interacting with the Bloock Identity Managed API. It allows you to securely access and use the API's features.
   - **[Create API Key](https://docs.bloock.com/libraries/authentication/create-an-api-key)**
+  - **Required**: **If you don't add the API KEY here, you must add it every time you execute a request to the API.**
+  - **Example**: no9rLf9dOMjXGvXQX3I96a39qYFoZknGd6YHtY3x1VPelr6M-TmTLpAF-fm1k9Zi
 - **BLOOCK_DB_CONNECTION_STRING** (**_OPTIONAL_**)
   - **Description**: Your custom database connection URL.
   - **Default**: "file:bloock?mode=memory&cache=shared&\_fk=1"
   - **Purpose**: This variable allows you to specify your own [database](#database-support) connection string. You can use it to connect the API to your existing database infrastructure. The format depends on the [database](#database-support) type you choose.
   - **Required**: When docker database container or your existing database infrastructure provided.
-- **BLOOCK_WEBHOOK_SECRET_KEY** (**_OPTIONAL_**)
+- **BLOOCK_BLOOCK_WEBHOOK_SECRET_KEY** (**_OPTIONAL_**)
   - **Description**: Your [BLOOCK webhook secret key](https://docs.bloock.com/webhooks/overview).
   - **Purpose**: The [webhook secret key](https://docs.bloock.com/webhooks/overview) is used to secure and verify incoming webhook requests. It ensures that webhook data is received from a trusted source and has not been tampered with during transmission.
   - **Required**: When you want to certificate data using integrity Bloock product.
   - **[Create webhook](https://docs.bloock.com/webhooks/overview)**
-- **BLOOCK_CLIENT_ENDPOINT_URL** (**_OPTIONAL_**)
+  - **Example**: ew1b2d5qf7WeUOPy1u1CW6FXro6j5plS
+- **BLOOCK_WEBHOOK_CLIENT_ENDPOINT_URL** (**_OPTIONAL_**)
   - **Description**: An endpoint URL where you want to send processed files.
   - **Purpose**: This URL specifies the destination where processed files will be sent after successful verification. It can be configured to integrate with other systems or services that require the processed data.
-- **BLOOCK_AUTHENTICITY_KEY** (**_OPTIONAL_**)
+  - **Example**: https://bloock.com/endpoint/to/send/file
+- **BLOOCK_API_HOST** (**_OPTIONAL_**)
+    - **Description**: The API host IP address.
+    - **Default**: 0.0.0.0
+    - **Purpose**: This variable allows you to specify the IP address on which the Bloock Managed API should listen for incoming requests. You can customize it based on your network configuration.
+- **BLOOCK_API_PORT** (**_OPTIONAL_**)
+    - **Description**: The API port number.
+    - **Default**: 8080
+    - **Purpose**: The API listens on this port for incoming HTTP requests. You can adjust it to match your preferred port configuration.
+- **BLOOCK_API_DEBUG_MODE** (**_OPTIONAL_**)
+    - **Description**: Enable or disable debug mode.
+    - **Default**: false
+    - **Purpose**: When set to true, debug mode provides more detailed log information, which can be useful for troubleshooting and debugging. Set it to false for normal operation.
+
+If you do not want to use Bloock's managed key service and use your own keys locally, then you must fill in these variables in order to perform authenticity or encryption on your files:
+
+- **BLOOCK_AUTHENTICITY_KEY_KEY** (**_OPTIONAL_**)
   - **Description**: Private key for signing data.
   - **Purpose**: If you want to sign data using your own local private key, you can specify it here. This private key is used for cryptographic operations to ensure data integrity and authenticity.
-- **BLOOCK_ENCRYPTION_KEY** (**_OPTIONAL_**)
+  - **Example**: bf5e13dd8d9f784aee781b4de7836caa3499168514553eaa3d892911ad3c115t
+- **BLOOCK_AUTHENTICITY_KEY_KEY_TYPE** (**_OPTIONAL_**)
+    - **Description**: Type of key.
+    - **Purpose**: This key type is utilized for cryptographic signing processes.
+    - **Options**: EcP256k, Rsa2048, Rsa3072, Rsa4096.
+- **BLOOCK_AUTHENTICITY_CERTIFICATE_PKCS12_PATH** (**_OPTIONAL_**)
+    - **Description**: Certificate for signing data.
+    - **Purpose**: In case you want to upload a digital certificate in pkcs12 (`.pfx, .p12`) format, you can specify the url where it is to be processed.
+    - **Example**: ./my_cert.p12
+- **BLOOCK_AUTHENTICITY_CERTIFICATE_PKCS12_PASSWORD** (**_OPTIONAL_**)
+    - **Description**: Certificate password.
+    - **Purpose**: If the certificate is protected by a password, you must provide it.
+
+- **BLOOCK_ENCRYPTION_KEY_KEY** (**_OPTIONAL_**)
   - **Description**: Private key for encrypting data.
   - **Purpose**: If you want to encrypt data using your own local key, you can specify it here.
-- **BLOOCK_API_HOST** (**_OPTIONAL_**)
-  - **Description**: The API host IP address.
-  - **Default**: 0.0.0.0
-  - **Purpose**: This variable allows you to specify the IP address on which the Bloock Managed API should listen for incoming requests. You can customize it based on your network configuration.
-- **BLOOCK_API_PORT** (**_OPTIONAL_**)
-  - **Description**: The API port number.
-  - **Default**: 8080
-  - **Purpose**: The API listens on this port for incoming HTTP requests. You can adjust it to match your preferred port configuration.
-- **BLOOCK_API_DEBUG_MODE** (**_OPTIONAL_**)
-  - **Description**: Enable or disable debug mode.
-  - **Default**: false
-  - **Purpose**: When set to true, debug mode provides more detailed log information, which can be useful for troubleshooting and debugging. Set it to false for normal operation.
+  - **Example**: bf5e13dd8d9f784aee781b4de7836caa3499168514553eaa3d892911ad3c115t
+- **BLOOCK_ENCRYPTION_KEY_KEY_TYPE** (**_OPTIONAL_**)
+    - **Description**: Type of key.
+    - **Purpose**: This key type is utilized for cryptographic signing processes.
+    - **Options**: Rsa2048, Rsa3072, Rsa4096.
+- **BLOOCK_ENCRYPTION_CERTIFICATE_PKCS12_PATH** (**_OPTIONAL_**)
+    - **Description**: Certificate for encrypting data.
+    - **Purpose**: In case you want to upload a digital certificate in pkcs12 (`.pfx, .p12`) format, you can specify the url where it is to be processed.
+    - **Example**: ./my_cert.p12
+- **BLOOCK_ENCRYPTION_CERTIFICATE_PKCS12_PASSWORD** (**_OPTIONAL_**)
+    - **Description**: Certificate password.
+    - **Purpose**: If the certificate is protected by a password, you must provide it.
+
+Finally, in case you want to store your files locally, with these variables you can edit the configuration:
+
 - **BLOOCK_TMP_DIR** (**_OPTIONAL_**)
   - **Description**: The temporary directory path for storing processed files.
   - **Default**: ./tmp
@@ -302,31 +371,6 @@ Here are the configuration variables used by the Bloock Managed API:
   - **Purpose**: Currently it supports two possible values: `HASH` (default) will set the file name to the content's hash and `FILENAME` will try to compute the file name based on the URL or the file provided (WARNING: this strategy may overwrite files if two of them compute to the same filename, i.e. uploading to files with the same name).
 
 These configuration variables provide fine-grained control over the behavior of the Bloock Managed API. You can adjust them to match your specific requirements and deployment environment.
-
-### Configuration file
-
-The configuration file should be named `config.yaml`. The service will try to locate this file in the root directory unless the BLOOCK_CONFIG_PATH is defined (i.e. `BLOOCK_CONFIG_PATH="app/conf/"`).
-
-Sample content of `config.yaml`:
-
-```yaml
-BLOOCK_API_HOST: "0.0.0.0"
-BLOOCK_API_PORT: "8080"
-BLOOCK_API_DEBUG_MODE: "false"
-
-BLOOCK_DB_CONNECTION_STRING: "file:bloock?mode=memory&cache=shared&_fk=1"
-
-BLOOCK_API_KEY: ""
-BLOOCK_WEBHOOK_SECRET_KEY: ""
-BLOOCK_CLIENT_ENDPOINT_URL: ""
-
-BLOOCK_AUTHENTICITY_KEY: ""
-
-BLOOCK_ENCRYPTION_KEY: ""
-
-BLOOCK_TMP_DIR: "./tmp"
-BLOOCK_STORAGE_LOCAL_PATH: "./data"
-```
 
 ### Database Support
 
@@ -344,7 +388,7 @@ Replace `user`, `password`, `host`, `port`, and `database` with your MySQL datab
 - **Postgres**: For PostgreSQL database integration, use the following connection string format:
 
   ```
-  postgresql://user:password@host/database?sslmode=disable
+  postgres://user:password@host/database?sslmode=disable
   ```
 
 Similar to MySQL, replace `user`, `password`, `host`, and `database` with your PostgreSQL database details. Additionally, you can set the `sslmode` as needed. The `sslmode=disable` option is used in the example, but you can adjust it according to your PostgreSQL server's SSL requirements.

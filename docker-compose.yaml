@@ -9,4 +9,6 @@ services:
     ports:
       - 8080:8080
     environment:
-      BLOOCK_API_KEY: "942NwSPZd8Ha7nLoPW69QYB-ju8NmqPCGB-gO01ylSHrUZbns-3mTVcTP3Jv8oad"
+      BLOOCK_BLOOCK_API_KEY: ""
+      BLOOCK_BLOOCK_WEBHOOK_SECRET_KEY: ""
+      BLOOCK_WEBHOOK_CLIENT_ENDPOINT_URL: ""

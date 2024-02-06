@@ -7,9 +7,9 @@ db:
   connection_string: "file:bloock?mode=memory&cache=shared&_fk=1"
 
 bloock:
-  api_host: "https://api.bloock.dev"
-  api_key: "ygTYw85v26j1Zazm61CpJdhMaOB53kZTJvDTaS0Qlw9-LPJS1LSbQAS91ZvZiq45"
-  cdn_host: "https://cdn.bloock.dev"
+  api_host: ""
+  api_key: ""
+  cdn_host: ""
   webhook_secret_key: ""
 
 webhook:

@@ -2,12 +2,15 @@ package connection
 
 import (
 	"context"
+	"entgo.io/ent/dialect"
 	"errors"
 	"strings"
 
+	"database/sql"
+	entsql "entgo.io/ent/dialect/sql"
 	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent"
 	_ "github.com/go-sql-driver/mysql"
-	_ "github.com/lib/pq"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/rs/zerolog"
 )
@@ -46,13 +49,15 @@ func NewEntConnection(connectionURL string, connector SQLConnector, logger zerol
 			db: client,
 		}, nil
 	}
-	if strings.Contains(connectionURL, "postgresql") {
-		client, err := open(connector, Postgres, strings.Replace(connectionURL, "postgresql://", "", 1))
+	if strings.Contains(connectionURL, "postgres") {
+		db, err := sql.Open("pgx", connectionURL)
 		if err != nil {
 			return nil, err
 		}
+
+		drv := entsql.OpenDB(dialect.Postgres, db)
 		return &EntConnection{
-			db: client,
+			db: ent.NewClient(ent.Driver(drv)),
 		}, nil
 	}
 
