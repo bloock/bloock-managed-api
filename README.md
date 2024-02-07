@@ -229,6 +229,9 @@ To deploy the API as a standalone application, follow these steps:
     
            db:
             connection_string: "file:bloock?mode=memory&cache=shared&_fk=1"
+           
+           auth:
+            secret: ""
     
            bloock:
             api_host: ""
@@ -238,6 +241,7 @@ To deploy the API as a standalone application, follow these steps:
     
            webhook:
             client_endpoint_url: ""
+            max_retries: 
     
            authenticity:
             key:
@@ -308,6 +312,14 @@ Here are the configuration variables used by the Bloock Managed API:
   - **Description**: An endpoint URL where you want to send processed files.
   - **Purpose**: This URL specifies the destination where processed files will be sent after successful verification. It can be configured to integrate with other systems or services that require the processed data.
   - **Example**: https://bloock.com/endpoint/to/send/file
+- **BLOOCK_WEBHOOK_MAX_RETRIES** (**_OPTIONAL_**)
+  - **Description**: Number of times it will try to send your processed files.
+  - **Purpose**: The idea is that in case the request to your set endpoint fails, the API will try to send you that file again with an exponential backoff mechanism. These algorithms allow you to define how many times you want it to try to send you the file.
+  - **Example**: 3
+- **BLOOCK_AUTH_SECRET** (***OPTIONAL***)
+  - **Description**: If you want to add control in your API calls with Bearer Token you can add a secret here. A Bearer token is a type of token used for authentication and authorization and is used in web applications and APIs to hold user credentials and indicate authorization for requests and access.
+  - **Purpose**: The idea is that you can set a secret, which will be the same that you will have to pass in the headers of your requests in order to validate yourself.
+  - **Example**: 0tEStdP(dg5=VU4iX4+7}e((HVd^ShVm
 - **BLOOCK_API_HOST** (**_OPTIONAL_**)
   - **Description**: The API host IP address.
   - **Default**: 0.0.0.0
