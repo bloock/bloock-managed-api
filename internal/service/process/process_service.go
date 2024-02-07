@@ -3,6 +3,7 @@ package process
 import (
 	"context"
 	"errors"
+	"github.com/bloock/bloock-sdk-go/v2/entity/key"
 	"net/http"
 	"net/url"
 	"path"
@@ -208,8 +209,13 @@ func (s ProcessService) sign(ctx context.Context, file *domain.File, request *re
 			return nil, "", nil, err
 		}
 
+		accessControl, err := s.buildAccessControl(request.AccessControl)
+		if err != nil {
+			return nil, "", nil, err
+		}
+
 		signature, record, err := s.authenticityRepository.
-			SignWithManagedKey(ctx, file.Bytes(), *managedKey)
+			SignWithManagedKey(ctx, file.Bytes(), *managedKey, accessControl)
 		if err != nil {
 			return nil, "", nil, err
 		}
@@ -235,8 +241,13 @@ func (s ProcessService) sign(ctx context.Context, file *domain.File, request *re
 			return nil, "", nil, err
 		}
 
+		accessControl, err := s.buildAccessControl(request.AccessControl)
+		if err != nil {
+			return nil, "", nil, err
+		}
+
 		signature, record, err := s.authenticityRepository.
-			SignWithManagedCertificate(ctx, file.Bytes(), *managedCertificate)
+			SignWithManagedCertificate(ctx, file.Bytes(), *managedCertificate, accessControl)
 		if err != nil {
 			return nil, "", nil, err
 		}
@@ -266,7 +277,12 @@ func (s ProcessService) encrypt(ctx context.Context, file *domain.File, request 
 			return nil, nil, err
 		}
 
-		record, err := s.encryptionRepository.EncryptWithManagedKey(ctx, file.Bytes(), *managedKey)
+		accessControl, err := s.buildAccessControl(request.AccessControl)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		record, err := s.encryptionRepository.EncryptWithManagedKey(ctx, file.Bytes(), *managedKey, accessControl)
 		if err != nil {
 			return nil, record, err
 		}
@@ -280,7 +296,12 @@ func (s ProcessService) encrypt(ctx context.Context, file *domain.File, request 
 			return nil, nil, err
 		}
 
-		record, err := s.encryptionRepository.EncryptWithManagedCertificate(ctx, file.Bytes(), *managedCertificate)
+		accessControl, err := s.buildAccessControl(request.AccessControl)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		record, err := s.encryptionRepository.EncryptWithManagedCertificate(ctx, file.Bytes(), *managedCertificate, accessControl)
 		if err != nil {
 			return nil, record, err
 		}
@@ -342,4 +363,24 @@ func (n ProcessService) notify(ctx context.Context, certifications []domain.Cert
 	}
 
 	return nil
+}
+
+func (n ProcessService) buildAccessControl(request *request.AccessControlRequest) (*key.AccessControl, error) {
+	var accessControl key.AccessControl
+
+	if request != nil {
+		code := request.AccessCode
+		switch request.AccessControlType {
+		case domain.TotpAccessControl:
+			accessControl.AccessControlTotp = key.NewAccessControlTotp(code)
+		case domain.SecretAccessControl:
+			accessControl.AccessControlSecret = key.NewAccessControlSecret(code)
+		default:
+			return nil, errors.New("invalid access control type")
+		}
+	} else {
+		return nil, nil
+	}
+
+	return &accessControl, nil
 }

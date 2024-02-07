@@ -9,15 +9,21 @@ type ProcessFormIntegrityRequest struct {
 }
 
 type ProcessFormAuthenticityRequest struct {
-	Enabled   bool   `form:"authenticity.enabled,default=false"`
-	KeySource string `form:"authenticity.keySource"`
-	Key       string `form:"authenticity.key"`
+	Enabled       bool   `form:"authenticity.enabled,default=false"`
+	KeySource     string `form:"authenticity.keySource"`
+	Key           string `form:"authenticity.key"`
+	AccessEnabled bool   `form:"authenticity.accessEnabled,default=false"`
+	AccessType    string `form:"authenticity.accessType"`
+	AccessCode    string `form:"authenticity.accessCode"`
 }
 
 type ProcessFormEncryptionRequest struct {
-	Enabled   bool   `form:"encryption.enabled,default=false"`
-	KeySource string `form:"encryption.keySource"`
-	Key       string `form:"encryption.key"`
+	Enabled       bool   `form:"encryption.enabled,default=false"`
+	KeySource     string `form:"encryption.keySource"`
+	Key           string `form:"encryption.key"`
+	AccessEnabled bool   `form:"encryption.accessEnabled,default=false"`
+	AccessType    string `form:"encryption.accessType"`
+	AccessCode    string `form:"encryption.accessCode"`
 }
 
 type ProcessFormAvailabilityRequest struct {

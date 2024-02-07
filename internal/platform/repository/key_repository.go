@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-
 	"github.com/bloock/bloock-managed-api/internal/domain/repository"
 	"github.com/bloock/bloock-managed-api/internal/pkg"
 	"github.com/bloock/bloock-sdk-go/v2/client"
