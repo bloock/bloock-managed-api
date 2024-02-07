@@ -39,8 +39,8 @@ func (b BloockEncryptionRepository) EncryptWithLocalKey(ctx context.Context, dat
 	return &rec, nil
 }
 
-func (b BloockEncryptionRepository) EncryptWithManagedKey(ctx context.Context, data []byte, managedKey key.ManagedKey) (*record.Record, error) {
-	encrypter := encryption.NewEncrypterWithManagedKey(managedKey)
+func (b BloockEncryptionRepository) EncryptWithManagedKey(ctx context.Context, data []byte, managedKey key.ManagedKey, accessControl *key.AccessControl) (*record.Record, error) {
+	encrypter := encryption.NewEncrypterWithManagedKey(managedKey, accessControl)
 	rec, err := b.client.RecordClient.FromBytes(data).WithEncrypter(encrypter).Build()
 	if err != nil {
 		b.logger.Error().Err(err).Msg("")
@@ -50,8 +50,8 @@ func (b BloockEncryptionRepository) EncryptWithManagedKey(ctx context.Context, d
 	return &rec, nil
 }
 
-func (b BloockEncryptionRepository) EncryptWithManagedCertificate(ctx context.Context, data []byte, managedCertificate key.ManagedCertificate) (*record.Record, error) {
-	encrypter := encryption.NewEncrypterWithManagedCertificate(managedCertificate)
+func (b BloockEncryptionRepository) EncryptWithManagedCertificate(ctx context.Context, data []byte, managedCertificate key.ManagedCertificate, accessControl *key.AccessControl) (*record.Record, error) {
+	encrypter := encryption.NewEncrypterWithManagedCertificate(managedCertificate, accessControl)
 	rec, err := b.client.RecordClient.FromBytes(data).WithEncrypter(encrypter).Build()
 	if err != nil {
 		b.logger.Error().Err(err).Msg("")

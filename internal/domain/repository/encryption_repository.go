@@ -9,6 +9,6 @@ import (
 
 type EncryptionRepository interface {
 	EncryptWithLocalKey(ctx context.Context, data []byte, localKey key.LocalKey) (*record.Record, error)
-	EncryptWithManagedKey(ctx context.Context, data []byte, managedKey key.ManagedKey) (*record.Record, error)
-	EncryptWithManagedCertificate(ctx context.Context, data []byte, managedCertificate key.ManagedCertificate) (*record.Record, error)
+	EncryptWithManagedKey(ctx context.Context, data []byte, managedKey key.ManagedKey, accessControl *key.AccessControl) (*record.Record, error)
+	EncryptWithManagedCertificate(ctx context.Context, data []byte, managedCertificate key.ManagedCertificate, accessControl *key.AccessControl) (*record.Record, error)
 }

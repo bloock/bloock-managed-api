@@ -33,6 +33,11 @@ type ManagedCertificateRequest struct {
 	Uuid uuid.UUID
 }
 
+type AccessControlRequest struct {
+	AccessControlType domain.AccessControlType
+	AccessCode        string
+}
+
 type AuthenticityRequest struct {
 	Enabled            bool
 	KeySource          domain.KeyType
@@ -40,6 +45,7 @@ type AuthenticityRequest struct {
 	LocalCertificate   *LocalCertificateRequest
 	ManagedKey         *ManagedKeyRequest
 	ManagedCertificate *ManagedCertificateRequest
+	AccessControl      *AccessControlRequest
 }
 
 type EncryptionRequest struct {
@@ -49,6 +55,7 @@ type EncryptionRequest struct {
 	LocalCertificate   *LocalCertificateRequest
 	ManagedKey         *ManagedKeyRequest
 	ManagedCertificate *ManagedCertificateRequest
+	AccessControl      *AccessControlRequest
 }
 
 type AvailabilityRequest struct {
@@ -125,6 +132,23 @@ func NewProcessRequest(file domain.File, request *request.ProcessFormRequest) (*
 			}
 		}
 
+		if request.Authenticity.AccessEnabled {
+			if request.Authenticity.AccessCode == "" {
+				return nil, domain.ErrEmptyAccessCode
+			}
+			authenticityAccessType, err := domain.ParseAccessControlType(request.Authenticity.AccessType)
+			if err != nil {
+				return nil, err
+			}
+			accessControl := &AccessControlRequest{
+				AccessControlType: authenticityAccessType,
+			}
+			accessControl.AccessCode = request.Authenticity.AccessCode
+			authenticityRequest.AccessControl = accessControl
+		} else {
+			authenticityRequest.AccessControl = nil
+		}
+
 		processRequestInstance.Authenticity = authenticityRequest
 	}
 
@@ -175,6 +199,23 @@ func NewProcessRequest(file domain.File, request *request.ProcessFormRequest) (*
 			encryptionRequest.ManagedCertificate = &ManagedCertificateRequest{
 				Uuid: keyID,
 			}
+		}
+
+		if request.Encryption.AccessEnabled {
+			if request.Encryption.AccessCode == "" {
+				return nil, domain.ErrEmptyAccessCode
+			}
+			encryptionAccessType, err := domain.ParseAccessControlType(request.Encryption.AccessType)
+			if err != nil {
+				return nil, err
+			}
+			accessControl := &AccessControlRequest{
+				AccessControlType: encryptionAccessType,
+			}
+			accessControl.AccessCode = request.Encryption.AccessCode
+			encryptionRequest.AccessControl = accessControl
+		} else {
+			encryptionRequest.AccessControl = nil
 		}
 
 		processRequestInstance.Encryption = encryptionRequest
