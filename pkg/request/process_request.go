@@ -1,9 +1,5 @@
 package request
 
-import (
-	"mime/multipart"
-)
-
 type ProcessFormIntegrityRequest struct {
 	Enabled bool `form:"integrity.enabled,default=false"`
 }
@@ -52,8 +48,7 @@ type SignatureMetadataRequest struct {
 }
 
 type ProcessFormRequest struct {
-	File         *multipart.FileHeader `form:"file,omitempty"`
-	Url          string                `form:"url,omitempty"`
+	Url          string `form:"url,omitempty"`
 	Integrity    ProcessFormIntegrityRequest
 	Authenticity ProcessFormAuthenticityRequest
 	Encryption   ProcessFormEncryptionRequest
