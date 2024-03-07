@@ -96,6 +96,21 @@ func (mr *MockMetadataRepositoryMockRecorder) GetRecord(ctx, file interface{}) *
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRecord", reflect.TypeOf((*MockMetadataRepository)(nil).GetRecord), ctx, file)
 }
 
+// GetRecordDetails mocks base method.
+func (m *MockMetadataRepository) GetRecordDetails(ctx context.Context, file []byte) (*record.RecordDetails, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetRecordDetails", ctx, file)
+	ret0, _ := ret[0].(*record.RecordDetails)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetRecordDetails indicates an expected call of GetRecordDetails.
+func (mr *MockMetadataRepositoryMockRecorder) GetRecordDetails(ctx, file interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRecordDetails", reflect.TypeOf((*MockMetadataRepository)(nil).GetRecordDetails), ctx, file)
+}
+
 // SaveCertification mocks base method.
 func (m *MockMetadataRepository) SaveCertification(ctx context.Context, certification domain.Certification) error {
 	m.ctrl.T.Helper()

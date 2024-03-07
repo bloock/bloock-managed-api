@@ -8,6 +8,7 @@ import (
 	context "context"
 	reflect "reflect"
 
+	domain "github.com/bloock/bloock-managed-api/internal/domain"
 	record "github.com/bloock/bloock-sdk-go/v2/entity/record"
 	gomock "github.com/golang/mock/gomock"
 )
@@ -66,61 +67,61 @@ func (mr *MockAvailabilityRepositoryMockRecorder) RetrieveTmp(ctx, filename inte
 }
 
 // UploadHosted mocks base method.
-func (m *MockAvailabilityRepository) UploadHosted(ctx context.Context, record *record.Record) (string, error) {
+func (m *MockAvailabilityRepository) UploadHosted(ctx context.Context, file *domain.File, record record.Record) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UploadHosted", ctx, record)
+	ret := m.ctrl.Call(m, "UploadHosted", ctx, file, record)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // UploadHosted indicates an expected call of UploadHosted.
-func (mr *MockAvailabilityRepositoryMockRecorder) UploadHosted(ctx, record interface{}) *gomock.Call {
+func (mr *MockAvailabilityRepositoryMockRecorder) UploadHosted(ctx, file, record interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UploadHosted", reflect.TypeOf((*MockAvailabilityRepository)(nil).UploadHosted), ctx, record)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UploadHosted", reflect.TypeOf((*MockAvailabilityRepository)(nil).UploadHosted), ctx, file, record)
 }
 
 // UploadIpfs mocks base method.
-func (m *MockAvailabilityRepository) UploadIpfs(ctx context.Context, record *record.Record) (string, error) {
+func (m *MockAvailabilityRepository) UploadIpfs(ctx context.Context, file *domain.File, record record.Record) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UploadIpfs", ctx, record)
+	ret := m.ctrl.Call(m, "UploadIpfs", ctx, file, record)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // UploadIpfs indicates an expected call of UploadIpfs.
-func (mr *MockAvailabilityRepositoryMockRecorder) UploadIpfs(ctx, record interface{}) *gomock.Call {
+func (mr *MockAvailabilityRepositoryMockRecorder) UploadIpfs(ctx, file, record interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UploadIpfs", reflect.TypeOf((*MockAvailabilityRepository)(nil).UploadIpfs), ctx, record)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UploadIpfs", reflect.TypeOf((*MockAvailabilityRepository)(nil).UploadIpfs), ctx, file, record)
 }
 
 // UploadLocal mocks base method.
-func (m *MockAvailabilityRepository) UploadLocal(ctx context.Context, filename string, record *record.Record) (string, error) {
+func (m *MockAvailabilityRepository) UploadLocal(ctx context.Context, file *domain.File) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UploadLocal", ctx, filename, record)
+	ret := m.ctrl.Call(m, "UploadLocal", ctx, file)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // UploadLocal indicates an expected call of UploadLocal.
-func (mr *MockAvailabilityRepositoryMockRecorder) UploadLocal(ctx, filename, record interface{}) *gomock.Call {
+func (mr *MockAvailabilityRepositoryMockRecorder) UploadLocal(ctx, file interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UploadLocal", reflect.TypeOf((*MockAvailabilityRepository)(nil).UploadLocal), ctx, filename, record)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UploadLocal", reflect.TypeOf((*MockAvailabilityRepository)(nil).UploadLocal), ctx, file)
 }
 
 // UploadTmp mocks base method.
-func (m *MockAvailabilityRepository) UploadTmp(ctx context.Context, record *record.Record) (string, error) {
+func (m *MockAvailabilityRepository) UploadTmp(ctx context.Context, file *domain.File, record record.Record) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UploadTmp", ctx, record)
+	ret := m.ctrl.Call(m, "UploadTmp", ctx, file, record)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // UploadTmp indicates an expected call of UploadTmp.
-func (mr *MockAvailabilityRepositoryMockRecorder) UploadTmp(ctx, record interface{}) *gomock.Call {
+func (mr *MockAvailabilityRepositoryMockRecorder) UploadTmp(ctx, file, record interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UploadTmp", reflect.TypeOf((*MockAvailabilityRepository)(nil).UploadTmp), ctx, record)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UploadTmp", reflect.TypeOf((*MockAvailabilityRepository)(nil).UploadTmp), ctx, file, record)
 }
