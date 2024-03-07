@@ -1,6 +1,6 @@
 module github.com/bloock/bloock-managed-api
 
-go 1.18
+go 1.20
 
 require (
 	entgo.io/ent v0.12.4
