@@ -10,25 +10,25 @@ type ProcessFormIntegrityRequest struct {
 
 type ProcessFormAuthenticityRequest struct {
 	Enabled       bool   `form:"authenticity.enabled,default=false"`
-	KeySource     string `form:"authenticity.keySource"`
-	Key           string `form:"authenticity.key"`
+	KeySource     string `form:"authenticity.keySource,omitempty"`
+	Key           string `form:"authenticity.key,omitempty"`
 	AccessEnabled bool   `form:"authenticity.accessEnabled,default=false"`
-	AccessType    string `form:"authenticity.accessType"`
-	AccessCode    string `form:"authenticity.accessCode"`
+	AccessType    string `form:"authenticity.accessType,omitempty"`
+	AccessCode    string `form:"authenticity.accessCode,omitempty"`
 }
 
 type ProcessFormEncryptionRequest struct {
 	Enabled       bool   `form:"encryption.enabled,default=false"`
-	KeySource     string `form:"encryption.keySource"`
-	Key           string `form:"encryption.key"`
+	KeySource     string `form:"encryption.keySource,omitempty"`
+	Key           string `form:"encryption.key,omitempty"`
 	AccessEnabled bool   `form:"encryption.accessEnabled,default=false"`
-	AccessType    string `form:"encryption.accessType"`
-	AccessCode    string `form:"encryption.accessCode"`
+	AccessType    string `form:"encryption.accessType,omitempty"`
+	AccessCode    string `form:"encryption.accessCode,omitempty"`
 }
 
 type ProcessFormAvailabilityRequest struct {
 	Enabled bool   `form:"availability.enabled,default=false"`
-	Type    string `form:"availability.type"`
+	Type    string `form:"availability.type,omitempty"`
 }
 
 type AuthenticityMetadataRequest struct {
@@ -52,8 +52,8 @@ type SignatureMetadataRequest struct {
 }
 
 type ProcessFormRequest struct {
-	File         *multipart.FileHeader `form:"file"`
-	Url          string                `form:"url"`
+	File         *multipart.FileHeader `form:"file,omitempty"`
+	Url          string                `form:"url,omitempty"`
 	Integrity    ProcessFormIntegrityRequest
 	Authenticity ProcessFormAuthenticityRequest
 	Encryption   ProcessFormEncryptionRequest
