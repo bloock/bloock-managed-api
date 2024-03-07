@@ -36,62 +36,47 @@ func (m *MockEncryptionRepository) EXPECT() *MockEncryptionRepositoryMockRecorde
 	return m.recorder
 }
 
-// EncryptAESWithLocalKey mocks base method.
-func (m *MockEncryptionRepository) EncryptAESWithLocalKey(ctx context.Context, data []byte, kty key.KeyType, key string) (*record.Record, error) {
+// EncryptWithLocalKey mocks base method.
+func (m *MockEncryptionRepository) EncryptWithLocalKey(ctx context.Context, data []byte, localKey key.LocalKey) (*record.Record, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "EncryptAESWithLocalKey", ctx, data, kty, key)
+	ret := m.ctrl.Call(m, "EncryptWithLocalKey", ctx, data, localKey)
 	ret0, _ := ret[0].(*record.Record)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// EncryptAESWithLocalKey indicates an expected call of EncryptAESWithLocalKey.
-func (mr *MockEncryptionRepositoryMockRecorder) EncryptAESWithLocalKey(ctx, data, kty, key interface{}) *gomock.Call {
+// EncryptWithLocalKey indicates an expected call of EncryptWithLocalKey.
+func (mr *MockEncryptionRepositoryMockRecorder) EncryptWithLocalKey(ctx, data, localKey interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EncryptAESWithLocalKey", reflect.TypeOf((*MockEncryptionRepository)(nil).EncryptAESWithLocalKey), ctx, data, kty, key)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EncryptWithLocalKey", reflect.TypeOf((*MockEncryptionRepository)(nil).EncryptWithLocalKey), ctx, data, localKey)
 }
 
-// EncryptAESWithManagedKey mocks base method.
-func (m *MockEncryptionRepository) EncryptAESWithManagedKey(ctx context.Context, data []byte, kid string) (*record.Record, error) {
+// EncryptWithManagedCertificate mocks base method.
+func (m *MockEncryptionRepository) EncryptWithManagedCertificate(ctx context.Context, data []byte, managedCertificate key.ManagedCertificate, accessControl *key.AccessControl) (*record.Record, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "EncryptAESWithManagedKey", ctx, data, kid)
+	ret := m.ctrl.Call(m, "EncryptWithManagedCertificate", ctx, data, managedCertificate, accessControl)
 	ret0, _ := ret[0].(*record.Record)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// EncryptAESWithManagedKey indicates an expected call of EncryptAESWithManagedKey.
-func (mr *MockEncryptionRepositoryMockRecorder) EncryptAESWithManagedKey(ctx, data, kid interface{}) *gomock.Call {
+// EncryptWithManagedCertificate indicates an expected call of EncryptWithManagedCertificate.
+func (mr *MockEncryptionRepositoryMockRecorder) EncryptWithManagedCertificate(ctx, data, managedCertificate, accessControl interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EncryptAESWithManagedKey", reflect.TypeOf((*MockEncryptionRepository)(nil).EncryptAESWithManagedKey), ctx, data, kid)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EncryptWithManagedCertificate", reflect.TypeOf((*MockEncryptionRepository)(nil).EncryptWithManagedCertificate), ctx, data, managedCertificate, accessControl)
 }
 
-// EncryptRSAWithLocalKey mocks base method.
-func (m *MockEncryptionRepository) EncryptRSAWithLocalKey(ctx context.Context, data []byte, kty key.KeyType, publicKey string, privateKey *string) (*record.Record, error) {
+// EncryptWithManagedKey mocks base method.
+func (m *MockEncryptionRepository) EncryptWithManagedKey(ctx context.Context, data []byte, managedKey key.ManagedKey, accessControl *key.AccessControl) (*record.Record, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "EncryptRSAWithLocalKey", ctx, data, kty, publicKey, privateKey)
+	ret := m.ctrl.Call(m, "EncryptWithManagedKey", ctx, data, managedKey, accessControl)
 	ret0, _ := ret[0].(*record.Record)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// EncryptRSAWithLocalKey indicates an expected call of EncryptRSAWithLocalKey.
-func (mr *MockEncryptionRepositoryMockRecorder) EncryptRSAWithLocalKey(ctx, data, kty, publicKey, privateKey interface{}) *gomock.Call {
+// EncryptWithManagedKey indicates an expected call of EncryptWithManagedKey.
+func (mr *MockEncryptionRepositoryMockRecorder) EncryptWithManagedKey(ctx, data, managedKey, accessControl interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EncryptRSAWithLocalKey", reflect.TypeOf((*MockEncryptionRepository)(nil).EncryptRSAWithLocalKey), ctx, data, kty, publicKey, privateKey)
-}
-
-// EncryptRSAWithManagedKey mocks base method.
-func (m *MockEncryptionRepository) EncryptRSAWithManagedKey(ctx context.Context, data []byte, kid string) (*record.Record, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "EncryptRSAWithManagedKey", ctx, data, kid)
-	ret0, _ := ret[0].(*record.Record)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// EncryptRSAWithManagedKey indicates an expected call of EncryptRSAWithManagedKey.
-func (mr *MockEncryptionRepositoryMockRecorder) EncryptRSAWithManagedKey(ctx, data, kid interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EncryptRSAWithManagedKey", reflect.TypeOf((*MockEncryptionRepository)(nil).EncryptRSAWithManagedKey), ctx, data, kid)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EncryptWithManagedKey", reflect.TypeOf((*MockEncryptionRepository)(nil).EncryptWithManagedKey), ctx, data, managedKey, accessControl)
 }

@@ -3,6 +3,7 @@ package process
 import (
 	"fmt"
 	"io"
+	"mime/multipart"
 	"net/http"
 	"net/url"
 
@@ -20,8 +21,15 @@ import (
 
 func PostProcess(l zerolog.Logger) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		multiPartForm, err := ctx.MultipartForm()
+		if err != nil {
+			badRequestAPIError := api_error.NewBadRequestAPIError("error getting form")
+			ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
+			return
+		}
+
 		var formData http_request.ProcessFormRequest
-		err := ctx.Bind(&formData)
+		err = ctx.Bind(&formData)
 		if err != nil {
 			badRequestAPIError := api_error.NewBadRequestAPIError("error binding form")
 			ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
@@ -31,8 +39,8 @@ func PostProcess(l zerolog.Logger) gin.HandlerFunc {
 		processService := process.NewProcessService(ctx, l)
 
 		var file domain.File
-		if formData.File != nil {
-			file, err = loadFile(formData)
+		if multiPartForm.File["file"] != nil {
+			file, err = loadFile(multiPartForm.File["file"])
 			if err != nil {
 				badRequestAPIError := api_error.NewBadRequestAPIError(err.Error())
 				ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
@@ -129,22 +137,25 @@ func toProcessJsonResponse(processResponse *response.ProcessResponse) http_respo
 	return resp
 }
 
-func loadFile(formData http_request.ProcessFormRequest) (domain.File, error) {
-	fileReader, err := formData.File.Open()
-	if err != nil {
-		return domain.File{}, err
-	}
+func loadFile(formsData []*multipart.FileHeader) (domain.File, error) {
+	for _, formData := range formsData {
+		fileReader, err := formData.Open()
+		if err != nil {
+			return domain.File{}, err
+		}
 
-	filename := formData.File.Filename
-	file, err := io.ReadAll(fileReader)
-	if err != nil {
-		return domain.File{}, err
-	}
-	if len(file) == 0 {
-		return domain.File{}, fmt.Errorf("file must be a valid file")
-	}
+		filename := formData.Filename
+		file, err := io.ReadAll(fileReader)
+		if err != nil {
+			return domain.File{}, err
+		}
+		if len(file) == 0 {
+			return domain.File{}, fmt.Errorf("file must be a valid file")
+		}
 
-	contentType := http.DetectContentType(file)
+		contentType := http.DetectContentType(file)
 
-	return domain.NewFile(file, filename, contentType), nil
+		return domain.NewFile(file, filename, contentType), nil
+	}
+	return domain.File{}, nil
 }
