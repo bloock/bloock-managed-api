@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -500,7 +499,7 @@ func sendRequest(server *rest.Server, r *request.ProcessFormRequest, headers map
 	buf := new(bytes.Buffer)
 	writer := multipart.NewWriter(buf)
 
-	if r.File != nil {
+	/*if r.File != nil {
 		fileReader, err := r.File.Open()
 		if err != nil {
 			return nil, 0, err
@@ -520,7 +519,7 @@ func sendRequest(server *rest.Server, r *request.ProcessFormRequest, headers map
 		if err != nil {
 			return nil, 0, err
 		}
-	}
+	}*/
 
 	_ = writer.WriteField("url", r.Url)
 	_ = writer.WriteField("integrity.enabled", strconv.FormatBool(r.Integrity.Enabled))
