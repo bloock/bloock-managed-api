@@ -19,5 +19,6 @@ RUN update-ca-certificates
 
 WORKDIR /app
 COPY --from=builder /go/bin/managed-api /app/managed-api
+COPY --from=builder /go/bin/static /app/static
 
 ENTRYPOINT ["/app/managed-api"]

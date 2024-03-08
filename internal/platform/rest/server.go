@@ -48,7 +48,7 @@ func NewServer(l zerolog.Logger) (*Server, error) {
 	v1.GET("health", handler.Health())
 	v1.POST("process", middleware.AuthMiddleware(), process.PostProcess(l))
 	v1.POST("webhook", webhook.PostReceiveWebhook(l))
-	v1.StaticFile("docs", "./internal/platform/rest/static/index.html")
+	v1.StaticFile("docs", "./static/index.html")
 	if config.Configuration.Api.DebugMode {
 		v1.POST("debug", handler.Debug())
 	}
