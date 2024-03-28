@@ -6,7 +6,6 @@ import (
 	"github.com/bloock/bloock-sdk-go/v2/client"
 	"github.com/bloock/bloock-sdk-go/v2/entity/key"
 	"github.com/google/uuid"
-	"log"
 	"net/http"
 	"os"
 	"testing"
