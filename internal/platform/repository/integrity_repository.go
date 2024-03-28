@@ -1,7 +1,12 @@
 package repository
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
+	"errors"
+	"io"
+	"net/http"
 
 	"github.com/bloock/bloock-managed-api/internal/domain"
 	"github.com/bloock/bloock-managed-api/internal/domain/repository"
@@ -12,20 +17,53 @@ import (
 	"github.com/rs/zerolog"
 )
 
+var ErrInvalidResponse = errors.New("record couldn't send")
+
 type BloockIntegrityRepository struct {
-	client client.BloockClient
-	logger zerolog.Logger
+	httpClient http.Client
+	client     client.BloockClient
+	apiKey     string
+	logger     zerolog.Logger
 }
 
-func NewBloockIntegrityRepository(ctx context.Context, logger zerolog.Logger) repository.IntegrityRepository {
-	logger.With().Caller().Str("component", "integrity-repository").Logger()
+func NewBloockIntegrityRepository(ctx context.Context, l zerolog.Logger) repository.IntegrityRepository {
+	logger := l.With().Caller().Str("component", "integrity-repository").Logger()
 
-	c := client.NewBloockClient(pkg.GetApiKeyFromContext(ctx), nil, pkg.GetEnvFromContext(ctx))
+	apiKey := pkg.GetApiKeyFromContext(ctx)
+	c := client.NewBloockClient(apiKey, nil)
 
 	return &BloockIntegrityRepository{
-		client: c,
-		logger: logger,
+		httpClient: http.Client{},
+		apiKey:     apiKey,
+		client:     c,
+		logger:     logger,
 	}
+}
+
+type sendRecordRequest struct {
+	Messages []string `json:"messages"`
+}
+
+type sendRecordResponse struct {
+	Anchor int `json:"anchor"`
+}
+
+type getProofRequest struct {
+	Messages []string `json:"messages"`
+}
+
+func mapToSendRecordRequest(hash string) sendRecordRequest {
+	sr := sendRecordRequest{
+		Messages: []string{hash},
+	}
+	return sr
+}
+
+func mapToGetProofRequest(hash string) getProofRequest {
+	pr := getProofRequest{
+		Messages: []string{hash},
+	}
+	return pr
 }
 
 func (b BloockIntegrityRepository) Certify(ctx context.Context, file []byte) (domain.Certification, error) {
@@ -52,4 +90,78 @@ func (b BloockIntegrityRepository) Certify(ctx context.Context, file []byte) (do
 		Hash:     dataHash,
 		Record:   &rec,
 	}, nil
+}
+
+func (b BloockIntegrityRepository) CertifyFromHash(ctx context.Context, hash string, apiKey string) (domain.Certification, error) {
+	url := "https://api.bloock.dev/records/v1/records"
+
+	auth := b.apiKey
+	if apiKey != "" {
+		auth = apiKey
+	}
+	var recordResp sendRecordResponse
+	if err := b.postRequest(url, mapToSendRecordRequest(hash), &recordResp, auth); err != nil {
+		return domain.Certification{}, err
+	}
+
+	return domain.Certification{
+		Hash:     hash,
+		AnchorID: recordResp.Anchor,
+	}, nil
+}
+
+func (b BloockIntegrityRepository) GetProof(ctx context.Context, hash string, apiKey string) (json.RawMessage, error) {
+	url := "https://api.bloock.dev/proof/v1/proof"
+
+	auth := b.apiKey
+	if apiKey != "" {
+		auth = apiKey
+	}
+	var proofResp json.RawMessage
+	if err := b.postRequest(url, mapToGetProofRequest(hash), &proofResp, auth); err != nil {
+		return nil, err
+	}
+
+	return proofResp, nil
+}
+
+func (b BloockIntegrityRepository) postRequest(url string, body interface{}, response interface{}, apiKey string) error {
+	bodyBytes, err := json.Marshal(body)
+	if err != nil {
+		return err
+	}
+
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(bodyBytes))
+	if err != nil {
+		b.logger.Error().Err(err).Msg(err.Error())
+		return err
+	}
+	req.Header.Set("X-API-KEY", apiKey)
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := b.httpClient.Do(req)
+	if err != nil {
+		b.logger.Error().Err(err).Msgf("response was: %s", resp.Status)
+		return err
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		err = ErrInvalidResponse
+		b.logger.Error().Err(err).Msgf("response was: %s", resp.Status)
+		return err
+	}
+
+	respByte, err := io.ReadAll(resp.Body)
+	if err != nil {
+		b.logger.Error().Err(err).Msg(err.Error())
+		return err
+	}
+
+	err = json.Unmarshal(respByte, &response)
+	if err != nil {
+		b.logger.Error().Err(err).Msg(err.Error())
+		return err
+	}
+
+	return nil
 }

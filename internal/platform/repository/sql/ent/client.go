@@ -10,14 +10,15 @@ import (
 	"reflect"
 
 	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/migrate"
-
-	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/certification"
-	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/localkey"
+	"github.com/google/uuid"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
-	"github.com/google/uuid"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/certification"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/localkey"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/message"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/process"
 )
 
 // Client is the client that holds all ent builders.
@@ -29,6 +30,10 @@ type Client struct {
 	Certification *CertificationClient
 	// LocalKey is the client for interacting with the LocalKey builders.
 	LocalKey *LocalKeyClient
+	// Message is the client for interacting with the Message builders.
+	Message *MessageClient
+	// Process is the client for interacting with the Process builders.
+	Process *ProcessClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -44,6 +49,8 @@ func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Certification = NewCertificationClient(c.config)
 	c.LocalKey = NewLocalKeyClient(c.config)
+	c.Message = NewMessageClient(c.config)
+	c.Process = NewProcessClient(c.config)
 }
 
 type (
@@ -131,6 +138,8 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		config:        cfg,
 		Certification: NewCertificationClient(cfg),
 		LocalKey:      NewLocalKeyClient(cfg),
+		Message:       NewMessageClient(cfg),
+		Process:       NewProcessClient(cfg),
 	}, nil
 }
 
@@ -152,6 +161,8 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		config:        cfg,
 		Certification: NewCertificationClient(cfg),
 		LocalKey:      NewLocalKeyClient(cfg),
+		Message:       NewMessageClient(cfg),
+		Process:       NewProcessClient(cfg),
 	}, nil
 }
 
@@ -182,6 +193,8 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	c.Certification.Use(hooks...)
 	c.LocalKey.Use(hooks...)
+	c.Message.Use(hooks...)
+	c.Process.Use(hooks...)
 }
 
 // Intercept adds the query interceptors to all the entity clients.
@@ -189,6 +202,8 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	c.Certification.Intercept(interceptors...)
 	c.LocalKey.Intercept(interceptors...)
+	c.Message.Intercept(interceptors...)
+	c.Process.Intercept(interceptors...)
 }
 
 // Mutate implements the ent.Mutator interface.
@@ -198,6 +213,10 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Certification.mutate(ctx, m)
 	case *LocalKeyMutation:
 		return c.LocalKey.mutate(ctx, m)
+	case *MessageMutation:
+		return c.Message.mutate(ctx, m)
+	case *ProcessMutation:
+		return c.Process.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
@@ -469,12 +488,278 @@ func (c *LocalKeyClient) mutate(ctx context.Context, m *LocalKeyMutation) (Value
 	}
 }
 
+// MessageClient is a client for the Message schema.
+type MessageClient struct {
+	config
+}
+
+// NewMessageClient returns a client for the Message from the given config.
+func NewMessageClient(c config) *MessageClient {
+	return &MessageClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `message.Hooks(f(g(h())))`.
+func (c *MessageClient) Use(hooks ...Hook) {
+	c.hooks.Message = append(c.hooks.Message, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `message.Intercept(f(g(h())))`.
+func (c *MessageClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Message = append(c.inters.Message, interceptors...)
+}
+
+// Create returns a builder for creating a Message entity.
+func (c *MessageClient) Create() *MessageCreate {
+	mutation := newMessageMutation(c.config, OpCreate)
+	return &MessageCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Message entities.
+func (c *MessageClient) CreateBulk(builders ...*MessageCreate) *MessageCreateBulk {
+	return &MessageCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *MessageClient) MapCreateBulk(slice any, setFunc func(*MessageCreate, int)) *MessageCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &MessageCreateBulk{err: fmt.Errorf("calling to MessageClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*MessageCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &MessageCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Message.
+func (c *MessageClient) Update() *MessageUpdate {
+	mutation := newMessageMutation(c.config, OpUpdate)
+	return &MessageUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *MessageClient) UpdateOne(m *Message) *MessageUpdateOne {
+	mutation := newMessageMutation(c.config, OpUpdateOne, withMessage(m))
+	return &MessageUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *MessageClient) UpdateOneID(id uuid.UUID) *MessageUpdateOne {
+	mutation := newMessageMutation(c.config, OpUpdateOne, withMessageID(id))
+	return &MessageUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Message.
+func (c *MessageClient) Delete() *MessageDelete {
+	mutation := newMessageMutation(c.config, OpDelete)
+	return &MessageDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *MessageClient) DeleteOne(m *Message) *MessageDeleteOne {
+	return c.DeleteOneID(m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *MessageClient) DeleteOneID(id uuid.UUID) *MessageDeleteOne {
+	builder := c.Delete().Where(message.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &MessageDeleteOne{builder}
+}
+
+// Query returns a query builder for Message.
+func (c *MessageClient) Query() *MessageQuery {
+	return &MessageQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeMessage},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Message entity by its id.
+func (c *MessageClient) Get(ctx context.Context, id uuid.UUID) (*Message, error) {
+	return c.Query().Where(message.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *MessageClient) GetX(ctx context.Context, id uuid.UUID) *Message {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *MessageClient) Hooks() []Hook {
+	return c.hooks.Message
+}
+
+// Interceptors returns the client interceptors.
+func (c *MessageClient) Interceptors() []Interceptor {
+	return c.inters.Message
+}
+
+func (c *MessageClient) mutate(ctx context.Context, m *MessageMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&MessageCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&MessageUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&MessageUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&MessageDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Message mutation op: %q", m.Op())
+	}
+}
+
+// ProcessClient is a client for the Process schema.
+type ProcessClient struct {
+	config
+}
+
+// NewProcessClient returns a client for the Process from the given config.
+func NewProcessClient(c config) *ProcessClient {
+	return &ProcessClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `process.Hooks(f(g(h())))`.
+func (c *ProcessClient) Use(hooks ...Hook) {
+	c.hooks.Process = append(c.hooks.Process, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `process.Intercept(f(g(h())))`.
+func (c *ProcessClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Process = append(c.inters.Process, interceptors...)
+}
+
+// Create returns a builder for creating a Process entity.
+func (c *ProcessClient) Create() *ProcessCreate {
+	mutation := newProcessMutation(c.config, OpCreate)
+	return &ProcessCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Process entities.
+func (c *ProcessClient) CreateBulk(builders ...*ProcessCreate) *ProcessCreateBulk {
+	return &ProcessCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *ProcessClient) MapCreateBulk(slice any, setFunc func(*ProcessCreate, int)) *ProcessCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &ProcessCreateBulk{err: fmt.Errorf("calling to ProcessClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*ProcessCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &ProcessCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Process.
+func (c *ProcessClient) Update() *ProcessUpdate {
+	mutation := newProcessMutation(c.config, OpUpdate)
+	return &ProcessUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ProcessClient) UpdateOne(pr *Process) *ProcessUpdateOne {
+	mutation := newProcessMutation(c.config, OpUpdateOne, withProcess(pr))
+	return &ProcessUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ProcessClient) UpdateOneID(id uuid.UUID) *ProcessUpdateOne {
+	mutation := newProcessMutation(c.config, OpUpdateOne, withProcessID(id))
+	return &ProcessUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Process.
+func (c *ProcessClient) Delete() *ProcessDelete {
+	mutation := newProcessMutation(c.config, OpDelete)
+	return &ProcessDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ProcessClient) DeleteOne(pr *Process) *ProcessDeleteOne {
+	return c.DeleteOneID(pr.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ProcessClient) DeleteOneID(id uuid.UUID) *ProcessDeleteOne {
+	builder := c.Delete().Where(process.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ProcessDeleteOne{builder}
+}
+
+// Query returns a query builder for Process.
+func (c *ProcessClient) Query() *ProcessQuery {
+	return &ProcessQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeProcess},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Process entity by its id.
+func (c *ProcessClient) Get(ctx context.Context, id uuid.UUID) (*Process, error) {
+	return c.Query().Where(process.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ProcessClient) GetX(ctx context.Context, id uuid.UUID) *Process {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *ProcessClient) Hooks() []Hook {
+	return c.hooks.Process
+}
+
+// Interceptors returns the client interceptors.
+func (c *ProcessClient) Interceptors() []Interceptor {
+	return c.inters.Process
+}
+
+func (c *ProcessClient) mutate(ctx context.Context, m *ProcessMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ProcessCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ProcessUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ProcessUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ProcessDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Process mutation op: %q", m.Op())
+	}
+}
+
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Certification, LocalKey []ent.Hook
+		Certification, LocalKey, Message, Process []ent.Hook
 	}
 	inters struct {
-		Certification, LocalKey []ent.Interceptor
+		Certification, LocalKey, Message, Process []ent.Interceptor
 	}
 )

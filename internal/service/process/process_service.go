@@ -3,18 +3,19 @@ package process
 import (
 	"context"
 	"errors"
+	"github.com/bloock/bloock-managed-api/internal/config"
+	"github.com/bloock/bloock-managed-api/internal/domain"
+	"github.com/bloock/bloock-managed-api/internal/domain/repository"
+	bloock_repository "github.com/bloock/bloock-managed-api/internal/platform/repository"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/connection"
+	"github.com/bloock/bloock-managed-api/internal/service/process/request"
+	"github.com/bloock/bloock-managed-api/internal/service/process/response"
 	"github.com/bloock/bloock-sdk-go/v2/entity/key"
+	"github.com/rs/zerolog"
 	"net/http"
 	"net/url"
 	"path"
 	"strings"
-
-	"github.com/bloock/bloock-managed-api/internal/domain"
-	"github.com/bloock/bloock-managed-api/internal/domain/repository"
-	bloock_repository "github.com/bloock/bloock-managed-api/internal/platform/repository"
-	"github.com/bloock/bloock-managed-api/internal/service/process/request"
-	"github.com/bloock/bloock-managed-api/internal/service/process/response"
-	"github.com/rs/zerolog"
 
 	"github.com/bloock/bloock-sdk-go/v2/entity/record"
 )
@@ -23,6 +24,7 @@ var (
 	ErrSignKeyNotSupported    = errors.New("key type not supported for signing")
 	ErrEncryptKeyNotSupported = errors.New("key type not supported for encrypting")
 	ErrUnsupportedHosting     = errors.New("unsupported hosting type")
+	ErrAggregateModeDisabled  = errors.New("aggregate mode disabled")
 )
 
 type ProcessService struct {
@@ -33,46 +35,35 @@ type ProcessService struct {
 	availabilityRepository repository.AvailabilityRepository
 	metadataRepository     repository.MetadataRepository
 	notificationRepository repository.NotificationRepository
+	messageAggregator      repository.MessageAggregatorRepository
+	processRepository      repository.ProcessRepository
+	logger                 zerolog.Logger
 }
 
-func NewProcessService(ctx context.Context, logger zerolog.Logger) *ProcessService {
+func NewProcessService(ctx context.Context, l zerolog.Logger, ent *connection.EntConnection) *ProcessService {
+	logger := l.With().Caller().Str("component", "process-service").Logger()
+
 	return &ProcessService{
-		integrityRepository:    bloock_repository.NewBloockIntegrityRepository(ctx, logger),
-		keyRepository:          bloock_repository.NewBloockKeyRepository(ctx, logger),
-		authenticityRepository: bloock_repository.NewBloockAuthenticityRepository(ctx, logger),
-		encryptionRepository:   bloock_repository.NewBloockEncryptionRepository(ctx, logger),
-		availabilityRepository: bloock_repository.NewBloockAvailabilityRepository(ctx, logger),
-		metadataRepository:     bloock_repository.NewBloockMetadataRepository(ctx, logger),
-		notificationRepository: bloock_repository.NewHttpNotificationRepository(ctx, logger),
+		integrityRepository:    bloock_repository.NewBloockIntegrityRepository(ctx, l),
+		keyRepository:          bloock_repository.NewBloockKeyRepository(ctx, l),
+		authenticityRepository: bloock_repository.NewBloockAuthenticityRepository(ctx, l),
+		encryptionRepository:   bloock_repository.NewBloockEncryptionRepository(ctx, l),
+		availabilityRepository: bloock_repository.NewBloockAvailabilityRepository(ctx, l),
+		metadataRepository:     bloock_repository.NewBloockMetadataRepository(ctx, l, ent),
+		notificationRepository: bloock_repository.NewHttpNotificationRepository(ctx, l),
+		messageAggregator:      bloock_repository.NewMessageAggregatorRepository(ctx, l, ent),
+		processRepository:      bloock_repository.NewProcessRepository(ctx, l, ent),
+		logger:                 logger,
 	}
-}
-
-func (s ProcessService) LoadUrl(ctx context.Context, url *url.URL) (domain.File, error) {
-	fileBytes, err := s.availabilityRepository.FindFile(ctx, url.String())
-	if err != nil {
-		return domain.File{}, err
-	}
-
-	filename := path.Base(url.Path)
-	if filename == "" {
-		pathParts := strings.Split(url.Path, "/")
-
-		// If it's empty, use the second-to-last part as the filename
-		if len(pathParts) >= 2 {
-			filename = pathParts[len(pathParts)-2]
-		}
-	}
-
-	return domain.NewFile(fileBytes, filename, http.DetectContentType(fileBytes)), nil
 }
 
 func (s ProcessService) Process(ctx context.Context, req request.ProcessRequest) (*response.ProcessResponse, error) {
-	record, err := s.metadataRepository.GetRecord(ctx, req.File.Bytes())
+	rec, err := s.metadataRepository.GetRecord(ctx, req.File.Bytes())
 	if err != nil {
 		return nil, err
 	}
 
-	fileHash, err := record.GetHash()
+	fileHash, err := rec.GetHash()
 	if err != nil {
 		return nil, err
 	}
@@ -80,26 +71,26 @@ func (s ProcessService) Process(ctx context.Context, req request.ProcessRequest)
 	certification := domain.Certification{
 		Data:   req.File.Bytes(),
 		Hash:   fileHash,
-		Record: record,
+		Record: rec,
 	}
 
 	responseBuilder := response.NewProcessResponseBuilder()
 
 	if req.Authenticity.Enabled {
-		_, _, record, err := s.sign(ctx, &req.File, &req.Authenticity)
+		_, _, rec, err := s.sign(ctx, &req.File, &req.Authenticity)
 		if err != nil {
 			return nil, err
 		}
 
-		newHash, err := record.GetHash()
+		newHash, err := rec.GetHash()
 		if err != nil {
 			return nil, err
 		}
 
-		req.File.File = record.Retrieve()
+		req.File.File = rec.Retrieve()
 
-		certification.Data = record.Retrieve()
-		certification.Record = record
+		certification.Data = rec.Retrieve()
+		certification.Record = rec
 		certification.Hash = newHash
 
 		rd, err := s.metadataRepository.GetRecordDetails(ctx, certification.Data)
@@ -113,7 +104,7 @@ func (s ProcessService) Process(ctx context.Context, req request.ProcessRequest)
 	}
 
 	if req.Integrity.Enabled {
-		newCertification, err := s.certify(ctx, certification.Data)
+		newCertification, err := s.certify(ctx, certification.Data, req.Integrity.Aggregate)
 		if err != nil {
 			return nil, err
 		}
@@ -160,32 +151,76 @@ func (s ProcessService) Process(ctx context.Context, req request.ProcessRequest)
 		}
 	}
 
-	if err = s.metadataRepository.UpdateCertification(ctx, certification); err != nil {
-		return nil, err
+	if !req.Integrity.Aggregate {
+		if err = s.metadataRepository.UpdateCertification(ctx, certification); err != nil {
+			return nil, err
+		}
 	}
 
 	responseBuilder.HashResponse(certification.Hash)
 
-	if certification.AnchorID == 0 {
+	if certification.AnchorID == 0 && !req.Integrity.Aggregate {
 		if err = s.notify(ctx, []domain.Certification{certification}); err != nil {
 			return nil, err
 		}
 	}
 
-	return responseBuilder.Build(), nil
+	processResponse := responseBuilder.Build()
+
+	if err = s.saveProcess(ctx, processResponse, req.File.FilenameWithExtension(), req.Integrity.Aggregate); err != nil {
+		return nil, err
+	}
+
+	return processResponse, nil
 }
 
-func (s ProcessService) certify(ctx context.Context, data []byte) (domain.Certification, error) {
-	certification, err := s.integrityRepository.Certify(ctx, data)
+func (s ProcessService) LoadUrl(ctx context.Context, url *url.URL) (domain.File, error) {
+	fileBytes, err := s.availabilityRepository.FindFile(ctx, url.String())
 	if err != nil {
-		return domain.Certification{}, err
+		return domain.File{}, err
 	}
 
-	if err = s.metadataRepository.SaveCertification(ctx, certification); err != nil {
-		return domain.Certification{}, err
+	filename := path.Base(url.Path)
+	if filename == "" {
+		pathParts := strings.Split(url.Path, "/")
+
+		// If it's empty, use the second-to-last part as the filename
+		if len(pathParts) >= 2 {
+			filename = pathParts[len(pathParts)-2]
+		}
 	}
 
-	return certification, nil
+	return domain.NewFile(fileBytes, filename, http.DetectContentType(fileBytes)), nil
+}
+
+func (s ProcessService) certify(ctx context.Context, data []byte, aggregate bool) (domain.Certification, error) {
+	if aggregate {
+		if !config.Configuration.Integrity.AggregateMode {
+			return domain.Certification{}, ErrAggregateModeDisabled
+		}
+		rec, err := s.metadataRepository.GetRecord(ctx, data)
+		if err != nil {
+			return domain.Certification{}, err
+		}
+		hash, err := rec.GetHash()
+		if err != nil {
+			return domain.Certification{}, err
+		}
+		message := domain.Message{Hash: hash}
+		if err = s.messageAggregator.SaveMessage(ctx, message); err != nil {
+			return domain.Certification{}, err
+		}
+		return domain.Certification{Hash: hash, Data: data, Record: rec}, nil
+	} else {
+		certification, err := s.integrityRepository.Certify(ctx, data)
+		if err != nil {
+			return domain.Certification{}, err
+		}
+		if err = s.metadataRepository.SaveCertification(ctx, certification); err != nil {
+			return domain.Certification{}, err
+		}
+		return certification, nil
+	}
 }
 
 func (s ProcessService) sign(ctx context.Context, file *domain.File, request *request.AuthenticityRequest) (*string, string, *record.Record, error) {
@@ -311,22 +346,22 @@ func (s ProcessService) encrypt(ctx context.Context, file *domain.File, request 
 	return nil, nil, ErrEncryptKeyNotSupported
 }
 
-func (a ProcessService) upload(ctx context.Context, file *domain.File, record record.Record, request *request.AvailabilityRequest) (string, error) {
+func (s ProcessService) upload(ctx context.Context, file *domain.File, record record.Record, request *request.AvailabilityRequest) (string, error) {
 	switch request.Hostingtype {
 	case domain.HOSTED:
-		hostedID, err := a.availabilityRepository.UploadHosted(ctx, file, record)
+		hostedID, err := s.availabilityRepository.UploadHosted(ctx, file, record)
 		if err != nil {
 			return "", err
 		}
 		return hostedID, err
 	case domain.IPFS:
-		ipfsID, err := a.availabilityRepository.UploadIpfs(ctx, file, record)
+		ipfsID, err := s.availabilityRepository.UploadIpfs(ctx, file, record)
 		if err != nil {
 			return "", err
 		}
 		return ipfsID, err
 	case domain.LOCAL:
-		path, err := a.availabilityRepository.UploadLocal(ctx, file)
+		path, err := s.availabilityRepository.UploadLocal(ctx, file)
 		if err != nil {
 			return "", err
 		}
@@ -336,7 +371,7 @@ func (a ProcessService) upload(ctx context.Context, file *domain.File, record re
 	}
 }
 
-func (n ProcessService) notify(ctx context.Context, certifications []domain.Certification) error {
+func (s ProcessService) notify(ctx context.Context, certifications []domain.Certification) error {
 	for _, crt := range certifications {
 		var fileBytes []byte
 		var err error
@@ -345,19 +380,19 @@ func (n ProcessService) notify(ctx context.Context, certifications []domain.Cert
 			fileBytes = crt.Data
 		} else {
 			if crt.DataID != "" {
-				fileBytes, err = n.availabilityRepository.FindFile(ctx, crt.DataID)
+				fileBytes, err = s.availabilityRepository.FindFile(ctx, crt.DataID)
 				if err != nil {
 					return err
 				}
 			} else {
-				fileBytes, err = n.availabilityRepository.RetrieveTmp(ctx, crt.Hash)
+				fileBytes, err = s.availabilityRepository.RetrieveTmp(ctx, crt.Hash)
 				if err != nil {
 					return err
 				}
 			}
 		}
 
-		if err = n.notificationRepository.NotifyCertification(crt.Hash, fileBytes); err != nil {
+		if err = s.notificationRepository.NotifyCertification(crt.Hash, fileBytes); err != nil {
 			return err
 		}
 	}
@@ -365,7 +400,7 @@ func (n ProcessService) notify(ctx context.Context, certifications []domain.Cert
 	return nil
 }
 
-func (n ProcessService) buildAccessControl(request *request.AccessControlRequest) (*key.AccessControl, error) {
+func (s ProcessService) buildAccessControl(request *request.AccessControlRequest) (*key.AccessControl, error) {
 	var accessControl key.AccessControl
 
 	if request != nil {
@@ -383,4 +418,15 @@ func (n ProcessService) buildAccessControl(request *request.AccessControlRequest
 	}
 
 	return &accessControl, nil
+}
+
+func (s ProcessService) saveProcess(ctx context.Context, response *response.ProcessResponse, filename string, isAggregated bool) error {
+	handlerResponse := response.MapToHandlerProcessResponse()
+
+	newProcess := domain.Process{
+		Filename:        filename,
+		ProcessResponse: handlerResponse,
+	}
+
+	return s.processRepository.SaveProcess(ctx, newProcess, isAggregated)
 }

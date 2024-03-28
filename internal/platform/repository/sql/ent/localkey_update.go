@@ -6,12 +6,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/localkey"
-	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/localkey"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/predicate"
 	"github.com/bloock/bloock-sdk-go/v2/entity/key"
 )
 

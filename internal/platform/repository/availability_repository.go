@@ -28,10 +28,10 @@ type BloockAvailabilityRepository struct {
 	logger               zerolog.Logger
 }
 
-func NewBloockAvailabilityRepository(ctx context.Context, logger zerolog.Logger) repository.AvailabilityRepository {
-	logger.With().Caller().Str("component", "availability-repository").Logger()
+func NewBloockAvailabilityRepository(ctx context.Context, l zerolog.Logger) repository.AvailabilityRepository {
+	logger := l.With().Caller().Str("component", "availability-repository").Logger()
 
-	c := client.NewBloockClient(pkg.GetApiKeyFromContext(ctx), nil, pkg.GetEnvFromContext(ctx))
+	c := client.NewBloockClient(pkg.GetApiKeyFromContext(ctx), nil)
 
 	return &BloockAvailabilityRepository{
 		client:               c,
@@ -93,7 +93,6 @@ func (b BloockAvailabilityRepository) UploadTmp(ctx context.Context, file *domai
 func (b BloockAvailabilityRepository) RetrieveTmp(ctx context.Context, filename string) ([]byte, error) {
 	file, err := os.ReadFile(fmt.Sprintf("%s/%s", b.tmpPath, filename))
 	if err != nil {
-		b.logger.Log().Err(err).Msg("")
 		return nil, errors.New("error retrieving the file")
 	}
 

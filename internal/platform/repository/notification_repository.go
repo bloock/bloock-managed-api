@@ -3,7 +3,6 @@ package repository
 import (
 	"bytes"
 	"context"
-	"errors"
 	"mime/multipart"
 	"net/http"
 
@@ -13,8 +12,6 @@ import (
 	"github.com/rs/zerolog"
 )
 
-var ErrNotification = errors.New("notification couldn't send")
-
 type HttpNotificationRepository struct {
 	httpClient        http.Client
 	clientEndpointURL string
@@ -22,8 +19,8 @@ type HttpNotificationRepository struct {
 	logger            zerolog.Logger
 }
 
-func NewHttpNotificationRepository(ctx context.Context, logger zerolog.Logger) repository.NotificationRepository {
-	logger.With().Caller().Str("component", "notification-repository").Logger()
+func NewHttpNotificationRepository(ctx context.Context, l zerolog.Logger) repository.NotificationRepository {
+	logger := l.With().Caller().Str("component", "notification-repository").Logger()
 
 	return &HttpNotificationRepository{
 		httpClient:        http.Client{},
@@ -57,25 +54,25 @@ func (h HttpNotificationRepository) sendWebhook(hash string, file []byte) error 
 	filePart, err := writer.CreateFormFile("file", hash)
 	if err != nil {
 		h.logger.Error().Err(err).Msg("")
-		return ErrNotification
+		return err
 	}
 	_, err = filePart.Write(file)
 	if err != nil {
 		h.logger.Error().Err(err).Msg("")
-		return ErrNotification
+		return err
 	}
 	header := writer.FormDataContentType()
 	_ = writer.Close()
 
 	resp, err := h.httpClient.Post(h.clientEndpointURL, header, buf)
 	if err != nil {
-		err = ErrNotification
+
 		h.logger.Error().Err(err).Msgf("response was: %s", resp.Status)
 		return err
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		err = ErrNotification
+
 		h.logger.Error().Err(err).Msgf("response was: %s", resp.Status)
 		return err
 	}
