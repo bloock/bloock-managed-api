@@ -131,7 +131,6 @@ func TestProcessService(t *testing.T) {
 			},
 		}
 
-		log.Println(config.Configuration.Authenticity.KeyConfig.Key)
 		res, status, err := SendRequest(server, &req, FilePNG, nil)
 		require.NoError(t, err)
 

@@ -28,12 +28,14 @@ func NewGetFileByHash(ctx context.Context, l zerolog.Logger, ent *connection.Ent
 }
 
 func (s GetFileByHash) Get(ctx context.Context, hash string) ([]byte, error) {
+
 	certification, err := s.metadataRepository.FindCertificationByHash(ctx, hash)
 	if err != nil {
 		return nil, err
 	}
 
 	var fileBytes []byte
+
 	if certification.DataID != "" {
 		fileBytes, err = s.availabilityRepository.FindFile(ctx, certification.DataID)
 		if err != nil {

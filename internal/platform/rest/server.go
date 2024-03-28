@@ -51,6 +51,7 @@ func NewServer(l zerolog.Logger, ent *connection.EntConnection) (*Server, error)
 	v1.POST("process", middleware.AuthMiddleware(), process.PostProcess(l, ent))
 	v1.POST("webhook", webhook.PostReceiveWebhook(l, ent))
 	v1.GET("hashes/:id/file", middleware.AuthMiddleware(), process.GetFileByHash(l, ent))
+	v1.GET("process/:id/file", middleware.AuthMiddleware(), process.GetFileByProcessID(l, ent))
 	v1.GET("process/:id", middleware.AuthMiddleware(), process.GetProcessByID(l, ent))
 	v1.GET("process/list", middleware.AuthMiddleware(), process.ListProcess(l, ent))
 	if config.Configuration.Integrity.AggregateMode {
