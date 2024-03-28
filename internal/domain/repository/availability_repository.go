@@ -13,5 +13,6 @@ type AvailabilityRepository interface {
 	UploadLocal(ctx context.Context, file *domain.File) (string, error)
 	UploadTmp(ctx context.Context, file *domain.File, record record.Record) (string, error)
 	RetrieveTmp(ctx context.Context, filename string) ([]byte, error)
+	RetrieveLocal(ctx context.Context, filePath string) ([]byte, error)
 	FindFile(ctx context.Context, dataID string) ([]byte, error)
 }

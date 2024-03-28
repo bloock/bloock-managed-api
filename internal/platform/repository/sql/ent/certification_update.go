@@ -4,14 +4,16 @@ package ent
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/certification"
-	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/certification"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/predicate"
 )
 
 // CertificationUpdate is the builder for updating Certification entities.
@@ -49,6 +51,24 @@ func (cu *CertificationUpdate) SetHash(s string) *CertificationUpdate {
 // SetDataID sets the "data_id" field.
 func (cu *CertificationUpdate) SetDataID(s string) *CertificationUpdate {
 	cu.mutation.SetDataID(s)
+	return cu
+}
+
+// SetProof sets the "proof" field.
+func (cu *CertificationUpdate) SetProof(jm json.RawMessage) *CertificationUpdate {
+	cu.mutation.SetProof(jm)
+	return cu
+}
+
+// AppendProof appends jm to the "proof" field.
+func (cu *CertificationUpdate) AppendProof(jm json.RawMessage) *CertificationUpdate {
+	cu.mutation.AppendProof(jm)
+	return cu
+}
+
+// ClearProof clears the value of the "proof" field.
+func (cu *CertificationUpdate) ClearProof() *CertificationUpdate {
+	cu.mutation.ClearProof()
 	return cu
 }
 
@@ -123,6 +143,17 @@ func (cu *CertificationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := cu.mutation.DataID(); ok {
 		_spec.SetField(certification.FieldDataID, field.TypeString, value)
 	}
+	if value, ok := cu.mutation.Proof(); ok {
+		_spec.SetField(certification.FieldProof, field.TypeJSON, value)
+	}
+	if value, ok := cu.mutation.AppendedProof(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, certification.FieldProof, value)
+		})
+	}
+	if cu.mutation.ProofCleared() {
+		_spec.ClearField(certification.FieldProof, field.TypeJSON)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{certification.Label}
@@ -165,6 +196,24 @@ func (cuo *CertificationUpdateOne) SetHash(s string) *CertificationUpdateOne {
 // SetDataID sets the "data_id" field.
 func (cuo *CertificationUpdateOne) SetDataID(s string) *CertificationUpdateOne {
 	cuo.mutation.SetDataID(s)
+	return cuo
+}
+
+// SetProof sets the "proof" field.
+func (cuo *CertificationUpdateOne) SetProof(jm json.RawMessage) *CertificationUpdateOne {
+	cuo.mutation.SetProof(jm)
+	return cuo
+}
+
+// AppendProof appends jm to the "proof" field.
+func (cuo *CertificationUpdateOne) AppendProof(jm json.RawMessage) *CertificationUpdateOne {
+	cuo.mutation.AppendProof(jm)
+	return cuo
+}
+
+// ClearProof clears the value of the "proof" field.
+func (cuo *CertificationUpdateOne) ClearProof() *CertificationUpdateOne {
+	cuo.mutation.ClearProof()
 	return cuo
 }
 
@@ -268,6 +317,17 @@ func (cuo *CertificationUpdateOne) sqlSave(ctx context.Context) (_node *Certific
 	}
 	if value, ok := cuo.mutation.DataID(); ok {
 		_spec.SetField(certification.FieldDataID, field.TypeString, value)
+	}
+	if value, ok := cuo.mutation.Proof(); ok {
+		_spec.SetField(certification.FieldProof, field.TypeJSON, value)
+	}
+	if value, ok := cuo.mutation.AppendedProof(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, certification.FieldProof, value)
+		})
+	}
+	if cuo.mutation.ProofCleared() {
+		_spec.ClearField(certification.FieldProof, field.TypeJSON)
 	}
 	_node = &Certification{config: cuo.config}
 	_spec.Assign = _node.assignValues

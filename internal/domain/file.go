@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"fmt"
 	"mime"
 	"path/filepath"
 	"strings"
@@ -48,4 +49,8 @@ func (f File) FileExtension() string {
 		ext = exts[0]
 	}
 	return ext
+}
+
+func (f File) FilenameWithExtension() string {
+	return fmt.Sprintf("%s%s", f.filename, f.FileExtension())
 }

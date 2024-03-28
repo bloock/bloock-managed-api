@@ -14,10 +14,10 @@ type BloockKeyRepository struct {
 	logger zerolog.Logger
 }
 
-func NewBloockKeyRepository(ctx context.Context, logger zerolog.Logger) repository.KeyRepository {
-	logger.With().Caller().Str("component", "key-repository").Logger()
+func NewBloockKeyRepository(ctx context.Context, l zerolog.Logger) repository.KeyRepository {
+	logger := l.With().Caller().Str("component", "key-repository").Logger()
 
-	c := client.NewBloockClient(pkg.GetApiKeyFromContext(ctx), nil, pkg.GetEnvFromContext(ctx))
+	c := client.NewBloockClient(pkg.GetApiKeyFromContext(ctx), nil)
 
 	return &BloockEncryptionRepository{
 		client: c,

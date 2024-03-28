@@ -5,11 +5,11 @@ package ent
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/localkey"
 	"strings"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/localkey"
 	"github.com/bloock/bloock-sdk-go/v2/entity/key"
 	"github.com/google/uuid"
 )

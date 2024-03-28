@@ -27,11 +27,6 @@ func AuthMiddleware() gin.HandlerFunc {
 			c.Set(pkg.ApiKeyContextKey, config.Configuration.Bloock.ApiKey)
 		}
 
-		environment := getEnvironment(c)
-		if environment != "" {
-			c.Set(pkg.EnvContextKey, environment)
-		}
-
 		c.Next()
 	}
 }
@@ -52,8 +47,4 @@ func getBearerAuth(c *gin.Context) string {
 
 func getApiKey(c *gin.Context) string {
 	return c.Request.Header.Get("X-Api-Key")
-}
-
-func getEnvironment(c *gin.Context) string {
-	return c.Request.Header.Get("Environment")
 }

@@ -5,6 +5,7 @@ package hook
 import (
 	"context"
 	"fmt"
+
 	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent"
 )
 
@@ -30,6 +31,30 @@ func (f LocalKeyFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, er
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LocalKeyMutation", m)
+}
+
+// The MessageFunc type is an adapter to allow the use of ordinary
+// function as Message mutator.
+type MessageFunc func(context.Context, *ent.MessageMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f MessageFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.MessageMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.MessageMutation", m)
+}
+
+// The ProcessFunc type is an adapter to allow the use of ordinary
+// function as Process mutator.
+type ProcessFunc func(context.Context, *ent.ProcessMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ProcessFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ProcessMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ProcessMutation", m)
 }
 
 // Condition is a hook condition function.

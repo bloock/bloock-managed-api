@@ -3,9 +3,8 @@
 package certification
 
 import (
-	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/predicate"
-
 	"entgo.io/ent/dialect/sql"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/predicate"
 	"github.com/google/uuid"
 )
 
@@ -237,6 +236,16 @@ func DataIDEqualFold(v string) predicate.Certification {
 // DataIDContainsFold applies the ContainsFold predicate on the "data_id" field.
 func DataIDContainsFold(v string) predicate.Certification {
 	return predicate.Certification(sql.FieldContainsFold(FieldDataID, v))
+}
+
+// ProofIsNil applies the IsNil predicate on the "proof" field.
+func ProofIsNil() predicate.Certification {
+	return predicate.Certification(sql.FieldIsNull(FieldProof))
+}
+
+// ProofNotNil applies the NotNil predicate on the "proof" field.
+func ProofNotNil() predicate.Certification {
+	return predicate.Certification(sql.FieldNotNull(FieldProof))
 }
 
 // And groups predicates with the AND operator between them.

@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"reflect"
 	"regexp"
@@ -64,6 +65,12 @@ type StorageConfig struct {
 	LocalStrategy string `mapstructure:"local_strategy" default:"HASH"`
 }
 
+type IntegrityConfig struct {
+	AggregateMode     bool `mapstructure:"aggregate_mode" default:"false"`
+	AggregateWorker   bool `mapstructure:"aggregate_worker" default:"false"`
+	AggregateInterval int  `mapstructure:"aggregate_interval" default:"3600"`
+}
+
 type Config struct {
 	Api          APIConfig
 	Auth         AuthConfig
@@ -73,6 +80,7 @@ type Config struct {
 	Authenticity AuthenticityConfig
 	Encryption   EncryptionConfig
 	Storage      StorageConfig
+	Integrity    IntegrityConfig
 }
 
 var Configuration = Config{}
@@ -102,7 +110,12 @@ func InitConfig(logger zerolog.Logger) (*Config, error) {
 	defaults.SetDefaults(&Configuration)
 
 	bloock.ApiHost = Configuration.Bloock.ApiHost
-	bloock.DisableAnalytics = true
+
+	if Configuration.Integrity.AggregateMode {
+		if Configuration.Bloock.ApiKey == "" {
+			return nil, errors.New("aggregate mode requires a BLOOCK Api Key set")
+		}
+	}
 
 	return &Configuration, nil
 }

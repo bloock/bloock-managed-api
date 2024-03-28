@@ -6,14 +6,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/certification"
-	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/localkey"
 	"reflect"
 	"sync"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/certification"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/localkey"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/message"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/process"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -76,6 +78,8 @@ func checkColumn(table, column string) error {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			certification.Table: certification.ValidColumn,
 			localkey.Table:      localkey.ValidColumn,
+			message.Table:       message.ValidColumn,
+			process.Table:       process.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)

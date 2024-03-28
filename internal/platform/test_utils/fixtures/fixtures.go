@@ -2,5 +2,5 @@ package fixtures
 
 import _ "embed"
 
-//go:embed pdf.pdf
-var PDFContent []byte
+//go:embed sample.png
+var PNGContent []byte

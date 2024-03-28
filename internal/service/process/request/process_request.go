@@ -12,7 +12,8 @@ import (
 )
 
 type IntegrityRequest struct {
-	Enabled bool
+	Enabled   bool
+	Aggregate bool
 }
 
 type LocalKeyRequest struct {
@@ -76,9 +77,11 @@ func NewProcessRequest(file domain.File, request *request.ProcessFormRequest) (*
 
 	processRequestInstance.File = file
 
+	processRequestInstance.Integrity.Aggregate = false
 	if request.Integrity.Enabled {
 		integrityRequest := IntegrityRequest{
-			Enabled: request.Integrity.Enabled,
+			Enabled:   request.Integrity.Enabled,
+			Aggregate: request.Integrity.Aggregate,
 		}
 		processRequestInstance.Integrity = integrityRequest
 	}

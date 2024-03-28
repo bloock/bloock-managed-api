@@ -5,13 +5,13 @@ package ent
 import (
 	"context"
 	"fmt"
-	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/certification"
-	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/predicate"
 	"math"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/certification"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/predicate"
 	"github.com/google/uuid"
 )
 

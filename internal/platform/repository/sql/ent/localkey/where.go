@@ -3,9 +3,8 @@
 package localkey
 
 import (
-	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/predicate"
-
 	"entgo.io/ent/dialect/sql"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/predicate"
 	"github.com/google/uuid"
 )
 

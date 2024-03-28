@@ -3,10 +3,13 @@
 package ent
 
 import (
+	"time"
+
 	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/certification"
 	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/localkey"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/message"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/process"
 	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/schema"
-
 	"github.com/google/uuid"
 )
 
@@ -34,4 +37,50 @@ func init() {
 	localkeyDescID := localkeyFields[0].Descriptor()
 	// localkey.DefaultID holds the default value on creation for the id field.
 	localkey.DefaultID = localkeyDescID.Default.(func() uuid.UUID)
+	messageFields := schema.Message{}.Fields()
+	_ = messageFields
+	// messageDescMessage is the schema descriptor for message field.
+	messageDescMessage := messageFields[1].Descriptor()
+	// message.MessageValidator is a validator for the "message" field. It is called by the builders before save.
+	message.MessageValidator = messageDescMessage.Validators[0].(func(string) error)
+	// messageDescRoot is the schema descriptor for root field.
+	messageDescRoot := messageFields[2].Descriptor()
+	// message.DefaultRoot holds the default value on creation for the root field.
+	message.DefaultRoot = messageDescRoot.Default.(string)
+	// messageDescAnchorID is the schema descriptor for anchor_id field.
+	messageDescAnchorID := messageFields[3].Descriptor()
+	// message.DefaultAnchorID holds the default value on creation for the anchor_id field.
+	message.DefaultAnchorID = messageDescAnchorID.Default.(int)
+	// message.AnchorIDValidator is a validator for the "anchor_id" field. It is called by the builders before save.
+	message.AnchorIDValidator = messageDescAnchorID.Validators[0].(func(int) error)
+	// messageDescID is the schema descriptor for id field.
+	messageDescID := messageFields[0].Descriptor()
+	// message.DefaultID holds the default value on creation for the id field.
+	message.DefaultID = messageDescID.Default.(func() uuid.UUID)
+	processFields := schema.Process{}.Fields()
+	_ = processFields
+	// processDescFilename is the schema descriptor for filename field.
+	processDescFilename := processFields[1].Descriptor()
+	// process.FilenameValidator is a validator for the "filename" field. It is called by the builders before save.
+	process.FilenameValidator = processDescFilename.Validators[0].(func(string) error)
+	// processDescStatus is the schema descriptor for status field.
+	processDescStatus := processFields[2].Descriptor()
+	// process.DefaultStatus holds the default value on creation for the status field.
+	process.DefaultStatus = processDescStatus.Default.(bool)
+	// processDescHash is the schema descriptor for hash field.
+	processDescHash := processFields[3].Descriptor()
+	// process.HashValidator is a validator for the "hash" field. It is called by the builders before save.
+	process.HashValidator = processDescHash.Validators[0].(func(string) error)
+	// processDescIsAggregated is the schema descriptor for is_aggregated field.
+	processDescIsAggregated := processFields[6].Descriptor()
+	// process.DefaultIsAggregated holds the default value on creation for the is_aggregated field.
+	process.DefaultIsAggregated = processDescIsAggregated.Default.(bool)
+	// processDescCreatedAt is the schema descriptor for created_at field.
+	processDescCreatedAt := processFields[7].Descriptor()
+	// process.DefaultCreatedAt holds the default value on creation for the created_at field.
+	process.DefaultCreatedAt = processDescCreatedAt.Default.(time.Time)
+	// processDescID is the schema descriptor for id field.
+	processDescID := processFields[0].Descriptor()
+	// process.DefaultID holds the default value on creation for the id field.
+	process.DefaultID = processDescID.Default.(func() uuid.UUID)
 }

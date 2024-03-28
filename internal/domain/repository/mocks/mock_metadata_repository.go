@@ -6,6 +6,7 @@ package mock_repository
 
 import (
 	context "context"
+	json "encoding/json"
 	reflect "reflect"
 
 	domain "github.com/bloock/bloock-managed-api/internal/domain"
@@ -49,6 +50,37 @@ func (m *MockMetadataRepository) ExistCertificationByHash(ctx context.Context, h
 func (mr *MockMetadataRepositoryMockRecorder) ExistCertificationByHash(ctx, hash interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExistCertificationByHash", reflect.TypeOf((*MockMetadataRepository)(nil).ExistCertificationByHash), ctx, hash)
+}
+
+// FindCertificationByHash mocks base method.
+func (m *MockMetadataRepository) FindCertificationByHash(ctx context.Context, hash string) (domain.Certification, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindCertificationByHash", ctx, hash)
+	ret0, _ := ret[0].(domain.Certification)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindCertificationByHash indicates an expected call of FindCertificationByHash.
+func (mr *MockMetadataRepositoryMockRecorder) FindCertificationByHash(ctx, hash interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindCertificationByHash", reflect.TypeOf((*MockMetadataRepository)(nil).FindCertificationByHash), ctx, hash)
+}
+
+// GetCertificationByHashAndAnchorID mocks base method.
+func (m *MockMetadataRepository) GetCertificationByHashAndAnchorID(ctx context.Context, hash string, anchorID int) (domain.Certification, domain.Proof, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCertificationByHashAndAnchorID", ctx, hash, anchorID)
+	ret0, _ := ret[0].(domain.Certification)
+	ret1, _ := ret[1].(domain.Proof)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// GetCertificationByHashAndAnchorID indicates an expected call of GetCertificationByHashAndAnchorID.
+func (mr *MockMetadataRepositoryMockRecorder) GetCertificationByHashAndAnchorID(ctx, hash, anchorID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCertificationByHashAndAnchorID", reflect.TypeOf((*MockMetadataRepository)(nil).GetCertificationByHashAndAnchorID), ctx, hash, anchorID)
 }
 
 // GetCertificationsByAnchorID mocks base method.
@@ -151,4 +183,18 @@ func (m *MockMetadataRepository) UpdateCertificationDataID(ctx context.Context, 
 func (mr *MockMetadataRepositoryMockRecorder) UpdateCertificationDataID(ctx, certification interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateCertificationDataID", reflect.TypeOf((*MockMetadataRepository)(nil).UpdateCertificationDataID), ctx, certification)
+}
+
+// UpdateCertificationProof mocks base method.
+func (m *MockMetadataRepository) UpdateCertificationProof(ctx context.Context, cert domain.Certification, proof json.RawMessage) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateCertificationProof", ctx, cert, proof)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateCertificationProof indicates an expected call of UpdateCertificationProof.
+func (mr *MockMetadataRepositoryMockRecorder) UpdateCertificationProof(ctx, cert, proof interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateCertificationProof", reflect.TypeOf((*MockMetadataRepository)(nil).UpdateCertificationProof), ctx, cert, proof)
 }

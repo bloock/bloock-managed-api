@@ -35,6 +35,11 @@ encryption:
     pkcs12_path: "./"
     pkcs12_password: ""
 
+integrity:
+  aggregate_mode: false
+  aggregate_worker: false
+  aggregate_interval:
+
 storage:
   tmp_dir: "./tmp"
   local_strategy: "FILENAME"

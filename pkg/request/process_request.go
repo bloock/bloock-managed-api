@@ -1,7 +1,8 @@
 package request
 
 type ProcessFormIntegrityRequest struct {
-	Enabled bool `form:"integrity.enabled,default=false"`
+	Enabled   bool `form:"integrity.enabled,default=false"`
+	Aggregate bool `form:"integrity.aggregate,default=false"`
 }
 
 type ProcessFormAuthenticityRequest struct {
