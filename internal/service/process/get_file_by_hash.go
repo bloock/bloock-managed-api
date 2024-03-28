@@ -37,7 +37,10 @@ func (s GetFileByHash) Get(ctx context.Context, hash string) ([]byte, error) {
 	if certification.DataID != "" {
 		fileBytes, err = s.availabilityRepository.FindFile(ctx, certification.DataID)
 		if err != nil {
-			return nil, err
+			fileBytes, err = s.availabilityRepository.RetrieveLocal(ctx, certification.DataID)
+			if err != nil {
+				return nil, ErrHashNotFound
+			}
 		}
 	} else {
 		fileBytes, err = s.availabilityRepository.RetrieveTmp(ctx, hash)

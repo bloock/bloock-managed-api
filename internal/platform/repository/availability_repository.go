@@ -90,7 +90,17 @@ func (b BloockAvailabilityRepository) UploadTmp(ctx context.Context, file *domai
 	return b.saveLocalFile(ctx, b.tmpPath, hash, record)
 }
 
+func (b BloockAvailabilityRepository) RetrieveLocal(ctx context.Context, filePath string) ([]byte, error) {
+	file, err := os.ReadFile(fmt.Sprintf("%s", filePath))
+	if err != nil {
+		return nil, errors.New("error retrieving the file")
+	}
+
+	return file, nil
+}
+
 func (b BloockAvailabilityRepository) RetrieveTmp(ctx context.Context, filename string) ([]byte, error) {
+
 	file, err := os.ReadFile(fmt.Sprintf("%s/%s", b.tmpPath, filename))
 	if err != nil {
 		return nil, errors.New("error retrieving the file")

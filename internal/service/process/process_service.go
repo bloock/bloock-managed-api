@@ -11,6 +11,7 @@ import (
 	"github.com/bloock/bloock-managed-api/internal/service/process/request"
 	"github.com/bloock/bloock-managed-api/internal/service/process/response"
 	"github.com/bloock/bloock-sdk-go/v2/entity/key"
+	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 	"net/http"
 	"net/url"
@@ -158,6 +159,7 @@ func (s ProcessService) Process(ctx context.Context, req request.ProcessRequest)
 	}
 
 	responseBuilder.HashResponse(certification.Hash)
+	responseBuilder.ProcessIDResponse(uuid.New().String())
 
 	if certification.AnchorID == 0 && !req.Integrity.Aggregate {
 		if err = s.notify(ctx, []domain.Certification{certification}); err != nil {
@@ -424,6 +426,7 @@ func (s ProcessService) saveProcess(ctx context.Context, response *response.Proc
 	handlerResponse := response.MapToHandlerProcessResponse()
 
 	newProcess := domain.Process{
+		ID:              handlerResponse.ProcessID,
 		Filename:        filename,
 		ProcessResponse: handlerResponse,
 	}

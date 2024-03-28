@@ -59,7 +59,10 @@ func (s ServiceNotifier) Notify(ctx context.Context, anchorID int) ([]domain.Cer
 			if crt.DataID != "" {
 				fileBytes, err = s.availabilityRepository.FindFile(ctx, crt.DataID)
 				if err != nil {
-					return nil, err
+					fileBytes, err = s.availabilityRepository.RetrieveLocal(ctx, crt.DataID)
+					if err != nil {
+						return nil, err
+					}
 				}
 			} else {
 				fileBytes, err = s.availabilityRepository.RetrieveTmp(ctx, crt.Hash)

@@ -66,9 +66,11 @@ func (p ProcessRepository) SaveProcess(ctx context.Context, process domain.Proce
 		p.logger.Error().Err(err).Msg("")
 		return err
 	}
+	processID, _ := uuid.Parse(process.ProcessID)
 
 	proc := p.connection.DB().
 		Process.Create().
+		SetID(processID).
 		SetFilename(process.Filename).
 		SetHash(process.ProcessResponse.Hash).
 		SetProcessResponse(processResponse).

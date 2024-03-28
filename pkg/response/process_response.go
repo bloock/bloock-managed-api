@@ -2,6 +2,7 @@ package response
 
 type ProcessResponse struct {
 	Success      bool                      `json:"success"`
+	ProcessID    string                    `json:"process_id"`
 	Hash         string                    `json:"hash"`
 	Integrity    *IntegrityJSONResponse    `json:"integrity,omitempty"`
 	Authenticity *AuthenticityJSONResponse `json:"authenticity,omitempty"`

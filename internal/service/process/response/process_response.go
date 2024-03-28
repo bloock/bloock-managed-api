@@ -4,6 +4,7 @@ import http_response "github.com/bloock/bloock-managed-api/pkg/response"
 
 type ProcessResponse struct {
 	hash                  string
+	processID             string
 	certificationResponse *IntegrityResponse
 	signResponse          *SignResponse
 	encryptResponse       *EncryptResponse
@@ -22,6 +23,11 @@ func NewProcessResponseBuilder() *ProcessResponseBuilder {
 
 func (b *ProcessResponseBuilder) HashResponse(hash string) *ProcessResponseBuilder {
 	b.processResponse.hash = hash
+	return b
+}
+
+func (b *ProcessResponseBuilder) ProcessIDResponse(processID string) *ProcessResponseBuilder {
+	b.processResponse.processID = processID
 	return b
 }
 
@@ -57,6 +63,10 @@ func (p ProcessResponse) Hash() string {
 	return p.hash
 }
 
+func (p ProcessResponse) ProcessID() string {
+	return p.processID
+}
+
 func (p ProcessResponse) CertificationResponse() *IntegrityResponse {
 	return p.certificationResponse
 }
@@ -75,8 +85,9 @@ func (p ProcessResponse) AvailabilityResponse() *AvailabilityResponse {
 
 func (p ProcessResponse) MapToHandlerProcessResponse() http_response.ProcessResponse {
 	resp := http_response.ProcessResponse{
-		Success: true,
-		Hash:    p.Hash(),
+		Success:   true,
+		ProcessID: p.ProcessID(),
+		Hash:      p.Hash(),
 	}
 
 	if p.CertificationResponse() != nil {
