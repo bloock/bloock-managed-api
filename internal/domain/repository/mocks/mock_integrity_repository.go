@@ -6,6 +6,7 @@ package mock_repository
 
 import (
 	context "context"
+	json "encoding/json"
 	reflect "reflect"
 
 	domain "github.com/bloock/bloock-managed-api/internal/domain"
@@ -48,4 +49,34 @@ func (m *MockIntegrityRepository) Certify(ctx context.Context, file []byte) (dom
 func (mr *MockIntegrityRepositoryMockRecorder) Certify(ctx, file interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Certify", reflect.TypeOf((*MockIntegrityRepository)(nil).Certify), ctx, file)
+}
+
+// CertifyFromHash mocks base method.
+func (m *MockIntegrityRepository) CertifyFromHash(ctx context.Context, hash, apiKey string) (domain.Certification, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CertifyFromHash", ctx, hash, apiKey)
+	ret0, _ := ret[0].(domain.Certification)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CertifyFromHash indicates an expected call of CertifyFromHash.
+func (mr *MockIntegrityRepositoryMockRecorder) CertifyFromHash(ctx, hash, apiKey interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CertifyFromHash", reflect.TypeOf((*MockIntegrityRepository)(nil).CertifyFromHash), ctx, hash, apiKey)
+}
+
+// GetProof mocks base method.
+func (m *MockIntegrityRepository) GetProof(ctx context.Context, hash, apiKey string) (json.RawMessage, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetProof", ctx, hash, apiKey)
+	ret0, _ := ret[0].(json.RawMessage)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetProof indicates an expected call of GetProof.
+func (mr *MockIntegrityRepositoryMockRecorder) GetProof(ctx, hash, apiKey interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProof", reflect.TypeOf((*MockIntegrityRepository)(nil).GetProof), ctx, hash, apiKey)
 }

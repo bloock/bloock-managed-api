@@ -2,6 +2,7 @@ package webhook
 
 import (
 	"encoding/json"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/connection"
 	"io"
 	"net/http"
 
@@ -41,7 +42,7 @@ type WebhookResponse struct {
 	Success bool `json:"success"`
 }
 
-func PostReceiveWebhook(l zerolog.Logger) gin.HandlerFunc {
+func PostReceiveWebhook(l zerolog.Logger, ent *connection.EntConnection) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		buf, err := io.ReadAll(ctx.Request.Body)
 		if err != nil {
@@ -71,12 +72,22 @@ func PostReceiveWebhook(l zerolog.Logger) gin.HandlerFunc {
 			return
 		}
 
-		notifyService := notify.NewNotifyService(ctx, l)
-		if err = notifyService.Notify(ctx, webhookRequest.Data.Id); err != nil {
+		notifyService := notify.NewServiceNotifier(ctx, l, ent)
+		aggregateHash, err := notifyService.Notify(ctx, webhookRequest.Data.Id)
+		if err != nil {
 			serverAPIError := api_error.NewInternalServerAPIError(err.Error())
 			ctx.JSON(serverAPIError.Status, serverAPIError)
 			return
 		}
+
+		go func() {
+			notifyAggregateService := notify.NewServiceAggregateNotifier(ctx, l, ent)
+			if err = notifyAggregateService.Notify(ctx, aggregateHash); err != nil {
+				serverAPIError := api_error.NewInternalServerAPIError(err.Error())
+				ctx.JSON(serverAPIError.Status, serverAPIError)
+				return
+			}
+		}()
 
 		ctx.JSON(http.StatusOK, WebhookResponse{Success: true})
 	}

@@ -3,12 +3,13 @@
 package ent
 
 import (
+	"encoding/json"
 	"fmt"
-	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/certification"
 	"strings"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/certification"
 	"github.com/google/uuid"
 )
 
@@ -22,7 +23,9 @@ type Certification struct {
 	// Hash holds the value of the "hash" field.
 	Hash string `json:"hash,omitempty"`
 	// DataID holds the value of the "data_id" field.
-	DataID       string `json:"data_id,omitempty"`
+	DataID string `json:"data_id,omitempty"`
+	// Proof holds the value of the "proof" field.
+	Proof        json.RawMessage `json:"proof,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -31,6 +34,8 @@ func (*Certification) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case certification.FieldProof:
+			values[i] = new([]byte)
 		case certification.FieldAnchorID:
 			values[i] = new(sql.NullInt64)
 		case certification.FieldHash, certification.FieldDataID:
@@ -76,6 +81,14 @@ func (c *Certification) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				c.DataID = value.String
 			}
+		case certification.FieldProof:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field proof", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &c.Proof); err != nil {
+					return fmt.Errorf("unmarshal field proof: %w", err)
+				}
+			}
 		default:
 			c.selectValues.Set(columns[i], values[i])
 		}
@@ -120,6 +133,9 @@ func (c *Certification) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("data_id=")
 	builder.WriteString(c.DataID)
+	builder.WriteString(", ")
+	builder.WriteString("proof=")
+	builder.WriteString(fmt.Sprintf("%v", c.Proof))
 	builder.WriteByte(')')
 	return builder.String()
 }

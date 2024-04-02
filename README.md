@@ -258,6 +258,11 @@ To deploy the API as a standalone application, follow these steps:
              certificate:
                pkcs12_path: "./"
                pkcs12_password: ""
+           
+           integrity:
+              aggregate_mode: false
+              aggregate_worker: false
+              aggregate_interval:
     
            storage:
              tmp_dir: "./tmp"
@@ -365,6 +370,21 @@ If you do not want to use Bloock's managed key service and use your own keys loc
 - **BLOOCK_ENCRYPTION_CERTIFICATE_PKCS12_PASSWORD** (**_OPTIONAL_**)
   - **Description**: Certificate password.
   - **Purpose**: If the certificate is protected by a password, you must provide it.
+
+As an advanced configuration option, users have the ability to enable the aggregator mode. Prior to enabling this feature, it is strongly advised to refer to the accompanying documentation for a comprehensive understanding of its functionality and implications. Once acquainted with the documentation, users can activate the aggregator mode by adjusting the specified variables as follows:
+
+- **BLOOCK_INTEGRITY_AGGREGATE_MODE** (**_OPTIONAL_**)
+  - **Description**: Flag to enable the aggregator mode.
+  - **Default**: false
+  - **Purpose**: The process to certify a file will be changed with the aggregate feature. Basically will allow you to scale up and optimize your certifications.
+- **BLOOCK_INTEGRITY_AGGREGATE_WORKER** (**_OPTIONAL_**)
+  - **Description**: Flag to enable the aggregator worker.
+  - **Default**: false
+  - **Purpose**: This option starts a background worker that will aggregate your certifications with a custom interval.
+- **BLOOCK_INTEGRITY_AGGREGATE_INTERVAL** (**_OPTIONAL_**)
+  - **Description**: worker interval with seconds.
+  - **Default**: 36000
+  - **Purpose**: This option allows you to set your worker with the interval (with seconds) you need.
 
 Finally, in case you want to store your files locally, with these variables you can edit the configuration:
 

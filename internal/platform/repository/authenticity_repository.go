@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-
 	"github.com/bloock/bloock-managed-api/internal/domain/repository"
 	"github.com/bloock/bloock-managed-api/internal/pkg"
 	"github.com/bloock/bloock-sdk-go/v2/client"
@@ -17,10 +16,10 @@ type BloockAuthenticityRepository struct {
 	logger zerolog.Logger
 }
 
-func NewBloockAuthenticityRepository(ctx context.Context, logger zerolog.Logger) repository.AuthenticityRepository {
-	logger.With().Caller().Str("component", "authenticity-repository").Logger()
+func NewBloockAuthenticityRepository(ctx context.Context, l zerolog.Logger) repository.AuthenticityRepository {
+	logger := l.With().Caller().Str("component", "authenticity-repository").Logger()
 
-	c := client.NewBloockClient(pkg.GetApiKeyFromContext(ctx), nil, pkg.GetEnvFromContext(ctx))
+	c := client.NewBloockClient(pkg.GetApiKeyFromContext(ctx), nil)
 
 	return &BloockAuthenticityRepository{
 		client: c,

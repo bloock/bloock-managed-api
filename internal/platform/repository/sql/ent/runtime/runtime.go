@@ -2,7 +2,7 @@
 
 package runtime
 
-// The schema-stitching logic is generated in bloock-managed-api/internal/platform/repository/sql/ent/runtime.go
+// The schema-stitching logic is generated in github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/runtime.go
 
 const (
 	Version = "v0.12.4"                                         // Version of ent codegen.
