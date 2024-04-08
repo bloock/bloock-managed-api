@@ -68,13 +68,21 @@ func (p ProcessRepository) SaveProcess(ctx context.Context, process domain.Proce
 	}
 	processID, _ := uuid.Parse(process.ProcessID)
 
+	anchorID := 0
+	status := true
+	if process.ProcessResponse.Integrity != nil {
+		status = false
+		anchorID = process.ProcessResponse.Integrity.AnchorId
+	}
+
 	proc := p.connection.DB().
 		Process.Create().
 		SetID(processID).
 		SetFilename(process.Filename).
 		SetHash(process.ProcessResponse.Hash).
 		SetProcessResponse(processResponse).
-		SetAnchorID(process.ProcessResponse.Integrity.AnchorId).
+		SetAnchorID(anchorID).
+		SetStatus(status).
 		SetIsAggregated(isAggregated)
 
 	if _, err = proc.Save(ctx); err != nil {
