@@ -68,11 +68,11 @@ func (mr *MockMetadataRepositoryMockRecorder) FindCertificationByHash(ctx, hash 
 }
 
 // GetCertificationByHashAndAnchorID mocks base method.
-func (m *MockMetadataRepository) GetCertificationByHashAndAnchorID(ctx context.Context, hash string, anchorID int) (domain.Certification, domain.Proof, error) {
+func (m *MockMetadataRepository) GetCertificationByHashAndAnchorID(ctx context.Context, hash string, anchorID int) (domain.Certification, domain.BloockProof, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetCertificationByHashAndAnchorID", ctx, hash, anchorID)
 	ret0, _ := ret[0].(domain.Certification)
-	ret1, _ := ret[1].(domain.Proof)
+	ret1, _ := ret[1].(domain.BloockProof)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
 }

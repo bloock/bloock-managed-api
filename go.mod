@@ -1,10 +1,10 @@
 module github.com/bloock/bloock-managed-api
 
-go 1.20
+go 1.21
 
 require (
 	entgo.io/ent v0.12.4
-	github.com/bloock/bloock-sdk-go/v2 v2.8.5
+	github.com/bloock/bloock-sdk-go/v2 v2.8.7
 	github.com/cenkalti/backoff/v4 v4.2.1
 	github.com/gin-contrib/logger v0.2.6
 	github.com/gin-gonic/gin v1.9.1
@@ -19,7 +19,7 @@ require (
 	github.com/rs/zerolog v1.29.1
 	github.com/spf13/viper v1.16.0
 	github.com/stretchr/testify v1.8.4
-	github.com/txaty/go-merkletree v0.1.15
+	github.com/txaty/go-merkletree v0.2.2
 	golang.org/x/crypto v0.17.0
 )
 
@@ -64,7 +64,6 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.4.2 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
-	github.com/txaty/gool v0.1.4 // indirect
 	github.com/ugorji/go/codec v1.2.11 // indirect
 	github.com/zclconf/go-cty v1.8.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect

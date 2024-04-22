@@ -66,9 +66,10 @@ type StorageConfig struct {
 }
 
 type IntegrityConfig struct {
-	AggregateMode     bool `mapstructure:"aggregate_mode" default:"false"`
-	AggregateWorker   bool `mapstructure:"aggregate_worker" default:"false"`
-	AggregateInterval int  `mapstructure:"aggregate_interval" default:"3600"`
+	AggregateMode       bool `mapstructure:"aggregate_mode" default:"false"`
+	AggregateWorker     bool `mapstructure:"aggregate_worker" default:"false"`
+	AggregateInterval   int  `mapstructure:"aggregate_interval" default:"3600"`
+	MaxProofMessageSize int  `mapstructure:"max_proof_message_size" default:"1000"`
 }
 
 type Config struct {

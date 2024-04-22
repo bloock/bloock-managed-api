@@ -51,6 +51,21 @@ func (mr *MockAvailabilityRepositoryMockRecorder) FindFile(ctx, dataID interface
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindFile", reflect.TypeOf((*MockAvailabilityRepository)(nil).FindFile), ctx, dataID)
 }
 
+// RetrieveLocal mocks base method.
+func (m *MockAvailabilityRepository) RetrieveLocal(ctx context.Context, filePath string) ([]byte, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RetrieveLocal", ctx, filePath)
+	ret0, _ := ret[0].([]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RetrieveLocal indicates an expected call of RetrieveLocal.
+func (mr *MockAvailabilityRepositoryMockRecorder) RetrieveLocal(ctx, filePath interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RetrieveLocal", reflect.TypeOf((*MockAvailabilityRepository)(nil).RetrieveLocal), ctx, filePath)
+}
+
 // RetrieveTmp mocks base method.
 func (m *MockAvailabilityRepository) RetrieveTmp(ctx context.Context, filename string) ([]byte, error) {
 	m.ctrl.T.Helper()

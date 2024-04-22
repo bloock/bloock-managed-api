@@ -22,23 +22,23 @@ type Stack struct {
 	Depth   int
 }
 
-func (m MerkleTreeProof) ConvertToBloockProof(hash string) (Proof, error) {
-	var proof Proof
+func (m MerkleTreeProof) ParseToBloockProof(hash string, root string) (BloockProof, error) {
+	var proof BloockProof
 
-	rawSiblings := make([][]byte, len(m.Siblings))
+	rawSiblings := make([][]byte, 0)
 	for _, sb := range m.Siblings {
 		siblingBytes, err := hex.DecodeString(sb)
 		if err != nil {
-			return Proof{}, err
+			return BloockProof{}, err
 		}
 		rawSiblings = append(rawSiblings, siblingBytes)
 	}
 	leave, err := hex.DecodeString(hash)
 	if err != nil {
-		return Proof{}, err
+		return BloockProof{}, err
 	}
 
-	var depth []uint32
+	var depth utils.BitsetInt
 	var bitmap uint32
 	stack := make([]Stack, 0)
 	n := len(rawSiblings) - 1
@@ -49,7 +49,7 @@ func (m MerkleTreeProof) ConvertToBloockProof(hash string) (Proof, error) {
 		if m.Path&cc == 0 {
 			proof.Nodes = append(proof.Nodes, hex.EncodeToString(rawSiblings[i]))
 			bitmap += uint32(math.Pow(2, float64(counter)))
-			depth = append(depth, uint32(n-i+1))
+			depth = append(depth, n-i+1)
 			counter--
 		} else {
 			stack = append(stack, Stack{
@@ -60,38 +60,28 @@ func (m MerkleTreeProof) ConvertToBloockProof(hash string) (Proof, error) {
 	}
 
 	proof.Leaves = append(proof.Leaves, hex.EncodeToString(leave))
-	depth = append(depth, uint32(n+1))
+	depth = append(depth, n+1)
 	counter--
 
 	for i := len(stack) - 1; i >= 0; i-- {
 		proof.Nodes = append(proof.Nodes, hex.EncodeToString(stack[i].Sibling))
 		bitmap += uint32(math.Pow(2, float64(counter)))
-		depth = append(depth, uint32(stack[i].Depth))
+		depth = append(depth, stack[i].Depth)
 		counter--
 	}
 
-	var depthU16 []uint16
-	for _, p := range depth {
-		if p > 65535 {
-			// Handle the error case where the uint32 value is too large for uint16
-			return Proof{}, fmt.Errorf("error: value too large for uint16: %d", p)
-		}
-		depthU16 = append(depthU16, uint16(p))
+	depthString, err := depth.ToString()
+	if err != nil {
+		return BloockProof{}, err
 	}
+	proof.Depth = depthString
 
-	var depthU8 []byte
-	for _, x := range depthU16 {
-		depthU8 = append(depthU8, utils.Uint16ToBytes(x)...)
-	}
-
-	depthHex := hex.EncodeToString(depthU8)
-
-	proof.Depth = depthHex
 	preBitmap := fmt.Sprintf("%x", bitmap)
 	if len(preBitmap)%2 != 0 {
 		preBitmap = fmt.Sprintf("%s%s", preBitmap, "0")
 	}
 	proof.Bitmap = preBitmap
+	proof.Root = root
 
 	return proof, nil
 }
