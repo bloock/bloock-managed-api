@@ -12,7 +12,7 @@ import (
 type MetadataRepository interface {
 	SaveCertification(ctx context.Context, certification domain.Certification) error
 	GetCertificationsByAnchorID(ctx context.Context, anchor int) (certification []domain.Certification, err error)
-	GetCertificationByHashAndAnchorID(ctx context.Context, hash string, anchorID int) (domain.Certification, domain.Proof, error)
+	GetCertificationByHashAndAnchorID(ctx context.Context, hash string, anchorID int) (domain.Certification, domain.BloockProof, error)
 	FindCertificationByHash(ctx context.Context, hash string) (domain.Certification, error)
 	ExistCertificationByHash(ctx context.Context, hash string) (bool, error)
 	UpdateCertificationDataID(ctx context.Context, certification domain.Certification) error

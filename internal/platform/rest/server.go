@@ -22,7 +22,7 @@ type Server struct {
 	logger zerolog.Logger
 }
 
-func NewServer(l zerolog.Logger, ent *connection.EntConnection) (*Server, error) {
+func NewServer(l zerolog.Logger, ent *connection.EntConnection, maxProofMessageSize int) (*Server, error) {
 	l = l.With().Str("layer", "infrastructure").Str("component", "gin").Logger()
 	gin.DefaultWriter = l.With().Str("level", "info").Logger()
 	gin.DefaultErrorWriter = l.With().Str("level", "error").Logger()
@@ -56,7 +56,7 @@ func NewServer(l zerolog.Logger, ent *connection.EntConnection) (*Server, error)
 	v1.GET("process/list", middleware.AuthMiddleware(), process.ListProcess(l, ent))
 	if config.Configuration.Integrity.AggregateMode {
 		v1.PUT("aggregate", middleware.AuthMiddleware(), aggregate.PutAggregate(l, ent))
-		v1.POST("proof", middleware.AuthMiddleware(), proof.GetProof(l, ent))
+		v1.POST("proof", middleware.AuthMiddleware(), proof.GetProof(l, ent, maxProofMessageSize))
 	}
 	v1.StaticFile("docs", "./static/index.html")
 	if config.Configuration.Api.DebugMode {

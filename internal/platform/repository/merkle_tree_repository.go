@@ -55,7 +55,7 @@ func mapToMerkleTree(root []byte, merkleProofs []*mt.Proof, messages []domain.Me
 	hexRoot := hex.EncodeToString(root)
 
 	for i, prf := range merkleProofs {
-		siblings := make([]string, len(prf.Siblings))
+		siblings := make([]string, 0)
 		for _, sib := range prf.Siblings {
 			siblings = append(siblings, hex.EncodeToString(sib))
 		}

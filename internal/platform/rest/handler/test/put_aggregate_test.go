@@ -32,6 +32,7 @@ func TestPutAggregate(t *testing.T) {
 	server, err := rest.NewServer(
 		zerolog.Logger{},
 		conn,
+		1000,
 	)
 	require.NoError(t, err)
 	go func() {

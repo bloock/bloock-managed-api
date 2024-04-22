@@ -50,19 +50,34 @@ func (mr *MockMessageAggregatorRepositoryMockRecorder) ExistRoot(ctx, root inter
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExistRoot", reflect.TypeOf((*MockMessageAggregatorRepository)(nil).ExistRoot), ctx, root)
 }
 
-// FindMessageByHash mocks base method.
-func (m *MockMessageAggregatorRepository) FindMessageByHash(ctx context.Context, hash string) (domain.Message, error) {
+// FindMessagesByHashesAndRoot mocks base method.
+func (m *MockMessageAggregatorRepository) FindMessagesByHashesAndRoot(ctx context.Context, hash []string, root string) ([]domain.Message, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindMessageByHash", ctx, hash)
+	ret := m.ctrl.Call(m, "FindMessagesByHashesAndRoot", ctx, hash, root)
+	ret0, _ := ret[0].([]domain.Message)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindMessagesByHashesAndRoot indicates an expected call of FindMessagesByHashesAndRoot.
+func (mr *MockMessageAggregatorRepositoryMockRecorder) FindMessagesByHashesAndRoot(ctx, hash, root interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindMessagesByHashesAndRoot", reflect.TypeOf((*MockMessageAggregatorRepository)(nil).FindMessagesByHashesAndRoot), ctx, hash, root)
+}
+
+// GetMessageByHash mocks base method.
+func (m *MockMessageAggregatorRepository) GetMessageByHash(ctx context.Context, hash string) (domain.Message, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetMessageByHash", ctx, hash)
 	ret0, _ := ret[0].(domain.Message)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// FindMessageByHash indicates an expected call of FindMessageByHash.
-func (mr *MockMessageAggregatorRepositoryMockRecorder) FindMessageByHash(ctx, hash interface{}) *gomock.Call {
+// GetMessageByHash indicates an expected call of GetMessageByHash.
+func (mr *MockMessageAggregatorRepositoryMockRecorder) GetMessageByHash(ctx, hash interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindMessageByHash", reflect.TypeOf((*MockMessageAggregatorRepository)(nil).FindMessageByHash), ctx, hash)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMessageByHash", reflect.TypeOf((*MockMessageAggregatorRepository)(nil).GetMessageByHash), ctx, hash)
 }
 
 // GetMessagesByRootAndAnchorID mocks base method.

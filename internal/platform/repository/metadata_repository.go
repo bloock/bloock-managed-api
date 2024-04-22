@@ -44,10 +44,10 @@ func mapToCertification(cert *ent.Certification) domain.Certification {
 	}
 }
 
-func mapToProof(rawProof json.RawMessage) (domain.Proof, error) {
-	var proof domain.Proof
+func mapToProof(rawProof json.RawMessage) (domain.BloockProof, error) {
+	var proof domain.BloockProof
 	if err := json.Unmarshal(rawProof, &proof); err != nil {
-		return domain.Proof{}, err
+		return domain.BloockProof{}, err
 	}
 
 	return proof, nil
@@ -132,18 +132,18 @@ func (s BloockMetadataRepository) GetCertificationsByAnchorID(ctx context.Contex
 	return certifications, nil
 }
 
-func (s BloockMetadataRepository) GetCertificationByHashAndAnchorID(ctx context.Context, hash string, anchorID int) (domain.Certification, domain.Proof, error) {
+func (s BloockMetadataRepository) GetCertificationByHashAndAnchorID(ctx context.Context, hash string, anchorID int) (domain.Certification, domain.BloockProof, error) {
 	certificationSchema, err := s.connection.DB().Certification.Query().
 		Where(certification.AnchorID(anchorID), certification.HashEQ(hash)).Only(ctx)
 	if err != nil {
 		s.logger.Error().Err(err).Msg("")
-		return domain.Certification{}, domain.Proof{}, err
+		return domain.Certification{}, domain.BloockProof{}, err
 	}
 
 	proof, err := mapToProof(certificationSchema.Proof)
 	if err != nil {
 		s.logger.Error().Err(err).Msg("")
-		return domain.Certification{}, domain.Proof{}, err
+		return domain.Certification{}, domain.BloockProof{}, err
 	}
 
 	return mapToCertification(certificationSchema), proof, nil

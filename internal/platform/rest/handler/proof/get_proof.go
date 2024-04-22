@@ -12,7 +12,7 @@ import (
 )
 
 type GetProofRequest struct {
-	Message string `json:"message" binding:"required"`
+	Message []string `json:"messages" binding:"required"`
 }
 
 type GetProofResponse struct {
@@ -24,7 +24,7 @@ type GetProofResponse struct {
 	Anchor interface{} `json:"anchor"`
 }
 
-func mapToGetProofResponse(proof domain.Proof) GetProofResponse {
+func mapToGetProofResponse(proof domain.BloockProof) GetProofResponse {
 	return GetProofResponse{
 		Leaves: proof.Leaves,
 		Nodes:  proof.Nodes,
@@ -35,7 +35,7 @@ func mapToGetProofResponse(proof domain.Proof) GetProofResponse {
 	}
 }
 
-func GetProof(l zerolog.Logger, ent *connection.EntConnection) gin.HandlerFunc {
+func GetProof(l zerolog.Logger, ent *connection.EntConnection, maxProofMessageSize int) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var req GetProofRequest
 		if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -44,11 +44,12 @@ func GetProof(l zerolog.Logger, ent *connection.EntConnection) gin.HandlerFunc {
 			return
 		}
 
-		service := proof.NewGetProof(ctx, l, ent)
+		service := proof.NewGetProof(ctx, l, ent, maxProofMessageSize)
 
 		res, err := service.Get(ctx, req.Message)
 		if err != nil {
-			if errors.Is(proof.ErrMessageNotFound, err) {
+			if errors.Is(proof.ErrMessageNotFound, err) || errors.Is(proof.ErrEmptyMessages, err) || errors.Is(proof.ErrInvalidMessageHash, err) ||
+				errors.Is(proof.ErrMaxProofMessagesSize, err) || errors.Is(proof.ErrInconsistentMessages, err) {
 				badRequestAPIError := api_error.NewAPIError(http.StatusNotFound, err.Error())
 				ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
 				return

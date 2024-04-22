@@ -52,6 +52,19 @@ func mapToMerkleTreeProof(rawProof json.RawMessage) (domain.MerkleTreeProof, err
 	return proof, nil
 }
 
+func mapToMessage(mss *ent.Message) (domain.Message, error) {
+	proof, err := mapToMerkleTreeProof(mss.Proof)
+	if err != nil {
+		return domain.Message{}, err
+	}
+	return domain.Message{
+		Hash:     mss.Message,
+		Root:     mss.Root,
+		AnchorID: mss.AnchorID,
+		Proof:    proof,
+	}, nil
+}
+
 func (s MessageAggregatorRepository) SaveMessage(ctx context.Context, message domain.Message) error {
 	crt := s.connection.DB().
 		Message.Create().
@@ -106,29 +119,50 @@ func (s MessageAggregatorRepository) GetMessagesByRootAndAnchorID(ctx context.Co
 	return messages, nil
 }
 
-func (s MessageAggregatorRepository) FindMessageByHash(ctx context.Context, hash string) (domain.Message, error) {
-	messageSchema, err := s.connection.DB().Message.Query().
-		Where(message.MessageEQ(hash), message.AnchorIDGT(0)).Order(ent.Desc(message.FieldAnchorID)).First(ctx)
+func (s MessageAggregatorRepository) FindMessagesByHashesAndRoot(ctx context.Context, hash []string, root string) ([]domain.Message, error) {
+	messageSchemas, err := s.connection.DB().Message.Query().
+		Where(message.MessageIn(hash...), message.RootEQ(root)).Order(ent.Desc(message.FieldAnchorID)).All(ctx)
 	if err != nil {
 		if ent.IsNotFound(err) && strings.Contains(err.Error(), "not found") {
-			return domain.Message{}, nil
+			return []domain.Message{}, nil
 		}
 		s.logger.Error().Err(err).Msg("")
-		return domain.Message{}, err
+		return []domain.Message{}, err
 	}
 
-	proof, err := mapToMerkleTreeProof(messageSchema.Proof)
+	var messages []domain.Message
+	for _, mss := range messageSchemas {
+		proof, err := mapToMerkleTreeProof(mss.Proof)
+		if err != nil {
+			s.logger.Error().Err(err).Msg("")
+			return []domain.Message{}, err
+		}
+		messages = append(messages, domain.Message{
+			Hash:     mss.Message,
+			AnchorID: mss.AnchorID,
+			Root:     mss.Root,
+			Proof:    proof,
+		})
+	}
+
+	return messages, nil
+}
+
+func (s MessageAggregatorRepository) GetMessageByHash(ctx context.Context, hash string) (domain.Message, error) {
+	messageSchema, err := s.connection.DB().Message.Query().
+		Where(message.MessageEQ(hash)).Order(ent.Desc(message.FieldAnchorID)).First(ctx)
 	if err != nil {
 		s.logger.Error().Err(err).Msg("")
 		return domain.Message{}, err
 	}
 
-	return domain.Message{
-		Hash:     messageSchema.Message,
-		AnchorID: messageSchema.AnchorID,
-		Root:     messageSchema.Root,
-		Proof:    proof,
-	}, nil
+	messageDomain, err := mapToMessage(messageSchema)
+	if err != nil {
+		s.logger.Error().Err(err).Msg("")
+		return domain.Message{}, err
+	}
+
+	return messageDomain, nil
 }
 
 func (s MessageAggregatorRepository) ExistRoot(ctx context.Context, root string) (bool, error) {

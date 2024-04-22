@@ -36,7 +36,7 @@ func main() {
 
 	go func() {
 		defer wg.Done()
-		server, err := rest.NewServer(logger, conn)
+		server, err := rest.NewServer(logger, conn, config.Configuration.Integrity.MaxProofMessageSize)
 		if err != nil {
 			panic(err)
 		}
