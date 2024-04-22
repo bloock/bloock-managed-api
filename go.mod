@@ -19,7 +19,7 @@ require (
 	github.com/rs/zerolog v1.29.1
 	github.com/spf13/viper v1.16.0
 	github.com/stretchr/testify v1.8.4
-	github.com/txaty/go-merkletree v0.2.2
+	github.com/txaty/go-merkletree v0.1.15
 	golang.org/x/crypto v0.17.0
 )
 
@@ -64,6 +64,7 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.4.2 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
+	github.com/txaty/gool v0.1.4 // indirect
 	github.com/ugorji/go/codec v1.2.11 // indirect
 	github.com/zclconf/go-cty v1.8.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
