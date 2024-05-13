@@ -13,7 +13,6 @@ import (
 	"github.com/bloock/bloock-sdk-go/v2/client"
 	"github.com/bloock/bloock-sdk-go/v2/entity/key"
 	"github.com/mcuadros/go-defaults"
-	"github.com/rs/zerolog"
 	"github.com/spf13/viper"
 	"mime/multipart"
 	"net/http"
