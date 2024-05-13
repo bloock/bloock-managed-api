@@ -50,11 +50,6 @@ func (s GetProof) Get(ctx context.Context, hashes []string) (domain.BloockProof,
 		s.logger.Error().Err(err).Msg("")
 		return domain.BloockProof{}, err
 	}
-
-	/*messages, err := s.messageRepository.FindMessagesByHashesAndRoot(ctx, hashes, messageDomain.Root)
-	if err != nil {
-		return domain.BloockProof{}, err
-	}*/
 	if len(messages) == 0 {
 		err = ErrMessageNotFound
 		s.logger.Error().Err(err).Msg("")
@@ -102,17 +97,6 @@ func (s GetProof) Get(ctx context.Context, hashes []string) (domain.BloockProof,
 	if err != nil {
 		return domain.BloockProof{}, err
 	}
-
-	/*_, certificationProof, err := s.metadataRepository.GetCertificationByHashAndAnchorID(ctx, messages[0].Root, messages[0].AnchorID)
-	if err != nil {
-		return domain.BloockProof{}, err
-	}*/
-
-	/*joinedBloockProof, err := domain.JoinBloockMultiProofs(bloockProofs)
-	if err != nil {
-		s.logger.Error().Err(err).Msg("")
-		return domain.BloockProof{}, err
-	}*/
 
 	assembledProof, err := certificationProof.AssembleProof(joinedProofs)
 	if err != nil {
