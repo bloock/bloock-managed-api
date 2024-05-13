@@ -5,21 +5,20 @@ import (
 	"github.com/bloock/bloock-managed-api/internal/platform/cron"
 	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/connection"
 	"github.com/bloock/bloock-managed-api/internal/platform/worker"
-	"os"
+	"github.com/bloock/bloock-managed-api/pkg"
 	"sync"
 
 	"github.com/bloock/bloock-managed-api/internal/config"
 	"github.com/bloock/bloock-managed-api/internal/platform/rest"
-	"github.com/rs/zerolog"
 )
 
 func main() {
-	logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}).With().Timestamp().Logger()
-
-	_, err := config.InitConfig(logger)
+	_, err := config.InitConfig()
 	if err != nil {
 		panic(err)
 	}
+
+	logger := pkg.InitLogger(config.Configuration.Api.DebugMode)
 
 	wg := sync.WaitGroup{}
 	wg.Add(1)

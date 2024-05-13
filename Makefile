@@ -18,7 +18,7 @@ down:
 	docker compose down
 
 up:
-	docker-compose up -d --build
+	docker-compose -f docker-compose-postgres.yaml up -d --build
 
 test:
 	go test -v ./...

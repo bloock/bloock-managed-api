@@ -9,7 +9,6 @@ import (
 
 	"github.com/bloock/bloock-sdk-go/v2"
 	"github.com/mcuadros/go-defaults"
-	"github.com/rs/zerolog"
 	"github.com/spf13/viper"
 )
 
@@ -86,7 +85,7 @@ type Config struct {
 
 var Configuration = Config{}
 
-func InitConfig(logger zerolog.Logger) (*Config, error) {
+func InitConfig() (*Config, error) {
 	viper.AutomaticEnv()
 	viper.SetEnvPrefix("bloock")
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
@@ -98,7 +97,7 @@ func InitConfig(logger zerolog.Logger) (*Config, error) {
 		default:
 			return nil, fmt.Errorf("fatal error loading config file: %s", err)
 		case viper.ConfigFileNotFoundError:
-			logger.Warn().Msg("No config file found. Using defaults and environment variables")
+			return nil, errors.New("No config file found. Using defaults and environment variables")
 		}
 	}
 

@@ -62,7 +62,7 @@ func TestMain(m *testing.M) {
 	viper.Set("bloock.api_key", apiKey)
 	viper.Set("integrity.aggregate_mode", true)
 
-	config.InitConfig(zerolog.Logger{})
+	config.InitConfig()
 
 	keyClient := client.NewKeyClient()
 	managedKey, err := keyClient.NewManagedKey(key.ManagedKeyParams{
