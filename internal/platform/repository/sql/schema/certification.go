@@ -1,7 +1,6 @@
 package schema
 
 import (
-	"encoding/json"
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
@@ -19,7 +18,6 @@ func (Certification) Fields() []ent.Field {
 		field.Int("anchor_id").NonNegative(),
 		field.String("hash").NotEmpty(),
 		field.String("data_id"),
-		field.JSON("proof", json.RawMessage{}).Optional(),
 	}
 }
 

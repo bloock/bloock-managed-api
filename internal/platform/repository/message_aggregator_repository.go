@@ -52,19 +52,6 @@ func mapToMerkleTreeProof(rawProof json.RawMessage) (domain.MerkleTreeProof, err
 	return proof, nil
 }
 
-func mapToMessage(mss *ent.Message) (domain.Message, error) {
-	proof, err := mapToMerkleTreeProof(mss.Proof)
-	if err != nil {
-		return domain.Message{}, err
-	}
-	return domain.Message{
-		Hash:     mss.Message,
-		Root:     mss.Root,
-		AnchorID: mss.AnchorID,
-		Proof:    proof,
-	}, nil
-}
-
 func (s MessageAggregatorRepository) SaveMessage(ctx context.Context, message domain.Message) error {
 	crt := s.connection.DB().
 		Message.Create().
@@ -119,13 +106,10 @@ func (s MessageAggregatorRepository) GetMessagesByRootAndAnchorID(ctx context.Co
 	return messages, nil
 }
 
-func (s MessageAggregatorRepository) FindMessagesByHashesAndRoot(ctx context.Context, hash []string, root string) ([]domain.Message, error) {
+func (s MessageAggregatorRepository) GetMessagesByHashes(ctx context.Context, hash []string) ([]domain.Message, error) {
 	messageSchemas, err := s.connection.DB().Message.Query().
-		Where(message.MessageIn(hash...), message.RootEQ(root)).Order(ent.Desc(message.FieldAnchorID)).All(ctx)
+		Where(message.MessageIn(hash...)).Order(ent.Desc(message.FieldAnchorID)).All(ctx)
 	if err != nil {
-		if ent.IsNotFound(err) && strings.Contains(err.Error(), "not found") {
-			return []domain.Message{}, nil
-		}
 		s.logger.Error().Err(err).Msg("")
 		return []domain.Message{}, err
 	}
@@ -146,23 +130,6 @@ func (s MessageAggregatorRepository) FindMessagesByHashesAndRoot(ctx context.Con
 	}
 
 	return messages, nil
-}
-
-func (s MessageAggregatorRepository) GetMessageByHash(ctx context.Context, hash string) (domain.Message, error) {
-	messageSchema, err := s.connection.DB().Message.Query().
-		Where(message.MessageEQ(hash)).Order(ent.Desc(message.FieldAnchorID)).First(ctx)
-	if err != nil {
-		s.logger.Error().Err(err).Msg("")
-		return domain.Message{}, err
-	}
-
-	messageDomain, err := mapToMessage(messageSchema)
-	if err != nil {
-		s.logger.Error().Err(err).Msg("")
-		return domain.Message{}, err
-	}
-
-	return messageDomain, nil
 }
 
 func (s MessageAggregatorRepository) ExistRoot(ctx context.Context, root string) (bool, error) {

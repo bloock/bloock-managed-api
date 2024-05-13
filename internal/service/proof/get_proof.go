@@ -3,6 +3,7 @@ package proof
 import (
 	"context"
 	"errors"
+	"github.com/bloock/bloock-managed-api/internal/config"
 	"github.com/bloock/bloock-managed-api/internal/domain"
 	"github.com/bloock/bloock-managed-api/internal/domain/repository"
 	bloock_repository "github.com/bloock/bloock-managed-api/internal/platform/repository"
@@ -20,7 +21,9 @@ var ErrInconsistentMessages = errors.New("some messages do not have the same roo
 type GetProof struct {
 	messageRepository   repository.MessageAggregatorRepository
 	metadataRepository  repository.MetadataRepository
+	integrityRepository repository.IntegrityRepository
 	maxProofMessageSize int
+	apiKey              string
 	logger              zerolog.Logger
 }
 
@@ -28,8 +31,10 @@ func NewGetProof(ctx context.Context, l zerolog.Logger, ent *connection.EntConne
 	logger := l.With().Caller().Str("component", "get-proof").Logger()
 
 	return &GetProof{
+		apiKey:              config.Configuration.Bloock.ApiKey,
 		messageRepository:   bloock_repository.NewMessageAggregatorRepository(ctx, l, ent),
 		metadataRepository:  bloock_repository.NewBloockMetadataRepository(ctx, l, ent),
+		integrityRepository: bloock_repository.NewBloockIntegrityRepository(ctx, l),
 		maxProofMessageSize: maxProofMessageSize,
 		logger:              logger,
 	}
@@ -40,14 +45,9 @@ func (s GetProof) Get(ctx context.Context, hashes []string) (domain.BloockProof,
 		return domain.BloockProof{}, err
 	}
 
-	messageDomain, err := s.messageRepository.GetMessageByHash(ctx, hashes[0])
+	messages, err := s.messageRepository.GetMessagesByHashes(ctx, hashes)
 	if err != nil {
 		s.logger.Error().Err(err).Msg("")
-		return domain.BloockProof{}, err
-	}
-
-	messages, err := s.messageRepository.FindMessagesByHashesAndRoot(ctx, hashes, messageDomain.Root)
-	if err != nil {
 		return domain.BloockProof{}, err
 	}
 	if len(messages) == 0 {
@@ -61,11 +61,6 @@ func (s GetProof) Get(ctx context.Context, hashes []string) (domain.BloockProof,
 		return domain.BloockProof{}, err
 	}
 
-	_, certificationProof, err := s.metadataRepository.GetCertificationByHashAndAnchorID(ctx, messages[0].Root, messages[0].AnchorID)
-	if err != nil {
-		return domain.BloockProof{}, err
-	}
-
 	bloockProofs := make([]domain.BloockProof, 0)
 	for _, mss := range messages {
 		bloockProof, err := mss.Proof.ParseToBloockProof(mss.Hash, mss.Root)
@@ -76,13 +71,34 @@ func (s GetProof) Get(ctx context.Context, hashes []string) (domain.BloockProof,
 		bloockProofs = append(bloockProofs, bloockProof)
 	}
 
-	joinedBloockProof, err := domain.JoinBloockMultiProofs(bloockProofs)
+	differentRoots := make([]string, 0)
+	temporaryJoinedProofs := make(map[string][]domain.BloockProof, 0)
+	for _, bloockProof := range bloockProofs {
+		_, ok := temporaryJoinedProofs[bloockProof.Root]
+		if !ok {
+			temporaryJoinedProofs[bloockProof.Root] = []domain.BloockProof{bloockProof}
+			differentRoots = append(differentRoots, bloockProof.Root)
+		} else {
+			temporaryJoinedProofs[bloockProof.Root] = append(temporaryJoinedProofs[bloockProof.Root], bloockProof)
+		}
+	}
+
+	joinedProofs := make([]domain.BloockProof, 0)
+	for _, tmpProofs := range temporaryJoinedProofs {
+		joinedBloockProof, err := domain.JoinBloockMultiProofs(tmpProofs)
+		if err != nil {
+			s.logger.Error().Err(err).Msg("")
+			return domain.BloockProof{}, err
+		}
+		joinedProofs = append(joinedProofs, joinedBloockProof)
+	}
+
+	certificationProof, err := s.integrityRepository.GetProof(ctx, differentRoots, s.apiKey)
 	if err != nil {
-		s.logger.Error().Err(err).Msg("")
 		return domain.BloockProof{}, err
 	}
 
-	assembledProof, err := certificationProof.AssembleProof([]domain.BloockProof{joinedBloockProof})
+	assembledProof, err := certificationProof.AssembleProof(joinedProofs)
 	if err != nil {
 		s.logger.Error().Err(err).Msg("")
 		return domain.BloockProof{}, err
