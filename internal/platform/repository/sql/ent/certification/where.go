@@ -238,16 +238,6 @@ func DataIDContainsFold(v string) predicate.Certification {
 	return predicate.Certification(sql.FieldContainsFold(FieldDataID, v))
 }
 
-// ProofIsNil applies the IsNil predicate on the "proof" field.
-func ProofIsNil() predicate.Certification {
-	return predicate.Certification(sql.FieldIsNull(FieldProof))
-}
-
-// ProofNotNil applies the NotNil predicate on the "proof" field.
-func ProofNotNil() predicate.Certification {
-	return predicate.Certification(sql.FieldNotNull(FieldProof))
-}
-
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Certification) predicate.Certification {
 	return predicate.Certification(sql.AndPredicates(predicates...))

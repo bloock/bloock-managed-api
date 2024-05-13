@@ -7,6 +7,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"strings"
 
 	"github.com/bloock/bloock-managed-api/internal/domain"
 	"github.com/bloock/bloock-managed-api/internal/domain/repository"
@@ -18,6 +19,7 @@ import (
 )
 
 var ErrInvalidResponse = errors.New("record couldn't send")
+var ErrUnreadyProofStatus = errors.New("unready proof status")
 
 type BloockIntegrityRepository struct {
 	httpClient http.Client
@@ -59,9 +61,9 @@ func mapToSendRecordRequest(hash string) sendRecordRequest {
 	return sr
 }
 
-func mapToGetProofRequest(hash string) getProofRequest {
+func mapToGetProofRequest(hash []string) getProofRequest {
 	pr := getProofRequest{
-		Messages: []string{hash},
+		Messages: hash,
 	}
 	return pr
 }
@@ -110,7 +112,7 @@ func (b BloockIntegrityRepository) CertifyFromHash(ctx context.Context, hash str
 	}, nil
 }
 
-func (b BloockIntegrityRepository) GetProof(ctx context.Context, hash string, apiKey string) (json.RawMessage, error) {
+func (b BloockIntegrityRepository) GetProof(ctx context.Context, hash []string, apiKey string) (domain.BloockProof, error) {
 	url := "https://api.bloock.dev/proof/v1/proof"
 
 	auth := b.apiKey
@@ -119,10 +121,16 @@ func (b BloockIntegrityRepository) GetProof(ctx context.Context, hash string, ap
 	}
 	var proofResp json.RawMessage
 	if err := b.postRequest(url, mapToGetProofRequest(hash), &proofResp, auth); err != nil {
-		return nil, err
+		return domain.BloockProof{}, err
 	}
 
-	return proofResp, nil
+	var bloockProof domain.BloockProof
+	if err := json.Unmarshal(proofResp, &bloockProof); err != nil {
+		b.logger.Error().Err(err).Msg(err.Error())
+		return domain.BloockProof{}, err
+	}
+
+	return bloockProof, nil
 }
 
 func (b BloockIntegrityRepository) postRequest(url string, body interface{}, response interface{}, apiKey string) error {
@@ -146,6 +154,18 @@ func (b BloockIntegrityRepository) postRequest(url string, body interface{}, res
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		if resp.StatusCode == 404 {
+			respByte, err := io.ReadAll(resp.Body)
+			if err != nil {
+				b.logger.Error().Err(err).Msg(err.Error())
+				return err
+			}
+			if strings.Contains(string(respByte), "proof not found") || strings.Contains(string(respByte), "records not found") {
+				err = ErrUnreadyProofStatus
+				b.logger.Error().Err(err).Msg("")
+				return err
+			}
+		}
 		err = ErrInvalidResponse
 		b.logger.Error().Err(err).Msgf("response was: %s", resp.Status)
 		return err

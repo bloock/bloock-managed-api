@@ -3,6 +3,7 @@ package proof
 import (
 	"errors"
 	"github.com/bloock/bloock-managed-api/internal/domain"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository"
 	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/connection"
 	api_error "github.com/bloock/bloock-managed-api/internal/platform/rest/error"
 	"github.com/bloock/bloock-managed-api/internal/service/proof"
@@ -50,7 +51,12 @@ func GetProof(l zerolog.Logger, ent *connection.EntConnection, maxProofMessageSi
 		if err != nil {
 			if errors.Is(proof.ErrMessageNotFound, err) || errors.Is(proof.ErrEmptyMessages, err) || errors.Is(proof.ErrInvalidMessageHash, err) ||
 				errors.Is(proof.ErrMaxProofMessagesSize, err) || errors.Is(proof.ErrInconsistentMessages, err) {
-				badRequestAPIError := api_error.NewAPIError(http.StatusNotFound, err.Error())
+				notFoundAPIError := api_error.NewAPIError(http.StatusNotFound, err.Error())
+				ctx.JSON(notFoundAPIError.Status, notFoundAPIError)
+				return
+			}
+			if errors.Is(repository.ErrUnreadyProofStatus, err) {
+				badRequestAPIError := api_error.NewAPIError(http.StatusBadRequest, err.Error())
 				ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
 				return
 			}

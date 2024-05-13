@@ -46,8 +46,6 @@ type CertificationMutation struct {
 	addanchor_id  *int
 	hash          *string
 	data_id       *string
-	proof         *json.RawMessage
-	appendproof   json.RawMessage
 	clearedFields map[string]struct{}
 	done          bool
 	oldValue      func(context.Context) (*Certification, error)
@@ -286,71 +284,6 @@ func (m *CertificationMutation) ResetDataID() {
 	m.data_id = nil
 }
 
-// SetProof sets the "proof" field.
-func (m *CertificationMutation) SetProof(jm json.RawMessage) {
-	m.proof = &jm
-	m.appendproof = nil
-}
-
-// Proof returns the value of the "proof" field in the mutation.
-func (m *CertificationMutation) Proof() (r json.RawMessage, exists bool) {
-	v := m.proof
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldProof returns the old "proof" field's value of the Certification entity.
-// If the Certification object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CertificationMutation) OldProof(ctx context.Context) (v json.RawMessage, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldProof is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldProof requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldProof: %w", err)
-	}
-	return oldValue.Proof, nil
-}
-
-// AppendProof adds jm to the "proof" field.
-func (m *CertificationMutation) AppendProof(jm json.RawMessage) {
-	m.appendproof = append(m.appendproof, jm...)
-}
-
-// AppendedProof returns the list of values that were appended to the "proof" field in this mutation.
-func (m *CertificationMutation) AppendedProof() (json.RawMessage, bool) {
-	if len(m.appendproof) == 0 {
-		return nil, false
-	}
-	return m.appendproof, true
-}
-
-// ClearProof clears the value of the "proof" field.
-func (m *CertificationMutation) ClearProof() {
-	m.proof = nil
-	m.appendproof = nil
-	m.clearedFields[certification.FieldProof] = struct{}{}
-}
-
-// ProofCleared returns if the "proof" field was cleared in this mutation.
-func (m *CertificationMutation) ProofCleared() bool {
-	_, ok := m.clearedFields[certification.FieldProof]
-	return ok
-}
-
-// ResetProof resets all changes to the "proof" field.
-func (m *CertificationMutation) ResetProof() {
-	m.proof = nil
-	m.appendproof = nil
-	delete(m.clearedFields, certification.FieldProof)
-}
-
 // Where appends a list predicates to the CertificationMutation builder.
 func (m *CertificationMutation) Where(ps ...predicate.Certification) {
 	m.predicates = append(m.predicates, ps...)
@@ -385,7 +318,7 @@ func (m *CertificationMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CertificationMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 3)
 	if m.anchor_id != nil {
 		fields = append(fields, certification.FieldAnchorID)
 	}
@@ -394,9 +327,6 @@ func (m *CertificationMutation) Fields() []string {
 	}
 	if m.data_id != nil {
 		fields = append(fields, certification.FieldDataID)
-	}
-	if m.proof != nil {
-		fields = append(fields, certification.FieldProof)
 	}
 	return fields
 }
@@ -412,8 +342,6 @@ func (m *CertificationMutation) Field(name string) (ent.Value, bool) {
 		return m.Hash()
 	case certification.FieldDataID:
 		return m.DataID()
-	case certification.FieldProof:
-		return m.Proof()
 	}
 	return nil, false
 }
@@ -429,8 +357,6 @@ func (m *CertificationMutation) OldField(ctx context.Context, name string) (ent.
 		return m.OldHash(ctx)
 	case certification.FieldDataID:
 		return m.OldDataID(ctx)
-	case certification.FieldProof:
-		return m.OldProof(ctx)
 	}
 	return nil, fmt.Errorf("unknown Certification field %s", name)
 }
@@ -460,13 +386,6 @@ func (m *CertificationMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDataID(v)
-		return nil
-	case certification.FieldProof:
-		v, ok := value.(json.RawMessage)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetProof(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Certification field %s", name)
@@ -512,11 +431,7 @@ func (m *CertificationMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *CertificationMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(certification.FieldProof) {
-		fields = append(fields, certification.FieldProof)
-	}
-	return fields
+	return nil
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -529,11 +444,6 @@ func (m *CertificationMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *CertificationMutation) ClearField(name string) error {
-	switch name {
-	case certification.FieldProof:
-		m.ClearProof()
-		return nil
-	}
 	return fmt.Errorf("unknown Certification nullable field %s", name)
 }
 
@@ -549,9 +459,6 @@ func (m *CertificationMutation) ResetField(name string) error {
 		return nil
 	case certification.FieldDataID:
 		m.ResetDataID()
-		return nil
-	case certification.FieldProof:
-		m.ResetProof()
 		return nil
 	}
 	return fmt.Errorf("unknown Certification field %s", name)

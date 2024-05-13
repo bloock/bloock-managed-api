@@ -18,8 +18,6 @@ const (
 	FieldHash = "hash"
 	// FieldDataID holds the string denoting the data_id field in the database.
 	FieldDataID = "data_id"
-	// FieldProof holds the string denoting the proof field in the database.
-	FieldProof = "proof"
 	// Table holds the table name of the certification in the database.
 	Table = "certifications"
 )
@@ -30,7 +28,6 @@ var Columns = []string{
 	FieldAnchorID,
 	FieldHash,
 	FieldDataID,
-	FieldProof,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

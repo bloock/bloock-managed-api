@@ -2,7 +2,6 @@ package notify
 
 import (
 	"context"
-	"github.com/bloock/bloock-managed-api/internal/config"
 	"github.com/bloock/bloock-managed-api/internal/domain"
 	"github.com/bloock/bloock-managed-api/internal/domain/repository"
 	bloock_repository "github.com/bloock/bloock-managed-api/internal/platform/repository"
@@ -14,10 +13,8 @@ type ServiceNotifier struct {
 	availabilityRepository repository.AvailabilityRepository
 	metadataRepository     repository.MetadataRepository
 	notificationRepository repository.NotificationRepository
-	integrityRepository    repository.IntegrityRepository
 	messageRepository      repository.MessageAggregatorRepository
 	processRepository      repository.ProcessRepository
-	apiKey                 string
 	logger                 zerolog.Logger
 }
 
@@ -25,11 +22,9 @@ func NewServiceNotifier(ctx context.Context, l zerolog.Logger, ent *connection.E
 	logger := l.With().Caller().Str("component", "service-notifier").Logger()
 
 	return &ServiceNotifier{
-		apiKey:                 config.Configuration.Bloock.ApiKey,
 		availabilityRepository: bloock_repository.NewBloockAvailabilityRepository(ctx, l),
 		metadataRepository:     bloock_repository.NewBloockMetadataRepository(ctx, l, ent),
 		notificationRepository: bloock_repository.NewHttpNotificationRepository(ctx, l),
-		integrityRepository:    bloock_repository.NewBloockIntegrityRepository(ctx, l),
 		messageRepository:      bloock_repository.NewMessageAggregatorRepository(ctx, l, ent),
 		processRepository:      bloock_repository.NewProcessRepository(ctx, l, ent),
 		logger:                 logger,
@@ -46,12 +41,6 @@ func (s ServiceNotifier) Notify(ctx context.Context, anchorID int) ([]domain.Cer
 	for _, crt := range certifications {
 		var fileBytes []byte
 		var err error
-
-		if s.apiKey != "" {
-			if err = s.saveProof(ctx, crt); err != nil {
-				return nil, err
-			}
-		}
 
 		if len(crt.Data) != 0 {
 			fileBytes = crt.Data
@@ -88,13 +77,4 @@ func (s ServiceNotifier) Notify(ctx context.Context, anchorID int) ([]domain.Cer
 	}
 
 	return aggregateCertifications, nil
-}
-
-func (s ServiceNotifier) saveProof(ctx context.Context, certification domain.Certification) error {
-	proof, err := s.integrityRepository.GetProof(ctx, certification.Hash, s.apiKey)
-	if err != nil {
-		return err
-	}
-
-	return s.metadataRepository.UpdateCertificationProof(ctx, certification, proof)
 }

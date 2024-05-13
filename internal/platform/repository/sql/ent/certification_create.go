@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -36,12 +35,6 @@ func (cc *CertificationCreate) SetHash(s string) *CertificationCreate {
 // SetDataID sets the "data_id" field.
 func (cc *CertificationCreate) SetDataID(s string) *CertificationCreate {
 	cc.mutation.SetDataID(s)
-	return cc
-}
-
-// SetProof sets the "proof" field.
-func (cc *CertificationCreate) SetProof(jm json.RawMessage) *CertificationCreate {
-	cc.mutation.SetProof(jm)
 	return cc
 }
 
@@ -167,10 +160,6 @@ func (cc *CertificationCreate) createSpec() (*Certification, *sqlgraph.CreateSpe
 	if value, ok := cc.mutation.DataID(); ok {
 		_spec.SetField(certification.FieldDataID, field.TypeString, value)
 		_node.DataID = value
-	}
-	if value, ok := cc.mutation.Proof(); ok {
-		_spec.SetField(certification.FieldProof, field.TypeJSON, value)
-		_node.Proof = value
 	}
 	return _node, _spec
 }

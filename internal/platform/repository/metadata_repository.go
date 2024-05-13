@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"encoding/json"
 	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent"
 	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/ent/message"
 	"strings"
@@ -44,17 +43,8 @@ func mapToCertification(cert *ent.Certification) domain.Certification {
 	}
 }
 
-func mapToProof(rawProof json.RawMessage) (domain.BloockProof, error) {
-	var proof domain.BloockProof
-	if err := json.Unmarshal(rawProof, &proof); err != nil {
-		return domain.BloockProof{}, err
-	}
-
-	return proof, nil
-}
-
-func (f BloockMetadataRepository) GetRecord(ctx context.Context, file []byte) (*record.Record, error) {
-	rec, err := f.recordClient.FromFile(file).Build()
+func (s BloockMetadataRepository) GetRecord(ctx context.Context, file []byte) (*record.Record, error) {
+	rec, err := s.recordClient.FromFile(file).Build()
 	if err != nil {
 		return nil, err
 	}
@@ -62,8 +52,8 @@ func (f BloockMetadataRepository) GetRecord(ctx context.Context, file []byte) (*
 	return &rec, nil
 }
 
-func (f BloockMetadataRepository) GetRecordDetails(ctx context.Context, file []byte) (*record.RecordDetails, error) {
-	rec, err := f.recordClient.FromFile(file).GetDetails()
+func (s BloockMetadataRepository) GetRecordDetails(ctx context.Context, file []byte) (*record.RecordDetails, error) {
+	rec, err := s.recordClient.FromFile(file).GetDetails()
 	if err != nil {
 		return nil, err
 	}
@@ -71,8 +61,8 @@ func (f BloockMetadataRepository) GetRecordDetails(ctx context.Context, file []b
 	return &rec, nil
 }
 
-func (f BloockMetadataRepository) GetFileHash(ctx context.Context, file []byte) (string, error) {
-	rec, err := f.recordClient.FromFile(file).Build()
+func (s BloockMetadataRepository) GetFileHash(ctx context.Context, file []byte) (string, error) {
+	rec, err := s.recordClient.FromFile(file).Build()
 	if err != nil {
 		return "", err
 	}
@@ -99,15 +89,15 @@ func (s BloockMetadataRepository) SaveCertification(ctx context.Context, certifi
 	return nil
 }
 
-func (c BloockMetadataRepository) UpdateCertification(ctx context.Context, certification domain.Certification) error {
-	exist, err := c.ExistCertificationByHash(ctx, certification.Hash)
+func (s BloockMetadataRepository) UpdateCertification(ctx context.Context, certification domain.Certification) error {
+	exist, err := s.ExistCertificationByHash(ctx, certification.Hash)
 	if err != nil {
 		return err
 	}
 	if !exist {
-		return c.SaveCertification(ctx, certification)
+		return s.SaveCertification(ctx, certification)
 	} else {
-		return c.UpdateCertificationDataID(ctx, certification)
+		return s.UpdateCertificationDataID(ctx, certification)
 	}
 }
 
@@ -130,23 +120,6 @@ func (s BloockMetadataRepository) GetCertificationsByAnchorID(ctx context.Contex
 	}
 
 	return certifications, nil
-}
-
-func (s BloockMetadataRepository) GetCertificationByHashAndAnchorID(ctx context.Context, hash string, anchorID int) (domain.Certification, domain.BloockProof, error) {
-	certificationSchema, err := s.connection.DB().Certification.Query().
-		Where(certification.AnchorID(anchorID), certification.HashEQ(hash)).Only(ctx)
-	if err != nil {
-		s.logger.Error().Err(err).Msg("")
-		return domain.Certification{}, domain.BloockProof{}, err
-	}
-
-	proof, err := mapToProof(certificationSchema.Proof)
-	if err != nil {
-		s.logger.Error().Err(err).Msg("")
-		return domain.Certification{}, domain.BloockProof{}, err
-	}
-
-	return mapToCertification(certificationSchema), proof, nil
 }
 
 func (s BloockMetadataRepository) FindCertificationByHash(ctx context.Context, hash string) (domain.Certification, error) {
@@ -179,16 +152,6 @@ func (s BloockMetadataRepository) UpdateCertificationDataID(ctx context.Context,
 		SetDataID(cert.DataID).
 		SetAnchorID(cert.AnchorID).
 		Where(certification.HashEQ(cert.Hash)).Save(ctx); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (s BloockMetadataRepository) UpdateCertificationProof(ctx context.Context, cert domain.Certification, proof json.RawMessage) error {
-	if _, err := s.connection.DB().Certification.Update().
-		SetProof(proof).
-		Where(certification.HashEQ(cert.Hash), certification.AnchorID(cert.AnchorID)).Save(ctx); err != nil {
 		return err
 	}
 
