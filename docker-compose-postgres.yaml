@@ -12,3 +12,20 @@ services:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       timeout: 5s
       retries: 5
+
+  bloock-managed-api:
+    image: bloock/managed-api:latest
+    container_name: bloock-managed-api
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+      - ./data:/app/data
+    ports:
+      - 8080:8080
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      BLOOCK_DB_CONNECTION_STRING: "postgresql://postgres:admin@postgres/managed?sslmode=disable"
+      BLOOCK_BLOOCK_API_KEY: ""
+      BLOOCK_BLOOCK_WEBHOOK_SECRET_KEY: ""
+      BLOOCK_WEBHOOK_CLIENT_ENDPOINT_URL: ""
