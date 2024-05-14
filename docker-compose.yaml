@@ -1,11 +1,10 @@
 services:
   bloock-managed-api:
     image: bloock/managed-api:latest
-    platform: linux/amd64
     container_name: bloock-managed-api
     volumes:
-      - ./config.yaml:/app/config.yaml:ro
-      - ./data:/app/data
+      - ./config.yaml:/home/nonroot/app/config.yaml:ro
+      - ./data:/home/nonroot/app/data
     ports:
       - 8080:8080
     environment:

@@ -3,6 +3,7 @@ package config
 import (
 	"errors"
 	"fmt"
+	"log"
 	"reflect"
 	"regexp"
 	"strings"
@@ -95,8 +96,10 @@ func InitConfig() (*Config, error) {
 	if err != nil {
 		switch err.(type) {
 		default:
+			log.Println("Enter 0")
 			return nil, fmt.Errorf("fatal error loading config file: %s", err)
 		case viper.ConfigFileNotFoundError:
+			log.Println("Enter 1")
 			return nil, errors.New("No config file found. Using defaults and environment variables")
 		}
 	}
@@ -105,6 +108,7 @@ func InitConfig() (*Config, error) {
 
 	err = viper.Unmarshal(&Configuration)
 	if err != nil {
+		log.Println("Enter 2")
 		return nil, fmt.Errorf("fatal error loading config file: %s", err)
 	}
 	defaults.SetDefaults(&Configuration)
@@ -113,6 +117,7 @@ func InitConfig() (*Config, error) {
 
 	if Configuration.Integrity.AggregateMode {
 		if Configuration.Bloock.ApiKey == "" {
+			log.Println("Enter 3")
 			return nil, errors.New("aggregate mode requires a BLOOCK Api Key set")
 		}
 	}

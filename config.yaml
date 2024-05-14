@@ -1,19 +1,19 @@
 api:
   host: "0.0.0.0"
   port: 8080
-  debug_mode: true
+  debug_mode: false
 
 db:
-  connection_string: "postgres://postgres:admin@localhost/managed?sslmode=disable"
+  connection_string: "file:bloock?mode=memory&cache=shared&_fk=1"
 
 auth:
   secret: ""
 
 bloock:
-  api_host: "https://api.bloock.dev"
-  api_key: "Fw93zvHaTu7VZeb50mfQi1C-K1iMWRJ0obFHUbvypInmz78hG-y0ZLSZKBo0H0V4"
+  api_host: ""
+  api_key: ""
   cdn_host: ""
-  webhook_secret_key: "sqGB7nEAmonrNhR80LijghwXRgo12ML4"
+  webhook_secret_key: ""
 
 webhook:
   client_endpoint_url: ""
@@ -36,7 +36,7 @@ encryption:
     pkcs12_password: ""
 
 integrity:
-  aggregate_mode: true
+  aggregate_mode: false
   aggregate_worker: false
   aggregate_interval:
 
