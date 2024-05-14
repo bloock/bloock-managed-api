@@ -3,8 +3,8 @@ services:
     image: bloock/managed-api:latest
     container_name: bloock-managed-api
     volumes:
-      - ./config.yaml:/home/nonroot/app/config.yaml:ro
-      - ./data:/home/nonroot/app/data
+      - ./config.yaml:/go/bin/config.yaml:ro
+      - ./data:/go/bin/data
     ports:
       - 8080:8080
     environment:

@@ -1,31 +1,28 @@
 ############################
 # STEP 1 build executable binary
 ############################
-FROM golang:buster as builder
-EXPOSE 8080
+FROM golang:1.22-bullseye AS build
+
+RUN useradd -u 1001 nonroot
 RUN update-ca-certificates
+
 WORKDIR /go/bin
 COPY . .
-RUN CGO_ENABLED=1 go build -buildvcs=false -o /go/bin/managed-api cmd/main.go
+RUN CGO_ENABLED=1 go build -buildvcs=false -ldflags="-linkmode external -extldflags -static" -o /go/bin/managed-api cmd/main.go
+
 
 ############################
 # STEP 2 create final image
 ############################
+FROM scratch
 
-FROM debian:buster-slim
+WORKDIR /go/bin
 
-RUN apt-get update && \
-    apt-get install -y ca-certificates sudo && \
-    adduser --disabled-password nonroot && \
-    echo 'nonroot ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers \
-RUN update-ca-certificates
+COPY --from=build /etc/passwd /etc/passwd
+COPY --from=build /go/bin/managed-api managed-api
+COPY --from=build /go/bin/static static
 
 USER nonroot
+EXPOSE 8080
 
-WORKDIR /home/nonroot/app
-COPY --from=builder --chown=nonroot:nonroot /go/bin/managed-api /home/nonroot/app/managed-api
-COPY --from=builder --chown=nonroot:nonroot /go/bin/static /home/nonroot/app/static
-
-RUN chmod -R 755 /home/nonroot/app
-
-ENTRYPOINT ["/home/nonroot/app/managed-api"]
+CMD ["/go/bin/managed-api"]
