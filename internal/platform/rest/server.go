@@ -12,6 +12,7 @@ import (
 	"github.com/bloock/bloock-managed-api/internal/platform/rest/middleware"
 	"github.com/gin-contrib/logger"
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog"
 )
 
@@ -27,15 +28,17 @@ func NewServer(l zerolog.Logger, ent *connection.EntConnection, maxProofMessageS
 	gin.DefaultWriter = l.With().Str("level", "info").Logger()
 	gin.DefaultErrorWriter = l.With().Str("level", "error").Logger()
 
-	router := gin.Default()
 	if config.Configuration.Api.DebugMode {
 		gin.SetMode(gin.DebugMode)
 	} else {
 		gin.SetMode(gin.ReleaseMode)
 	}
+	router := gin.Default()
 	if err := router.SetTrustedProxies(nil); err != nil {
 		return nil, err
 	}
+
+	_ = middleware.NewMetricsMiddleware()
 
 	router.Use(middleware.ErrorMiddleware())
 	router.Use(logger.SetLogger(
@@ -45,6 +48,9 @@ func NewServer(l zerolog.Logger, ent *connection.EntConnection, maxProofMessageS
 			return l
 		}),
 	))
+	router.Use(middleware.MetricsMiddleware())
+
+	router.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
 	v1 := router.Group("/v1/")
 	v1.GET("health", handler.Health())

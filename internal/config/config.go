@@ -3,13 +3,13 @@ package config
 import (
 	"errors"
 	"fmt"
+	"log"
 	"reflect"
 	"regexp"
 	"strings"
 
 	"github.com/bloock/bloock-sdk-go/v2"
 	"github.com/mcuadros/go-defaults"
-	"github.com/rs/zerolog"
 	"github.com/spf13/viper"
 )
 
@@ -86,7 +86,7 @@ type Config struct {
 
 var Configuration = Config{}
 
-func InitConfig(logger zerolog.Logger) (*Config, error) {
+func InitConfig() (*Config, error) {
 	viper.AutomaticEnv()
 	viper.SetEnvPrefix("bloock")
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
@@ -96,9 +96,11 @@ func InitConfig(logger zerolog.Logger) (*Config, error) {
 	if err != nil {
 		switch err.(type) {
 		default:
+			log.Println("Enter 0")
 			return nil, fmt.Errorf("fatal error loading config file: %s", err)
 		case viper.ConfigFileNotFoundError:
-			logger.Warn().Msg("No config file found. Using defaults and environment variables")
+			log.Println("Enter 1")
+			return nil, errors.New("No config file found. Using defaults and environment variables")
 		}
 	}
 
@@ -106,6 +108,7 @@ func InitConfig(logger zerolog.Logger) (*Config, error) {
 
 	err = viper.Unmarshal(&Configuration)
 	if err != nil {
+		log.Println("Enter 2")
 		return nil, fmt.Errorf("fatal error loading config file: %s", err)
 	}
 	defaults.SetDefaults(&Configuration)
@@ -114,6 +117,7 @@ func InitConfig(logger zerolog.Logger) (*Config, error) {
 
 	if Configuration.Integrity.AggregateMode {
 		if Configuration.Bloock.ApiKey == "" {
+			log.Println("Enter 3")
 			return nil, errors.New("aggregate mode requires a BLOOCK Api Key set")
 		}
 	}

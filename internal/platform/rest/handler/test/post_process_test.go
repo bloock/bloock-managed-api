@@ -121,7 +121,7 @@ func TestProcessService(t *testing.T) {
 		viper.Set("authenticity.key.key_type", "Rsa2048")
 		viper.Set("authenticity.key.key", authenticityKey.PrivateKey)
 
-		config.InitConfig(zerolog.Logger{})
+		config.InitConfig()
 
 		req := request.ProcessFormRequest{
 			Url: UrlFile,
@@ -197,7 +197,7 @@ func TestProcessService(t *testing.T) {
 		viper.Set("authenticity.certificate.pkcs12_path", path)
 		viper.Set("authenticity.certificate.pkcs12_password", "password")
 
-		config.InitConfig(zerolog.Logger{})
+		config.InitConfig()
 
 		req := request.ProcessFormRequest{
 			Url: UrlFile,
@@ -249,7 +249,7 @@ func TestProcessService(t *testing.T) {
 		viper.Set("encryption.key.key_type", "Aes128")
 		viper.Set("encryption.key.key", encryptionKey.Key)
 
-		config.InitConfig(zerolog.Logger{})
+		config.InitConfig()
 
 		req := request.ProcessFormRequest{
 			Url: UrlFile,
@@ -386,7 +386,7 @@ func TestProcessService(t *testing.T) {
 		viper.Set("storage.local_strategy", "HASH")
 		viper.Set("storage.local_path", "./tmp")
 
-		config.InitConfig(zerolog.Logger{})
+		config.InitConfig()
 
 		req := request.ProcessFormRequest{
 			Url: UrlFile,
@@ -411,7 +411,7 @@ func TestProcessService(t *testing.T) {
 		viper.Set("storage.local_strategy", "FILENAME")
 		viper.Set("storage.local_path", "./tmp")
 
-		config.InitConfig(zerolog.Logger{})
+		config.InitConfig()
 
 		req := request.ProcessFormRequest{
 			Url: UrlFile,
