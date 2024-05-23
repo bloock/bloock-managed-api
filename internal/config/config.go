@@ -99,7 +99,6 @@ func InitConfig() (*Config, error) {
 			return nil, fmt.Errorf("fatal error loading config file: %s", err)
 		case viper.ConfigFileNotFoundError:
 			log.Println("No config file found. Using defaults and environment variables")
-			return nil, nil
 		}
 	}
 
