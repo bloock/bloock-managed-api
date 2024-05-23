@@ -10,6 +10,7 @@ import (
 	"github.com/bloock/bloock-managed-api/internal/platform/rest/handler/proof"
 	"github.com/bloock/bloock-managed-api/internal/platform/rest/handler/webhook"
 	"github.com/bloock/bloock-managed-api/internal/platform/rest/middleware"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/logger"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -37,9 +38,14 @@ func NewServer(l zerolog.Logger, ent *connection.EntConnection, maxProofMessageS
 	if err := router.SetTrustedProxies(nil); err != nil {
 		return nil, err
 	}
+	corsConfig := cors.DefaultConfig()
+	corsConfig.AllowOrigins = []string{"*"}
+	corsConfig.AllowHeaders = []string{"*"}
+	corsConfig.AllowCredentials = true
 
 	_ = middleware.NewMetricsMiddleware()
 
+	router.Use(cors.New(corsConfig))
 	router.Use(middleware.ErrorMiddleware())
 	router.Use(logger.SetLogger(
 		logger.WithSkipPath([]string{"/health"}),
