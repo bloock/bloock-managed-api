@@ -1,7 +1,7 @@
 ############################
 # STEP 1 build executable binary
 ############################
-FROM golang:1.22-bullseye AS build
+FROM golang:1.22.3-bookworm AS build
 
 RUN useradd -u 1001 nonroot
 RUN update-ca-certificates
@@ -14,7 +14,7 @@ RUN CGO_ENABLED=1 go build -buildvcs=false -ldflags="-linkmode external -extldfl
 ############################
 # STEP 2 create final image
 ############################
-FROM scratch
+FROM debian:bookworm-slim
 
 WORKDIR /go/bin
 
