@@ -21,6 +21,7 @@ WORKDIR /go/bin
 COPY --from=build /etc/passwd /etc/passwd
 COPY --from=build /go/bin/managed-api managed-api
 COPY --from=build /go/bin/static static
+RUN chown -R nonroot:1001 /go/bin
 
 USER nonroot
 EXPOSE 8080
