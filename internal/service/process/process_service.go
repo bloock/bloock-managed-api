@@ -13,7 +13,6 @@ import (
 	"github.com/bloock/bloock-sdk-go/v2/entity/key"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
-	"log"
 	"net/http"
 	"net/url"
 	"path"
@@ -62,7 +61,6 @@ func NewProcessService(ctx context.Context, l zerolog.Logger, ent *connection.En
 func (s ProcessService) Process(ctx context.Context, req request.ProcessRequest) (*response.ProcessResponse, error) {
 	rec, err := s.metadataRepository.GetRecord(ctx, req.File.Bytes())
 	if err != nil {
-		log.Println("Enter")
 		return nil, err
 	}
 

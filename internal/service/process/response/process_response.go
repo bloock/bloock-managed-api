@@ -136,3 +136,14 @@ func (p ProcessResponse) MapToHandlerProcessResponse() http_response.ProcessResp
 
 	return resp
 }
+
+func MapToHandlerArrayProcessResponse(ps []ProcessResponse) http_response.ArrayProcessResponse {
+	processResponse := make([]http_response.ProcessResponse, 0)
+	for _, res := range ps {
+		processResponse = append(processResponse, res.MapToHandlerProcessResponse())
+	}
+	return http_response.ArrayProcessResponse{
+		Success:   true,
+		Processes: processResponse,
+	}
+}

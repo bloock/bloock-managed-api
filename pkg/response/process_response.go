@@ -10,6 +10,11 @@ type ProcessResponse struct {
 	Availability *AvailabilityJSONResponse `json:"availability,omitempty"`
 }
 
+type ArrayProcessResponse struct {
+	Success   bool              `json:"success"`
+	Processes []ProcessResponse `json:"processes"`
+}
+
 type IntegrityJSONResponse struct {
 	Enabled  bool `json:"enabled"`
 	AnchorId int  `json:"anchor_id"`
