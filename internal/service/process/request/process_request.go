@@ -72,7 +72,7 @@ type ProcessRequest struct {
 	Availability AvailabilityRequest
 }
 
-func NewProcessRequest(file domain.File, request *request.ProcessFormRequest) (*ProcessRequest, error) {
+func NewProcessRequest(file domain.File, request request.ProcessFormRequest) (*ProcessRequest, error) {
 	processRequestInstance := &ProcessRequest{}
 
 	processRequestInstance.File = file

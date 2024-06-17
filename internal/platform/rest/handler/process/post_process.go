@@ -3,21 +3,26 @@ package process
 import (
 	"errors"
 	"fmt"
-	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/connection"
-	"io"
-	"mime/multipart"
-	"net/http"
-	"net/url"
-
 	"github.com/bloock/bloock-managed-api/internal/domain"
+	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/connection"
 	api_error "github.com/bloock/bloock-managed-api/internal/platform/rest/error"
 	"github.com/bloock/bloock-managed-api/internal/service/process"
 	"github.com/bloock/bloock-managed-api/internal/service/process/request"
+	"github.com/bloock/bloock-managed-api/internal/service/process/response"
 	http_request "github.com/bloock/bloock-managed-api/pkg/request"
-	"github.com/rs/zerolog"
-
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog"
+	"io"
+	"mime/multipart"
+	"net/http"
 )
+
+func mapToPostProcessResponse(resp []response.ProcessResponse) interface{} {
+	if len(resp) == 1 {
+		return resp[0].MapToHandlerProcessResponse()
+	}
+	return response.MapToHandlerArrayProcessResponse(resp)
+}
 
 func PostProcess(l zerolog.Logger, ent *connection.EntConnection) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
@@ -38,25 +43,18 @@ func PostProcess(l zerolog.Logger, ent *connection.EntConnection) gin.HandlerFun
 
 		processService := process.NewProcessService(ctx, l, ent)
 
-		var file domain.File
-		if multiPartForm.File["file"] != nil {
-			file, err = loadFile(multiPartForm.File["file"])
+		var files []domain.File
+		if existFilesMultipart(multiPartForm.File) {
+			files, err = loadFiles(multiPartForm.File)
 			if err != nil {
 				badRequestAPIError := api_error.NewBadRequestAPIError(err.Error())
 				ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
 				return
 			}
 		} else if formData.Url != "" {
-			u, err := url.ParseRequestURI(formData.Url)
+			files, err = processService.LoadUrl(ctx, formData.Url)
 			if err != nil {
-				badRequestAPIError := api_error.NewBadRequestAPIError("Invalid URL provided")
-				ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
-				return
-			}
-
-			file, err = processService.LoadUrl(ctx, u)
-			if err != nil {
-				badRequestAPIError := api_error.NewBadRequestAPIError("Invalid URL provided")
+				badRequestAPIError := api_error.NewBadRequestAPIError(err.Error())
 				ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
 				return
 			}
@@ -66,48 +64,65 @@ func PostProcess(l zerolog.Logger, ent *connection.EntConnection) gin.HandlerFun
 			return
 		}
 
-		processRequest, err := request.NewProcessRequest(file, &formData)
-		if err != nil {
-			badRequestAPIError := api_error.NewBadRequestAPIError(err.Error())
-			ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
-			return
-		}
-
-		processResponse, err := processService.Process(ctx, *processRequest)
-		if err != nil {
-			if errors.Is(process.ErrAggregateModeDisabled, err) {
+		responses := make([]response.ProcessResponse, 0)
+		for _, file := range files {
+			processRequest, err := request.NewProcessRequest(file, formData)
+			if err != nil {
 				badRequestAPIError := api_error.NewBadRequestAPIError(err.Error())
 				ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
 				return
 			}
-			serverAPIError := api_error.NewInternalServerAPIError(err.Error())
-			ctx.JSON(serverAPIError.Status, serverAPIError)
-			return
+			processResponse, err := processService.Process(ctx, *processRequest)
+			if err != nil {
+				if errors.Is(process.ErrAggregateModeDisabled, err) {
+					badRequestAPIError := api_error.NewBadRequestAPIError(err.Error())
+					ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
+					return
+				}
+				serverAPIError := api_error.NewInternalServerAPIError(err.Error())
+				ctx.JSON(serverAPIError.Status, serverAPIError)
+				return
+			}
+			responses = append(responses, *processResponse)
 		}
 
-		ctx.JSON(http.StatusOK, processResponse.MapToHandlerProcessResponse())
+		ctx.JSON(http.StatusOK, mapToPostProcessResponse(responses))
 	}
 }
 
-func loadFile(formsData []*multipart.FileHeader) (domain.File, error) {
-	for _, formData := range formsData {
-		fileReader, err := formData.Open()
-		if err != nil {
-			return domain.File{}, err
-		}
+func loadFiles(files map[string][]*multipart.FileHeader) ([]domain.File, error) {
+	filesDomain := make([]domain.File, 0)
+	for _, formsData := range files {
+		for _, formData := range formsData {
+			fileReader, err := formData.Open()
+			if err != nil {
+				return []domain.File{}, err
+			}
 
-		filename := formData.Filename
-		file, err := io.ReadAll(fileReader)
-		if err != nil {
-			return domain.File{}, err
-		}
-		if len(file) == 0 {
-			return domain.File{}, fmt.Errorf("file must be a valid file")
-		}
+			filename := formData.Filename
+			file, err := io.ReadAll(fileReader)
+			if err != nil {
+				return []domain.File{}, err
+			}
+			if len(file) == 0 {
+				return []domain.File{}, fmt.Errorf("file must be a valid file")
+			}
 
-		contentType := http.DetectContentType(file)
+			contentType := http.DetectContentType(file)
 
-		return domain.NewFile(file, filename, contentType), nil
+			filesDomain = append(filesDomain, domain.NewFile(file, filename, contentType))
+		}
 	}
-	return domain.File{}, nil
+
+	return filesDomain, nil
+}
+
+func existFilesMultipart(files map[string][]*multipart.FileHeader) bool {
+	ok := false
+	for _, values := range files {
+		if values != nil {
+			ok = true
+		}
+	}
+	return ok
 }

@@ -15,4 +15,5 @@ type AvailabilityRepository interface {
 	RetrieveTmp(ctx context.Context, filename string) ([]byte, error)
 	RetrieveLocal(ctx context.Context, filePath string) ([]byte, error)
 	FindFile(ctx context.Context, dataID string) ([]byte, error)
+	FindAll(ctx context.Context, id string) ([]domain.File, error)
 }

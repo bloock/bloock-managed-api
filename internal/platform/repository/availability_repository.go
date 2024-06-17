@@ -4,15 +4,18 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io"
-	"net/http"
-	"net/url"
-	"os"
-
 	"github.com/bloock/bloock-managed-api/internal/config"
 	"github.com/bloock/bloock-managed-api/internal/domain"
 	"github.com/bloock/bloock-managed-api/internal/domain/repository"
 	"github.com/bloock/bloock-managed-api/internal/pkg"
+	"github.com/hashicorp/go-getter"
+	"io/fs"
+	"net/http"
+	"net/url"
+	"os"
+	"path/filepath"
+	"strings"
+	"time"
 
 	"github.com/bloock/bloock-sdk-go/v2/client"
 	"github.com/bloock/bloock-sdk-go/v2/entity/availability"
@@ -25,6 +28,7 @@ type BloockAvailabilityRepository struct {
 	localStoragePath     string
 	localStorageStrategy domain.LocalStorageStrategy
 	tmpPath              string
+	timeout              time.Duration
 	logger               zerolog.Logger
 }
 
@@ -38,6 +42,7 @@ func NewBloockAvailabilityRepository(ctx context.Context, l zerolog.Logger) repo
 		localStoragePath:     config.Configuration.Storage.LocalPath,
 		localStorageStrategy: domain.LocalStorageStrategyFromString(config.Configuration.Storage.LocalStrategy),
 		tmpPath:              config.Configuration.Storage.TmpDir,
+		timeout:              15 * time.Second,
 		logger:               logger,
 	}
 }
@@ -112,21 +117,28 @@ func (b BloockAvailabilityRepository) RetrieveTmp(ctx context.Context, filename 
 func (b BloockAvailabilityRepository) FindFile(ctx context.Context, id string) ([]byte, error) {
 	if _, err := url.ParseRequestURI(id); err != nil {
 		// is not a url
-
 		file, err := b.downloadUrl(ctx, fmt.Sprintf("%s/hosting/v1/hosted/%s", config.Configuration.Bloock.CdnHost, id))
 		if err != nil {
 			file, err := b.downloadUrl(ctx, fmt.Sprintf("%s/hosting/v1/ipfs/%s", config.Configuration.Bloock.CdnHost, id))
 			if err != nil {
 				return nil, err
 			}
-			return file, nil
+			return file[0].Bytes(), nil
 		}
 
-		return file, nil
+		return file[0].Bytes(), nil
 	} else {
 		// is a url
-		return b.downloadUrl(ctx, id)
+		files, err := b.downloadUrl(ctx, id)
+		if err != nil {
+			return nil, err
+		}
+		return files[0].Bytes(), nil
 	}
+}
+
+func (b BloockAvailabilityRepository) FindAll(ctx context.Context, id string) ([]domain.File, error) {
+	return b.downloadUrl(ctx, id)
 }
 
 func (b BloockAvailabilityRepository) saveLocalFile(ctx context.Context, dir string, name string, record record.Record) (string, error) {
@@ -154,21 +166,78 @@ func (b BloockAvailabilityRepository) saveLocalFile(ctx context.Context, dir str
 	return uri.String(), nil
 }
 
-func (b BloockAvailabilityRepository) downloadUrl(ctx context.Context, url string) ([]byte, error) {
-	resp, err := http.Get(url)
+func (b BloockAvailabilityRepository) downloadUrl(ctx context.Context, url string) ([]domain.File, error) {
+	tmpDir := "./tmp_url"
+
+	ctxTimeout, cancel := context.WithTimeout(ctx, b.timeout)
+	defer cancel()
+
+	getterClient := &getter.Client{
+		Ctx:  ctx,
+		Dst:  tmpDir,
+		Src:  url,
+		Mode: getter.ClientModeAny,
+		Getters: map[string]getter.Getter{
+			"git":   &getter.GitGetter{},
+			"https": &getter.HttpGetter{},
+		},
+		Options: []getter.ClientOption{
+			getter.WithContext(ctxTimeout),
+		},
+	}
+	if err := getterClient.Get(); err != nil {
+		_ = os.RemoveAll(tmpDir)
+		return nil, fmt.Errorf("error downloading from url: %s", err.Error())
+	}
+	filesDomain := make([]domain.File, 0)
+
+	if err := readFilesRecursive(tmpDir, &filesDomain); err != nil {
+		_ = os.RemoveAll(tmpDir)
+		return nil, err
+	}
+
+	if err := os.RemoveAll(tmpDir); err != nil {
+		return nil, err
+	}
+
+	return filesDomain, nil
+}
+
+func readFilesRecursive(dirPath string, filesDomain *[]domain.File) error {
+	entries, err := os.ReadDir(dirPath)
 	if err != nil {
-		return []byte{}, fmt.Errorf("error downloading file from %s: %s", url, err.Error())
+		return err
 	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return []byte{}, fmt.Errorf("error downloading file from %s: received status code %d", url, resp.StatusCode)
-	}
-
-	file, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return []byte{}, fmt.Errorf("error downloading file from %s: %s", url, err.Error())
+	files := make([]fs.FileInfo, 0, len(entries))
+	for _, entry := range entries {
+		info, err := entry.Info()
+		if err != nil {
+			return err
+		}
+		files = append(files, info)
 	}
 
-	return file, nil
+	for _, file := range files {
+		if strings.HasPrefix(file.Name(), ".") {
+			continue
+		}
+
+		filePath := filepath.Join(dirPath, file.Name())
+
+		if file.IsDir() {
+			err = readFilesRecursive(filePath, filesDomain)
+			if err != nil {
+				return err
+			}
+		} else {
+			fileBytes, err := os.ReadFile(filePath)
+			if err != nil {
+				return fmt.Errorf("error reading file %s: %v", filePath, err)
+			}
+
+			*filesDomain = append(*filesDomain, domain.NewFile(fileBytes, file.Name(), http.DetectContentType(fileBytes)))
+		}
+	}
+
+	return nil
 }
