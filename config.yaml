@@ -1,18 +1,18 @@
 api:
   host: "0.0.0.0"
   port: 8080
-  debug_mode: false
+  debug_mode: true
 
 db:
-  connection_string: "file:bloock?mode=memory&cache=shared&_fk=1"
+  connection_string: "postgresql://postgres:admin@localhost:5432/managed?sslmode=disable"
 
 auth:
   secret: ""
 
 bloock:
-  api_host: ""
-  api_key: ""
-  cdn_host: ""
+  api_host: "https://api.bloock.dev"
+  api_key: "Fw93zvHaTu7VZeb50mfQi1C-K1iMWRJ0obFHUbvypInmz78hG-y0ZLSZKBo0H0V4"
+  cdn_host: "https://cdn.bloock.dev"
   webhook_secret_key: ""
 
 webhook:

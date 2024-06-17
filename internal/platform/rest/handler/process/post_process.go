@@ -10,13 +10,11 @@ import (
 	"github.com/bloock/bloock-managed-api/internal/service/process/request"
 	"github.com/bloock/bloock-managed-api/internal/service/process/response"
 	http_request "github.com/bloock/bloock-managed-api/pkg/request"
+	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 	"io"
 	"mime/multipart"
 	"net/http"
-	"net/url"
-
-	"github.com/gin-gonic/gin"
 )
 
 func mapToPostProcessResponse(resp []response.ProcessResponse) interface{} {
@@ -54,20 +52,12 @@ func PostProcess(l zerolog.Logger, ent *connection.EntConnection) gin.HandlerFun
 				return
 			}
 		} else if formData.Url != "" {
-			u, err := url.ParseRequestURI(formData.Url)
+			files, err = processService.LoadUrl(ctx, formData.Url)
 			if err != nil {
-				badRequestAPIError := api_error.NewBadRequestAPIError("Invalid URL provided")
+				badRequestAPIError := api_error.NewBadRequestAPIError(err.Error())
 				ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
 				return
 			}
-
-			file, err := processService.LoadUrl(ctx, u)
-			if err != nil {
-				badRequestAPIError := api_error.NewBadRequestAPIError("Invalid URL provided")
-				ctx.JSON(badRequestAPIError.Status, badRequestAPIError)
-				return
-			}
-			files = append(files, file)
 		} else {
 			badRequestAPIError := api_error.NewBadRequestAPIError("You must provide a file or URL")
 			ctx.JSON(badRequestAPIError.Status, badRequestAPIError)

@@ -11,14 +11,9 @@ import (
 	"github.com/bloock/bloock-managed-api/internal/service/process/request"
 	"github.com/bloock/bloock-managed-api/internal/service/process/response"
 	"github.com/bloock/bloock-sdk-go/v2/entity/key"
+	"github.com/bloock/bloock-sdk-go/v2/entity/record"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
-	"net/http"
-	"net/url"
-	"path"
-	"strings"
-
-	"github.com/bloock/bloock-sdk-go/v2/entity/record"
 )
 
 var (
@@ -176,23 +171,8 @@ func (s ProcessService) Process(ctx context.Context, req request.ProcessRequest)
 	return processResponse, nil
 }
 
-func (s ProcessService) LoadUrl(ctx context.Context, url *url.URL) (domain.File, error) {
-	fileBytes, err := s.availabilityRepository.FindFile(ctx, url.String())
-	if err != nil {
-		return domain.File{}, err
-	}
-
-	filename := path.Base(url.Path)
-	if filename == "" {
-		pathParts := strings.Split(url.Path, "/")
-
-		// If it's empty, use the second-to-last part as the filename
-		if len(pathParts) >= 2 {
-			filename = pathParts[len(pathParts)-2]
-		}
-	}
-
-	return domain.NewFile(fileBytes, filename, http.DetectContentType(fileBytes)), nil
+func (s ProcessService) LoadUrl(ctx context.Context, url string) ([]domain.File, error) {
+	return s.availabilityRepository.FindAll(ctx, url)
 }
 
 func (s ProcessService) certify(ctx context.Context, data []byte, aggregate bool) (domain.Certification, error) {
