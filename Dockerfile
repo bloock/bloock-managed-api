@@ -21,6 +21,8 @@ WORKDIR /go/bin
 COPY --from=build /etc/passwd /etc/passwd
 COPY --from=build /go/bin/managed-api managed-api
 COPY --from=build /go/bin/static static
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+
 RUN chown -R nonroot:1001 /go/bin
 
 USER nonroot
