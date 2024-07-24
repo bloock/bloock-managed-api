@@ -5,6 +5,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"github.com/bloock/bloock-managed-api/internal/config"
 	"io"
 	"net/http"
 	"strings"
@@ -95,7 +97,7 @@ func (b BloockIntegrityRepository) Certify(ctx context.Context, file []byte) (do
 }
 
 func (b BloockIntegrityRepository) CertifyFromHash(ctx context.Context, hash string, apiKey string) (domain.Certification, error) {
-	url := "https://api.bloock.dev/records/v1/records"
+	url := fmt.Sprintf("%s/records/v1/records", config.Configuration.Bloock.ApiHost)
 
 	auth := b.apiKey
 	if apiKey != "" {
@@ -113,7 +115,7 @@ func (b BloockIntegrityRepository) CertifyFromHash(ctx context.Context, hash str
 }
 
 func (b BloockIntegrityRepository) GetProof(ctx context.Context, hash []string, apiKey string) (domain.BloockProof, error) {
-	url := "https://api.bloock.dev/proof/v1/proof"
+	url := fmt.Sprintf("%s/proof/v1/proof", config.Configuration.Bloock.ApiHost)
 
 	auth := b.apiKey
 	if apiKey != "" {
