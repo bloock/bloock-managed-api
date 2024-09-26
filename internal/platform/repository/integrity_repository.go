@@ -41,6 +41,7 @@ func NewBloockIntegrityRepository(ctx context.Context, l zerolog.Logger) reposit
 		httpClient: http.Client{},
 		apiKey:     apiKey,
 		client:     c,
+		apiVersion: config.Configuration.Api.ApiVersion,
 		logger:     logger,
 	}
 }
