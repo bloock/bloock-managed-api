@@ -27,6 +27,7 @@ type BloockIntegrityRepository struct {
 	httpClient http.Client
 	client     client.BloockClient
 	apiKey     string
+	apiVersion string
 	logger     zerolog.Logger
 }
 
@@ -148,6 +149,7 @@ func (b BloockIntegrityRepository) postRequest(url string, body interface{}, res
 	}
 	req.Header.Set("X-API-KEY", apiKey)
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("api_version", b.apiVersion)
 
 	resp, err := b.httpClient.Do(req)
 	if err != nil {

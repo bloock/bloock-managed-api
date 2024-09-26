@@ -17,6 +17,7 @@ type APIConfig struct {
 	Host      string `mapstructure:"host" default:"0.0.0.0"`
 	Port      string `mapstructure:"port" default:"8080"`
 	DebugMode bool   `mapstructure:"debug_mode" default:"false"`
+	ApiVersion string `mapstructure:"api_version" default:"2024-09-01"`
 }
 
 type AuthConfig struct {
