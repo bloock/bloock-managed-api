@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	entgo.io/ent v0.12.4
-	github.com/bloock/bloock-sdk-go/v2 v2.9.4
+	github.com/bloock/bloock-sdk-go/v2 v2.9.6
 	github.com/cenkalti/backoff/v4 v4.2.1
 	github.com/gin-contrib/cors v1.7.2
 	github.com/gin-contrib/logger v0.2.6

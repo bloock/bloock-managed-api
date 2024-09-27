@@ -48,11 +48,19 @@ func NewBloockAvailabilityRepository(ctx context.Context, l zerolog.Logger) repo
 }
 
 func (b BloockAvailabilityRepository) UploadHosted(ctx context.Context, file *domain.File, record record.Record) (string, error) {
-	return b.client.AvailabilityClient.Publish(record, availability.NewHostedPublisher())
+	response, err := b.client.AvailabilityClient.Publish(record, availability.NewHostedPublisher())
+	if err != nil {
+		return "", err
+	}
+	return response.ID, nil
 }
 
 func (b BloockAvailabilityRepository) UploadIpfs(ctx context.Context, file *domain.File, record record.Record) (string, error) {
-	return b.client.AvailabilityClient.Publish(record, availability.NewIpfsPublisher())
+	response, err := b.client.AvailabilityClient.Publish(record, availability.NewIpfsPublisher())
+	if err != nil {
+		return "", err
+	}
+	return response.ID, nil
 }
 
 func (b BloockAvailabilityRepository) UploadLocal(ctx context.Context, file *domain.File) (string, error) {
