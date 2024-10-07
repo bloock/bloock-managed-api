@@ -25,7 +25,7 @@ func PutAggregate(l zerolog.Logger, ent *connection.EntConnection) gin.HandlerFu
 				ctx.JSON(badAPIError.Status, badAPIError)
 				return
 			}
-			serverAPIError := api_error.NewInternalServerAPIError(err.Error())
+			serverAPIError := api_error.NewInternalServerAPIError(err)
 			ctx.JSON(serverAPIError.Status, serverAPIError)
 			return
 		}

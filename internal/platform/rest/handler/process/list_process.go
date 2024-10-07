@@ -29,7 +29,7 @@ func ListProcess(l zerolog.Logger, ent *connection.EntConnection) gin.HandlerFun
 		service := process.NewListProcess(ctx, l, ent)
 		listProcess, pagination, err := service.List(ctx, pq)
 		if err != nil {
-			serverAPIError := api_error.NewInternalServerAPIError(err.Error())
+			serverAPIError := api_error.NewInternalServerAPIError(err)
 			ctx.JSON(serverAPIError.Status, serverAPIError)
 			return
 		}

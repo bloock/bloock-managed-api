@@ -10,6 +10,7 @@ import (
 	"github.com/bloock/bloock-managed-api/internal/platform/rest/handler/proof"
 	"github.com/bloock/bloock-managed-api/internal/platform/rest/handler/webhook"
 	"github.com/bloock/bloock-managed-api/internal/platform/rest/middleware"
+	sentrygin "github.com/getsentry/sentry-go/gin"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/logger"
 	"github.com/gin-gonic/gin"
@@ -55,6 +56,9 @@ func NewServer(l zerolog.Logger, ent *connection.EntConnection, maxProofMessageS
 		}),
 	))
 	router.Use(middleware.MetricsMiddleware())
+	if config.Configuration.Tracing.Enabled {
+		router.Use(sentrygin.New(sentrygin.Options{Repanic: true}))
+	}
 
 	router.GET("/metrics", gin.WrapH(promhttp.Handler()))
 

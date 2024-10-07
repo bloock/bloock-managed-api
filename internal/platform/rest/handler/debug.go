@@ -37,7 +37,7 @@ func Debug() gin.HandlerFunc {
 
 		file, err := io.ReadAll(fileReader)
 		if err != nil {
-			serverAPIError := api_error.NewInternalServerAPIError(err.Error())
+			serverAPIError := api_error.NewInternalServerAPIError(err)
 			ctx.JSON(serverAPIError.Status, serverAPIError)
 			return
 		}

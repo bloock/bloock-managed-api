@@ -66,7 +66,7 @@ jobs:
           token: ${{ secrets.repo_api_token }}
           repository: bloock/managed-services-actions
           event-type: deploy_managed_api_dev
-          client-payload: '{"version": "${{ needs.push.outputs.version }}"}'
+          client-payload: '{"version": "${{ needs.push.outputs.version }}", "environment": "development"}'
 
   deploy-pro:
     name: Deploy PRO
@@ -80,4 +80,4 @@ jobs:
           token: ${{ secrets.repo_api_token }}
           repository: bloock/managed-services-actions
           event-type: deploy_managed_api_pro
-          client-payload: '{"version": "${{ needs.push.outputs.version }}"}'
+          client-payload: '{"version": "${{ needs.push.outputs.version }}", "environment": "production"}'

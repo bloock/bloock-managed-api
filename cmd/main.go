@@ -6,6 +6,8 @@ import (
 	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/connection"
 	"github.com/bloock/bloock-managed-api/internal/platform/worker"
 	"github.com/bloock/bloock-managed-api/pkg"
+	"github.com/getsentry/sentry-go"
+	"log"
 	"sync"
 
 	"github.com/bloock/bloock-managed-api/internal/config"
@@ -19,6 +21,28 @@ func main() {
 	}
 
 	logger := pkg.InitLogger(config.Configuration.Api.DebugMode)
+
+	// Initialize tracer if set
+	if config.Configuration.Tracing.Enabled {
+		options := sentry.ClientOptions{
+			Dsn:         config.Configuration.Tracing.TracerConnUrl,
+			Environment: config.Configuration.Tracing.AppEnvironment,
+			Release:     config.Configuration.Tracing.AppVersion,
+		}
+		if config.Configuration.Tracing.AppEnvironment == "production" {
+			options.EnableTracing = true
+			options.TracesSampleRate = 1.0
+			options.TracesSampler = func(ctx sentry.SamplingContext) float64 {
+				if ctx.Span.Op == "http.server" {
+					return 1.0
+				}
+				return 0.0
+			}
+		}
+		if err = sentry.Init(options); err != nil {
+			log.Fatal(err.Error())
+		}
+	}
 
 	wg := sync.WaitGroup{}
 	wg.Add(1)

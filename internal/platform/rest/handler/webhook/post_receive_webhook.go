@@ -2,6 +2,7 @@ package webhook
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/bloock/bloock-managed-api/internal/platform/repository/sql/connection"
 	"io"
 	"net/http"
@@ -46,7 +47,7 @@ func PostReceiveWebhook(l zerolog.Logger, ent *connection.EntConnection) gin.Han
 	return func(ctx *gin.Context) {
 		buf, err := io.ReadAll(ctx.Request.Body)
 		if err != nil {
-			webhookErr := api_error.NewInternalServerAPIError("error while reading webhook body")
+			webhookErr := api_error.NewInternalServerAPIError(errors.New("error while reading webhook body"))
 			ctx.JSON(webhookErr.Status, webhookErr)
 			return
 		}
@@ -62,7 +63,7 @@ func PostReceiveWebhook(l zerolog.Logger, ent *connection.EntConnection) gin.Han
 		webhookClient := client.NewWebhookClient()
 		ok, err := webhookClient.VerifyWebhookSignature(buf, bloockSignature, config.Configuration.Bloock.WebhookSecretKey, false)
 		if err != nil {
-			serverAPIError := api_error.NewInternalServerAPIError(err.Error())
+			serverAPIError := api_error.NewInternalServerAPIError(err)
 			ctx.JSON(serverAPIError.Status, serverAPIError)
 			return
 		}
@@ -75,7 +76,7 @@ func PostReceiveWebhook(l zerolog.Logger, ent *connection.EntConnection) gin.Han
 		notifyService := notify.NewServiceNotifier(ctx, l, ent)
 		aggregateHash, err := notifyService.Notify(ctx, webhookRequest.Data.Id)
 		if err != nil {
-			serverAPIError := api_error.NewInternalServerAPIError(err.Error())
+			serverAPIError := api_error.NewInternalServerAPIError(err)
 			ctx.JSON(serverAPIError.Status, serverAPIError)
 			return
 		}
@@ -83,7 +84,7 @@ func PostReceiveWebhook(l zerolog.Logger, ent *connection.EntConnection) gin.Han
 		go func() {
 			notifyAggregateService := notify.NewServiceAggregateNotifier(ctx, l, ent)
 			if err = notifyAggregateService.Notify(ctx, aggregateHash); err != nil {
-				serverAPIError := api_error.NewInternalServerAPIError(err.Error())
+				serverAPIError := api_error.NewInternalServerAPIError(err)
 				ctx.JSON(serverAPIError.Status, serverAPIError)
 				return
 			}

@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"errors"
 	api_error "github.com/bloock/bloock-managed-api/internal/platform/rest/error"
 	"github.com/gin-gonic/gin"
 )
@@ -22,7 +23,7 @@ func errorMiddleware(errType gin.ErrorType) gin.HandlerFunc {
 			case *api_error.APIError:
 				parsedError = *v
 			default:
-				parsedError = *api_error.NewInternalServerAPIError("Internal Server Error")
+				parsedError = *api_error.NewInternalServerAPIError(errors.New("Internal Server Error"))
 			}
 
 			c.AbortWithStatusJSON(parsedError.Status, parsedError)

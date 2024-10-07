@@ -1,6 +1,10 @@
 package api_error
 
-import "net/http"
+import (
+	"github.com/bloock/bloock-managed-api/internal/config"
+	"github.com/getsentry/sentry-go"
+	"net/http"
+)
 
 type APIError struct {
 	Status  int    `json:"status"`
@@ -20,6 +24,9 @@ func NewBadRequestAPIError(message string) *APIError {
 func NewUnauthorizedAPIError(message string) *APIError {
 	return &APIError{Status: http.StatusUnauthorized, Message: message}
 }
-func NewInternalServerAPIError(message string) *APIError {
-	return &APIError{Status: http.StatusInternalServerError, Message: message}
+func NewInternalServerAPIError(error error) *APIError {
+	if config.Configuration.Tracing.Enabled {
+		sentry.CaptureException(error)
+	}
+	return &APIError{Status: http.StatusInternalServerError, Message: error.Error()}
 }

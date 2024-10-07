@@ -33,7 +33,7 @@ func GetProcessByID(l zerolog.Logger, ent *connection.EntConnection) gin.Handler
 				ctx.JSON(notFoundAPIError.Status, notFoundAPIError)
 				return
 			}
-			serverAPIError := api_error.NewInternalServerAPIError(err.Error())
+			serverAPIError := api_error.NewInternalServerAPIError(err)
 			ctx.JSON(serverAPIError.Status, serverAPIError)
 			return
 		}
