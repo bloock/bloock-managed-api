@@ -6,17 +6,21 @@ The BLOOCK Managed API is a tool to integrate [BLOOCK](https://bloock.com)'s ser
 
 ## Table of Contents
 
-- [Installation](#installation)
-  - [Docker Setup Guide](#docker-setup-guide)
+- [BLOOCK Managed API](#bloock-managed-api)
+  - [Table of Contents](#table-of-contents)
+  - [Installation](#installation)
+    - [Docker Setup Guide](#docker-setup-guide)
     - [Option 1: Pull and Run the Docker Image](#option-1-pull-and-run-the-docker-image)
     - [Option 2: Use Docker Compose with Database Containers](#option-2-use-docker-compose-with-database-containers)
-  - [Standalone Setup](#standalone-setup)
+    - [Standalone Setup](#standalone-setup)
     - [Option 3: Clone the GitHub Repository](#option-3-clone-the-github-repository)
-- [Configuration](#configuration)
-  - [Variables](#variables)
-- [Database Support](#database-support)
-- [Documentation](#documentation)
-- [License](#license)
+      - [Standalone Requirements](#standalone-requirements)
+  - [Configuration](#configuration)
+    - [Variables](#variables)
+    - [Database Support](#database-support)
+  - [Documentation](#documentation)
+  - [License](#license)
+  - [Acknowledgements](#acknowledgements)
 
 ---
 
@@ -451,3 +455,7 @@ You can access the following Postman collection where is the specification for t
 ## License
 
 See [LICENSE](LICENSE).
+
+## Acknowledgements
+
+![RED.ES](https://docs.bloock.com/logo/logos-redes.png)
